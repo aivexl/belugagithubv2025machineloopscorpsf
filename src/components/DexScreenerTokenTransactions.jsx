@@ -334,6 +334,37 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
     }
   };
 
+  // Fallback: fetch via server real-time endpoint (DexScreener-backed)
+  const fetchNewTransactionsFallback = async (chain) => {
+    try {
+      const url = `/api/real-time/transactions?address=${pair.baseToken.address}&chain=${chain}&limit=100`;
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data?.success || !Array.isArray(data?.transactions) || data.transactions.length === 0) return;
+
+      const currentTransactionIds = new Set(
+        transactions.map((tx) => tx.transaction_hash || tx.transactionHash)
+      );
+
+      const newTxs = normalizeTransactions(data.transactions)
+        .filter(isBuySellTx)
+        .filter((tx) => !currentTransactionIds.has(tx.transaction_hash || tx.transactionHash));
+
+      if (newTxs.length > 0) {
+        setTransactions((prev) => {
+          const merged = [...newTxs, ...prev];
+          return reduceOnePerMinute(merged);
+        });
+        const newIds = new Set(newTxs.map((tx) => tx.transaction_hash || tx.transactionHash));
+        setNewTransactionIds(newIds);
+        setTimeout(() => setNewTransactionIds(new Set()), 5000);
+      }
+    } catch (e) {
+      console.warn('Fallback real-time transactions fetch failed', e);
+    }
+  };
+
   // Fetch new transactions for real-time updates
   const fetchNewTransactions = async () => {
     if (!pair || !pair.baseToken?.address) return;
@@ -360,7 +391,8 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
         const response = await fetch(url);
 
         if (!response.ok) {
-          console.error(`Real-time API error during polling: ${response.status}`);
+          console.warn(`Real-time API non-OK ${response.status} — using fallback`);
+          await fetchNewTransactionsFallback(chain);
           return;
         }
 
@@ -395,10 +427,11 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
           }
         }
       } catch (error) {
-        console.error("Error polling for new real-time transactions:", error);
+        console.warn("Error polling for new real-time transactions (using fallback)", error);
+        await fetchNewTransactionsFallback(chain);
       }
     } catch (err) {
-      console.error("Error polling for new Blockchain transactions:", err);
+      console.warn("Error polling for new Blockchain transactions:", err);
     }
   };
 

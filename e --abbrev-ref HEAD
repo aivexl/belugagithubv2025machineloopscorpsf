@@ -1,0 +1,9 @@
+640bd69 9 minutes ago feat(api): add CoinGecko proxy route to avoid CORS/rate limits; refactor TokenSidebar to use proxy for all CG requests
+de43610 28 minutes ago perf(api): add in-memory cache + CG proxy; cache Moralis swaps; route TokenSidebar to proxy; reduce external API calls without changing UX/refresh cadence
+8e3cbdc 37 minutes ago fix(sidebar): avoid throwing on empty Moralis swaps; fallback to CoinGecko; remove undefined DexScreener aggregation call
+66159ac 42 minutes ago fix: resolve ReferenceError in TokenSidebar - move heuristic helper functions to top level
+7873573 76 minutes ago feat(sidebar): improve CoinGecko integration  resolve by contract address per chain; longer market_chart window; compute m5/h1/h4/24h reliably
+e6fdc94 82 minutes ago fix(moralis): reduce swaps limit to 100; clamp and validate params server-side to avoid 400s; add detailed error forwarding
+d8ea1b3 2 hours ago fix(build): guard Supabase SSR/browser clients for prerender; skip in middleware for _not-found/static/api; remove deprecated supabase helpers
+e77f000 4 hours ago Initial commit: Complete Beluga crypto dashboard with all features
+52e7527 4 hours ago first commit

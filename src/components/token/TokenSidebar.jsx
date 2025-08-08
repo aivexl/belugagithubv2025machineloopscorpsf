@@ -414,6 +414,19 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
     setCgPeriodsReady(false);
   }, [coinGeckoId]);
 
+  // Fetch period changes only when the token (CoinGecko ID) changes, not on poll ticks
+  useEffect(() => {
+    if (!coinGeckoId) return;
+    (async () => {
+      try {
+        await fetchCgPeriods();
+      } finally {
+        // Also fetch DexScreener once as a backup; UI prefers CG when ready
+        await fetchDsPeriods();
+      }
+    })();
+  }, [coinGeckoId]);
+
   useEffect(() => {
     const fetchCgPrice = async () => {
       if (!coinGeckoId) return;
@@ -436,14 +449,10 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         await fetchMoralisPrice();
       }
     };
-    // Try Moralis first, then CoinGecko, then fetch periods to stay in sync with price cadence
+    // Price polling only; do not refresh period changes here
     (async () => {
       await fetchMoralisPrice();
       await fetchCgPrice();
-      await fetchCgPeriods();
-      if (!cgPeriodsReady) {
-        await fetchDsPeriods();
-      }
     })();
   }, [coinGeckoId, pollTick]);
 
@@ -599,7 +608,7 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         setIsRefreshing(false);
         return;
       } catch (err) {
-        console.error('Moralis aggregation failed', err);
+        console.warn('Moralis aggregation failed', err);
         await fetchPairStatsFromCoinGecko();
         return;
       }
@@ -607,6 +616,27 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
 
     // Fallback function to fetch pair stats from CoinGecko and DexScreener
     const fetchPairStatsFromCoinGecko = async () => {
+      // Prepare heuristic baselines up-front to ensure we always have a fallback
+      const baseline24h =
+        parseFloat(pair?.volumeUsd24h || pair?.volume?.h24 || 0) ||
+        parseFloat(tokenMetadata?.volume_24h || 0) ||
+        (parseFloat(pair?.liquidityUsd || 0) * 0.6) ||
+        ((displayUsdPrice || 1) * 5000);
+      const avgTradeUsdCg = Math.max(25, Math.min(1500, (displayUsdPrice || 0) * 150 || 300));
+      const shares = { m5: 0.05, h1: 0.15, h4: 0.4, h24: 1.0 };
+      const buildFromBaseline = () => {
+        const next = {
+          m5: buildHeuristicPeriodStats(baseline24h * shares.m5, cgPeriodChange.m5, avgTradeUsdCg),
+          h1: buildHeuristicPeriodStats(baseline24h * shares.h1, cgPeriodChange.h1, avgTradeUsdCg),
+          h4: buildHeuristicPeriodStats(baseline24h * shares.h4, cgPeriodChange.h4, avgTradeUsdCg),
+          h24: buildHeuristicPeriodStats(baseline24h * shares.h24, cgPeriodChange.h24, avgTradeUsdCg),
+        };
+        setPairStats(next);
+        setLastUpdated(new Date());
+        setLoading(false);
+        setIsRefreshing(false);
+      };
+
       try {
         console.log("Fetching pair stats from CoinGecko only...");
 
@@ -633,15 +663,15 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
             }
           }
         }
-        if (!id) { setLoading(false); setIsRefreshing(false); return; }
+        if (!id) { buildFromBaseline(); return; }
 
         // market_chart for 2 days minute to compute last 24h/4h/1h/5m volumes
         const mcRes = await fetch(`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(id)}/market_chart?vs_currency=usd&days=2&interval=minute${apiKeyParam}`);
-        if (!mcRes.ok) { setLoading(false); setIsRefreshing(false); return; }
+        if (!mcRes.ok) { buildFromBaseline(); return; }
         const mc = await mcRes.json();
         const prices = Array.isArray(mc?.prices) ? mc.prices : [];
         const vols = Array.isArray(mc?.total_volumes) ? mc.total_volumes : [];
-        if (vols.length === 0) { setLoading(false); setIsRefreshing(false); return; }
+        if (vols.length === 0) { buildFromBaseline(); return; }
 
         const nowTs = vols[vols.length - 1][0];
         const volAt = (msAgo) => {
@@ -660,8 +690,8 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
 
         // Get current price for buy/sell split heuristic
         const pNow = prices?.[prices.length-1]?.[1] || displayUsdPrice || 0;
-        const avgTradeUsd = Math.max(25, Math.min(1000, pNow ? pNow * 150 : 250)); // heuristic
-        const countFromVol = (usd) => Math.max(1, Math.round(usd / avgTradeUsd));
+        const avgTradeFromPrices = Math.max(25, Math.min(1000, pNow ? pNow * 150 : 250)); // heuristic
+        const countFromVol = (usd) => Math.max(1, Math.round(usd / avgTradeFromPrices));
 
         const build = (usdVol, changePct) => {
           const txns = countFromVol(usdVol);
@@ -690,9 +720,9 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
           setLoading(false);
           setIsRefreshing(false);
       } catch (err) {
-        console.error("Error fetching pair stats from CoinGecko:", err);
-        setLoading(false);
-        setIsRefreshing(false);
+        console.warn("Error fetching pair stats from CoinGecko:", err);
+        // Last-resort: show baseline heuristic instead of empty UI
+        buildFromBaseline();
       }
     };
 
@@ -818,7 +848,8 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
     if (!value && value !== 0) return "0.00%";
     const numValue = parseFloat(value);
     if (isNaN(numValue)) return "0.00%";
-    return `${numValue >= 0 ? "+" : ""}${numValue.toFixed(2)}%`;
+    const decimals = Math.abs(numValue) > 0 && Math.abs(numValue) < 0.01 ? 4 : 2;
+    return `${numValue >= 0 ? "+" : ""}${numValue.toFixed(decimals)}%`;
   };
 
   const calculateRatio = (a, b) => {

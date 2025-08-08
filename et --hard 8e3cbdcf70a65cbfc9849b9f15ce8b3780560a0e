@@ -1,0 +1,5 @@
+[33m8e3cbdc[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m fix(sidebar): avoid throwing on empty Moralis swaps; fallback to CoinGecko; remove undefined DexScreener aggregation call
+[33m66159ac[m fix: resolve ReferenceError in TokenSidebar - move heuristic helper functions to top level
+[33m7873573[m feat(sidebar): improve CoinGecko integration  resolve by contract address per chain; longer market_chart window; compute m5/h1/h4/24h reliably
+[33me6fdc94[m fix(moralis): reduce swaps limit to 100; clamp and validate params server-side to avoid 400s; add detailed error forwarding
+[33md8ea1b3[m fix(build): guard Supabase SSR/browser clients for prerender; skip in middleware for _not-found/static/api; remove deprecated supabase helpers
