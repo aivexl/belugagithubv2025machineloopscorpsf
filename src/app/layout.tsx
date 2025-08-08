@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "../contexts/AuthProvider";
+import ConsoleSilencer from "../components/ConsoleSilencer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,6 +62,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <AuthProvider>
             <div className="min-h-screen flex flex-col">
+              <ConsoleSilencer />
               <Navbar />
               <main className="flex-1">
                 {children}
