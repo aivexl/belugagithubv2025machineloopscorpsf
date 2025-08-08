@@ -28,7 +28,8 @@ export async function GET(request) {
   try {
     const moralisApiKey = process.env.MORALIS_API_KEY;
     if (!moralisApiKey) {
-      return NextResponse.json({ error: 'Moralis API key not configured' }, { status: 500 });
+      // Soft-fail to avoid surfacing 500s in client; frontend will fallback
+      return NextResponse.json({ success: false, source: 'moralis-token-swaps', transactions: [], total: 0, warning: 'Moralis API key not configured' }, { status: 200 });
     }
 
     let cursor = searchParams.get('cursor') || '';
@@ -50,7 +51,8 @@ export async function GET(request) {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Moralis token swaps API error:', response.status, errorText);
-        return NextResponse.json({ error: 'Failed to fetch token swaps', status: response.status, details: errorText?.slice(0, 500) }, { status: response.status });
+        // Soft-fail with empty result to let client fallback without console error statuses
+        return NextResponse.json({ success: false, source: 'moralis-token-swaps', transactions: [], total: 0, upstreamStatus: response.status, details: errorText?.slice(0, 500) }, { status: 200 });
       }
 
       const data = await response.json();
@@ -131,7 +133,8 @@ export async function GET(request) {
     });
   } catch (error) {
     console.error('Error fetching Moralis token swaps:', error);
-    return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 });
+    // Soft-fail
+    return NextResponse.json({ success: false, source: 'moralis-token-swaps', transactions: [], total: 0, error: String(error?.message || error) }, { status: 200 });
   }
 }
 
