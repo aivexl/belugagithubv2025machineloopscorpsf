@@ -1,0 +1,43 @@
+.tableRoot {
+  width: 100%;
+  background: #161B22;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0002;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+}
+thead {
+  background: #222;
+}
+th, td {
+  padding: 10px 12px;
+  text-align: left;
+}
+th {
+  cursor: pointer;
+  user-select: none;
+}
+tbody tr {
+  border-bottom: 1px solid #222;
+  transition: background 0.2s;
+}
+tbody tr:hover {
+  background: #23272f;
+}
+.logo {
+  width: 22px;
+  height: 22px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+.positive {
+  color: #22C55E;
+}
+.negative {
+  color: #EF4444;
+} 

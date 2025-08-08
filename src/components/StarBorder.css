@@ -1,0 +1,214 @@
+.star-border-container {
+  display: block;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Section 1 specific styles */
+.section-1-border {
+  border-radius: 16px;
+}
+
+.border-gradient-bottom {
+  position: absolute;
+  width: 400%;
+  height: 50%;
+  opacity: 0.7;
+  bottom: -12px;
+  right: -350%;
+  border-radius: 50%;
+  animation: star-movement-bottom linear infinite alternate;
+  z-index: 0;
+}
+
+.border-gradient-top {
+  position: absolute;
+  opacity: 0.7;
+  width: 400%;
+  height: 50%;
+  top: -12px;
+  left: -350%;
+  border-radius: 50%;
+  animation: star-movement-top linear infinite alternate;
+  z-index: 0;
+}
+
+/* Section 1: Two running Starborder animations */
+.border-gradient-top {
+  position: absolute;
+  width: 100px;
+  height: 800%;
+  opacity: 1;
+  left: -50px;
+  top: -400%;
+  border-radius: 50%;
+  animation: star-movement-top linear infinite;
+  z-index: 0;
+}
+
+.border-gradient-bottom {
+  position: absolute;
+  width: 100px;
+  height: 800%;
+  opacity: 1;
+  right: -50px;
+  bottom: -400%;
+  border-radius: 50%;
+  animation: star-movement-bottom linear infinite;
+  z-index: 0;
+}
+
+.inner-content {
+  position: relative;
+  border: 1px solid #222;
+  background: #161B22; /* exact bg-duniacrypto-panel */
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  padding: 20px;
+  border-radius: 20px;
+  z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Section 1: Adjust inner content border radius */
+.section-1-border .inner-content {
+  border-radius: 16px;
+}
+
+@keyframes star-movement-bottom {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100%, 0%);
+    opacity: 0;
+  }
+}
+
+@keyframes star-movement-top {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, 0%);
+    opacity: 0;
+  }
+}
+
+/* Section 1: Two running Starborder animations - path memutari grid dengan transform */
+@keyframes star-movement-top {
+  0% {
+    transform: translate(-100%, 0);
+    opacity: 1;
+  }
+  25% {
+    transform: translate(-100%, -100%);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(100%, -100%);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(100%, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100%, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes star-movement-bottom {
+  0% {
+    transform: translate(100%, 0);
+    opacity: 1;
+  }
+  25% {
+    transform: translate(100%, 100%);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-100%, 100%);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(-100%, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, 0);
+    opacity: 1;
+  }
+} 
+
+/* Directional classes for StarBorder */
+.star-border-left {
+  /* Default, no change needed */
+}
+.star-border-right {
+  direction: rtl;
+}
+.star-border-right .border-gradient-top,
+.star-border-right .border-gradient-bottom {
+  transform: scaleX(-1);
+}
+.star-border-center {
+  /* No special styling */
+} 
+
+/* Modern border sweep effect */
+.border-gradient-sweep {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sweep-cw::before, .sweep-ccw::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--star-color, #00fff7) 0%, transparent 70%);
+  box-shadow: 0 0 24px 8px var(--star-color, #00fff7);
+  opacity: 0.7;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.sweep-cw::before {
+  animation: sweep-cw-path var(--star-speed, 4s) linear infinite;
+}
+.sweep-ccw::before {
+  animation: sweep-ccw-path var(--star-speed, 4s) linear infinite;
+}
+
+@keyframes sweep-cw-path {
+  0%   { transform: translate(-50%, -50%) rotate(0deg) translateX(calc(50% - 16px)); }
+  100% { transform: translate(-50%, -50%) rotate(360deg) translateX(calc(50% - 16px)); }
+}
+@keyframes sweep-ccw-path {
+  0%   { transform: translate(-50%, -50%) rotate(0deg) translateX(calc(50% - 16px)); }
+  100% { transform: translate(-50%, -50%) rotate(-360deg) translateX(calc(50% - 16px)); }
+}
+
+@media (max-width: 600px) {
+  .border-gradient-sweep::before {
+    width: 18px;
+    height: 18px;
+    box-shadow: 0 0 12px 4px var(--star-color, #00fff7);
+  }
+} 
