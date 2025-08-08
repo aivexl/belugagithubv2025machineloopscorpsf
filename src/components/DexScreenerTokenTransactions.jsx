@@ -268,6 +268,11 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
       const baseAddress = (pair.baseToken.address || '').toLowerCase();
       let pairAddressToUse = resolvedPairAddress || (maybeTokenAddress && maybeTokenAddress !== baseAddress ? maybeTokenAddress : null);
 
+      // If the candidate is not a valid EVM address (e.g., a tx hash), discard it
+      if (pairAddressToUse && !isAddress(pairAddressToUse)) {
+        pairAddressToUse = null;
+      }
+
       if (!pairAddressToUse) {
         try {
           const dexChainMap = { eth: 'ethereum', bsc: 'bsc', polygon: 'polygon', avalanche: 'avalanche', arbitrum: 'arbitrum', optimism: 'optimism', base: 'base' };
@@ -323,7 +328,8 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
       // Helper: attempt Moralis pair-swaps by pool address
       const attemptPairSwaps = async () => {
         try {
-          const addr = pairAddressToUse || pair.pairAddress;
+          const candidate = pairAddressToUse || pair.pairAddress;
+          const addr = isAddress(candidate) ? candidate : null;
           if (!addr) return false;
           const apiUrl = `/api/moralis/pair-swaps?pairAddress=${addr}&chain=${chain}&order=DESC&limit=100`;
           console.log(`Trying Moralis Pair Swaps: ${apiUrl}`);

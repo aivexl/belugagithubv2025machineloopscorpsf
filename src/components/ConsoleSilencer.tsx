@@ -10,14 +10,13 @@ import { useEffect } from "react";
 export default function ConsoleSilencer() {
   useEffect(() => {
     try {
-      const isProduction = process.env.NODE_ENV === "production";
-      const allowConsole = process.env.NEXT_PUBLIC_ENABLE_CONSOLE === "true";
-      if (!isProduction || allowConsole) return;
+      // Do not silence by default. Only silence if explicitly requested via env.
+      const shouldSilence = process.env.NEXT_PUBLIC_SILENCE_CONSOLE === "true";
+      if (!shouldSilence) return;
 
       if (typeof window === "undefined" || typeof window.console === "undefined") return;
 
       const noop = () => {};
-      // Silence all console outputs in production (including errors)
       // eslint-disable-next-line no-console
       console.log = noop;
       // eslint-disable-next-line no-console
@@ -28,27 +27,8 @@ export default function ConsoleSilencer() {
       console.warn = noop;
       // eslint-disable-next-line no-console
       console.error = noop;
-
-      // Prevent default browser logging for global errors and unhandled rejections
-      const onWindowError = (e: ErrorEvent) => {
-        try { e.preventDefault?.(); } catch {}
-        return false;
-      };
-      const onUnhandledRejection = (e: PromiseRejectionEvent) => {
-        try { e.preventDefault?.(); } catch {}
-        return false;
-      };
-      window.addEventListener('error', onWindowError, { capture: true });
-      window.addEventListener('unhandledrejection', onUnhandledRejection, { capture: true } as any);
-
-      return () => {
-        try {
-          window.removeEventListener('error', onWindowError, { capture: true } as any);
-          window.removeEventListener('unhandledrejection', onUnhandledRejection, { capture: true } as any);
-        } catch {}
-      };
     } catch {
-      // fail-safe: never throw during hydration
+      // fail-safe
     }
   }, []);
 
