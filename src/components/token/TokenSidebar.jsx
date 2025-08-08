@@ -41,6 +41,19 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
     "24h": "h24",
   };
 
+  // Map EVM chain id to CoinGecko platform slug
+  const cgPlatformFromChainId = (cid) => {
+    if (cid === '0x1' || cid === '1') return 'ethereum';
+    if (cid === '0x38' || cid === '56') return 'binance-smart-chain';
+    if (cid === '0x89' || cid === '137') return 'polygon-pos';
+    if (cid === '0xa4b1' || cid === '42161') return 'arbitrum-one';
+    if (cid === '0xa' || cid === '10') return 'optimistic-ethereum';
+    if (cid === '0xa86a' || cid === '43114') return 'avalanche';
+    if (cid === '0x2105' || cid === '8453') return 'base';
+    if (cid === '0xfa' || cid === '250') return 'fantom';
+    return null;
+  };
+
   // Global 20s aligned polling tick (synchronized cadence)
   useEffect(() => {
     const pollMs = 20000;
@@ -122,7 +135,7 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
       }
 
       // Fallback to old method
-        await fetchFromCoinGecko();
+      await fetchFromCoinGecko();
     };
 
     // Helper function to get chain name from chainId
@@ -141,76 +154,78 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
       try {
         console.log("Fetching token data from CoinGecko API...");
         
-        // Try to get token data from CoinGecko by symbol
-        const symbol = token.symbol?.toLowerCase();
-        if (!symbol) {
-          setTokenMetadata({
-            name: token.name,
-            symbol: token.symbol,
-            logo: token.logo,
-            website: token.website,
-            twitter: token.twitter,
-            telegram: token.telegram,
-            discord: token.discord,
-          });
-          setLoading(false);
-          setIsRefreshing(false);
-          return;
+        // Prefer resolving by contract address on the correct platform
+        const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
+        const apiKeyParam = apiKey ? `&x_cg_demo_api_key=${apiKey}` : '';
+        const platform = cgPlatformFromChainId(chainId);
+
+        let resolvedId = null;
+        if (platform && token.address && token.address !== "0x0000000000000000000000000000000000000000") {
+          try {
+            const byContractUrl = `https://api.coingecko.com/api/v3/coins/${platform}/contract/${token.address}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false${apiKeyParam}`;
+            const byContractRes = await fetch(byContractUrl);
+            if (byContractRes.ok) {
+              const byContract = await byContractRes.json();
+              resolvedId = byContract?.id || null;
+            }
+          } catch (ignored) {}
         }
 
-        const coingeckoApiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
-        const apiKeyParam = coingeckoApiKey ? `&x_cg_demo_api_key=${coingeckoApiKey}` : '';
-        
-        // First try to search by symbol
-        const searchUrl = `https://api.coingecko.com/api/v3/search?query=${symbol}${apiKeyParam}`;
-        const searchResponse = await fetch(searchUrl);
-        
-        if (searchResponse.ok) {
-          const searchData = await searchResponse.json();
-          
-          if (searchData.coins && searchData.coins.length > 0) {
-            // Get the first matching coin
-            const coinId = searchData.coins[0].id;
-            
-            // Now get detailed data for this coin
-            const detailUrl = `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false${apiKeyParam}`;
-            const detailResponse = await fetch(detailUrl);
-            
-            if (detailResponse.ok) {
-              const coinData = await detailResponse.json();
-              
-          setTokenMetadata({
-            name: coinData.name || token.name,
-            symbol: coinData.symbol?.toUpperCase() || token.symbol,
-                logo: coinData.image?.large || coinData.image?.small || token.logo,
-                website: coinData.links?.homepage?.[0] || null,
-                twitter: coinData.links?.twitter_screen_name ? `https://twitter.com/${coinData.links.twitter_screen_name}` : null,
-                telegram: coinData.links?.telegram_channel_identifier ? `https://t.me/${coinData.links.telegram_channel_identifier}` : null,
-                discord: coinData.links?.repos_url?.github?.[0] || null,
-                market_cap: coinData.market_data?.market_cap?.usd || 0,
-                volume_24h: coinData.market_data?.total_volume?.usd || 0,
-                price_change_24h: coinData.market_data?.price_change_percentage_24h || 0,
-                totalSupply: coinData.market_data?.total_supply || 0,
-                circulatingSupply: coinData.market_data?.circulating_supply || 0,
-              });
-              setLastUpdated(new Date()); // Force update the last updated time
-              setLoading(false);
-              setIsRefreshing(false);
-              return;
+        // Fallback: search by symbol/name
+        if (!resolvedId) {
+          const symbol = token.symbol?.toLowerCase();
+          if (symbol) {
+            const searchUrl = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(symbol)}${apiKeyParam}`;
+            const searchResponse = await fetch(searchUrl);
+            if (searchResponse.ok) {
+              const searchData = await searchResponse.json();
+              const sym = (token.symbol || '').toLowerCase();
+              const name = (token.name || '').toLowerCase();
+              let found = searchData?.coins?.find(c => (c.symbol || '').toLowerCase() === sym);
+              if (!found && name) found = searchData?.coins?.find(c => (c.name || '').toLowerCase() === name);
+              if (found?.id) resolvedId = found.id;
             }
           }
         }
-        
+
+        // If we found an id, fetch details
+        if (resolvedId) {
+          setCoinGeckoId(resolvedId);
+          const detailUrl = `https://api.coingecko.com/api/v3/coins/${resolvedId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false${apiKeyParam}`;
+          const detailResponse = await fetch(detailUrl);
+          if (detailResponse.ok) {
+            const coinData = await detailResponse.json();
+            setTokenMetadata({
+              name: coinData.name || token.name,
+              symbol: coinData.symbol?.toUpperCase() || token.symbol,
+              logo: coinData.image?.large || coinData.image?.small || token.logo,
+              website: coinData.links?.homepage?.[0] || null,
+              twitter: coinData.links?.twitter_screen_name ? `https://twitter.com/${coinData.links.twitter_screen_name}` : null,
+              telegram: coinData.links?.telegram_channel_identifier ? `https://t.me/${coinData.links.telegram_channel_identifier}` : null,
+              discord: coinData.links?.repos_url?.github?.[0] || null,
+              market_cap: coinData.market_data?.market_cap?.usd || 0,
+              volume_24h: coinData.market_data?.total_volume?.usd || 0,
+              price_change_24h: coinData.market_data?.price_change_percentage_24h || 0,
+              totalSupply: coinData.market_data?.total_supply || 0,
+              circulatingSupply: coinData.market_data?.circulating_supply || 0,
+            });
+            setLastUpdated(new Date());
+            setLoading(false);
+            setIsRefreshing(false);
+            return;
+          }
+        }
+
         // Fallback: use basic token info
-          setTokenMetadata({
-            name: token.name,
-            symbol: token.symbol,
-            logo: token.logo,
-            website: null,
-            twitter: null,
-            telegram: null,
-            discord: null,
-          });
+        setTokenMetadata({
+          name: token.name,
+          symbol: token.symbol,
+          logo: token.logo,
+          website: null,
+          twitter: null,
+          telegram: null,
+          discord: null,
+        });
         setLoading(false);
         setIsRefreshing(false);
       } catch (err) {
@@ -232,14 +247,27 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
     fetchTokenMetadata();
   }, [token, chainId, pollTick]);
 
-  // Resolve CoinGecko ID by symbol/name once, then refresh price via simple/price every tick
+  // Resolve CoinGecko ID prioritizing contract address once, then refresh price via simple/price every tick
   useEffect(() => {
     const resolveId = async () => {
-      if (!token?.symbol) { setCoinGeckoId(null); return; }
+      if (!token?.address && !token?.symbol) { setCoinGeckoId(null); return; }
       try {
         const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
         const apiKeyParam = apiKey ? `&x_cg_demo_api_key=${apiKey}` : '';
-        const url = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(token.symbol)}${apiKeyParam}`;
+
+        // Try by contract address on the correct platform first
+        const platform = cgPlatformFromChainId(chainId);
+        if (platform && token.address) {
+          const byContractUrl = `https://api.coingecko.com/api/v3/coins/${platform}/contract/${token.address}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false${apiKeyParam}`;
+          const byContractRes = await fetch(byContractUrl);
+          if (byContractRes.ok) {
+            const byContract = await byContractRes.json();
+            if (byContract?.id) { setCoinGeckoId(byContract.id); return; }
+          }
+        }
+
+        // Fallback: search by symbol/name
+        const url = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(token.symbol || token.name || '')}${apiKeyParam}`;
         const res = await fetch(url);
         if (!res.ok) return;
         const js = await res.json();
@@ -249,11 +277,11 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         if (!found && name) found = js?.coins?.find(c => (c.name || '').toLowerCase() === name);
         if (found?.id) setCoinGeckoId(found.id);
       } catch (e) {
-        console.warn('CoinGecko search failed', e);
+        console.warn('CoinGecko search/contract resolve failed', e);
       }
     };
     resolveId();
-  }, [token?.symbol, token?.name]);
+  }, [token?.symbol, token?.name, token?.address, chainId]);
 
   useEffect(() => {
     const fetchCgPrice = async () => {
@@ -291,7 +319,8 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
       try {
         const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
         const apiKeyParam = apiKey ? `&x_cg_demo_api_key=${apiKey}` : '';
-        const url = `https://api.coingecko.com/api/v3/coins/${encodeURIComponent(coinGeckoId)}/market_chart?vs_currency=usd&days=1&interval=minute${apiKeyParam}`;
+        // use 2 days to ensure 24h baseline exists
+        const url = `https://api.coingecko.com/api/v3/coins/${encodeURIComponent(coinGeckoId)}/market_chart?vs_currency=usd&days=2&interval=minute${apiKeyParam}`;
         const res = await fetch(url);
         if (!res.ok) return;
         const js = await res.json();
@@ -366,10 +395,20 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         const chain = toMoralisChain(chainId);
         const baseAddress = pair?.baseToken?.address;
         if (!baseAddress) throw new Error('Missing base token address for Moralis stats');
-        const url = `/api/moralis/token-swaps?tokenAddress=${baseAddress}&chain=${chain}&order=DESC&limit=100`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`Moralis swaps ${res.status}`);
-        const data = await res.json();
+        // Try token-centric swaps first
+        let data = null;
+        let res = await fetch(`/api/moralis/token-swaps?tokenAddress=${baseAddress}&chain=${chain}&order=DESC&limit=100`, { cache: 'no-store' });
+        if (!res.ok) {
+          console.warn('Moralis token-swaps failed with status', res.status, '— trying pair-swaps');
+          // Fallback to pair-centric swaps
+          res = await fetch(`/api/moralis/pair-swaps?pairAddress=${pair.pairAddress}&chain=${chain}&order=DESC&limit=100`, { cache: 'no-store' });
+        }
+        if (res.ok) {
+          try { data = await res.json(); } catch { data = null; }
+        }
+        if (!data || !Array.isArray(data?.transactions)) {
+          throw new Error('No Moralis swaps data');
+        }
         const txs = Array.isArray(data?.transactions) ? data.transactions : [];
 
         const now = Date.now();
