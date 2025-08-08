@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { withCache } from '../../../lib/memoryCache';
+import { withCache } from '../../../../lib/memoryCache';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
