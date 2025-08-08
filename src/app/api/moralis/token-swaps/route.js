@@ -3,13 +3,18 @@ import { NextResponse } from 'next/server';
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const tokenAddress = searchParams.get('tokenAddress');
-  const chain = searchParams.get('chain') || 'eth';
-  const limit = searchParams.get('limit') || '100';
-  const order = searchParams.get('order') || 'DESC';
+  const chain = (searchParams.get('chain') || 'eth').toLowerCase();
+  const limitRaw = parseInt(searchParams.get('limit') || '100', 10);
+  const order = (searchParams.get('order') || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-  if (!tokenAddress) {
+  if (!tokenAddress || tokenAddress === '0x0000000000000000000000000000000000000000') {
     return NextResponse.json({ error: 'tokenAddress parameter is required' }, { status: 400 });
   }
+
+  // Clamp and validate
+  const supportedChains = new Set(['eth','bsc','polygon','avalanche','arbitrum','optimism','base']);
+  const safeChain = supportedChains.has(chain) ? chain : 'eth';
+  const limit = Math.max(1, Math.min(200, isFinite(limitRaw) ? limitRaw : 100));
 
   try {
     const moralisApiKey = process.env.MORALIS_API_KEY;
@@ -17,7 +22,7 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Moralis API key not configured' }, { status: 500 });
     }
 
-    const url = `https://deep-index.moralis.io/api/v2.2/erc20/${tokenAddress}/swaps?chain=${chain}&order=${order}&limit=${limit}`;
+    const url = `https://deep-index.moralis.io/api/v2.2/erc20/${tokenAddress}/swaps?chain=${safeChain}&order=${order}&limit=${limit}`;
 
     const response = await fetch(url, {
       headers: {
@@ -30,7 +35,7 @@ export async function GET(request) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Moralis token swaps API error:', response.status, errorText);
-      return NextResponse.json({ error: 'Failed to fetch token swaps' }, { status: response.status });
+      return NextResponse.json({ error: 'Failed to fetch token swaps', status: response.status, details: errorText?.slice(0, 500) }, { status: response.status });
     }
 
     const data = await response.json();

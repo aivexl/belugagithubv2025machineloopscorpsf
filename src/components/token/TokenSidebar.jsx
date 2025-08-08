@@ -366,7 +366,7 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         const chain = toMoralisChain(chainId);
         const baseAddress = pair?.baseToken?.address;
         if (!baseAddress) throw new Error('Missing base token address for Moralis stats');
-        const url = `/api/moralis/token-swaps?tokenAddress=${baseAddress}&chain=${chain}&order=DESC&limit=500`;
+        const url = `/api/moralis/token-swaps?tokenAddress=${baseAddress}&chain=${chain}&order=DESC&limit=100`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`Moralis swaps ${res.status}`);
         const data = await res.json();
