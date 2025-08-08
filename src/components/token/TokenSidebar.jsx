@@ -517,8 +517,11 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         if (res.ok) {
           try { data = await res.json(); } catch { data = null; }
         }
-        if (!data || !Array.isArray(data?.transactions)) {
-          throw new Error('No Moralis swaps data');
+        if (!data || !Array.isArray(data?.transactions) || data.transactions.length === 0) {
+          console.warn('No Moralis swaps data — falling back to CoinGecko');
+          await fetchPairStatsFromCoinGecko();
+          setIsRefreshing(false);
+          return;
         }
         const txs = Array.isArray(data?.transactions) ? data.transactions : [];
 
@@ -597,16 +600,8 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         return;
       } catch (err) {
         console.error('Moralis aggregation failed', err);
-        // As fallback, try DexScreener aggregation first, then CG mix
-        const dsAgg = await fetchDexScreenerPairStats();
-        if (dsAgg) {
-          setPairStats(dsAgg);
-          setLastUpdated(new Date());
-          setLoading(false);
-          setIsRefreshing(false);
-          return;
-        }
         await fetchPairStatsFromCoinGecko();
+        return;
       }
     };
 
