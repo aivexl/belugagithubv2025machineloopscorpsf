@@ -15,8 +15,14 @@ function withApiKey(url: URL): URL {
 type CachedResponse = { status: number; body: string; contentType: string };
 
 async function fetchJson(url: URL): Promise<CachedResponse> {
+  const apiKey = process.env.COINGECKO_API_KEY || process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
+  const headers: Record<string, string> = {
+    accept: 'application/json',
+    'User-Agent': 'beluga-app/1.0 (+https://vercel.app)'
+  };
+  if (apiKey) headers['x-cg-pro-api-key'] = apiKey;
   const upstream = await fetch(url.toString(), {
-    headers: { accept: 'application/json' },
+    headers,
     cache: 'no-store',
     // @ts-ignore - next options allowed in app router
     next: { revalidate: 0 },
@@ -132,6 +138,13 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await withCache(cacheKey, ttlMs, () => fetchJson(url));
+    // If upstream returns 401/403, degrade gracefully with minimal JSON
+    if (data.status === 401 || data.status === 403) {
+      return new Response(JSON.stringify({ success: false, error: 'coingecko_unauthorized' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
     return new Response(data.body, { status: data.status, headers: { 'content-type': data.contentType } });
   } catch (e: any) {
     return new Response(
