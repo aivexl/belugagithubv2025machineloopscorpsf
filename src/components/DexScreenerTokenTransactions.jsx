@@ -298,29 +298,79 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
         setResolvedPairAddress(pairAddressToUse);
       }
 
-      // Primary: Moralis Token Swaps by base token to align with header pair
-      try {
-        const apiUrl = `/api/moralis/token-swaps?tokenAddress=${pair.baseToken.address}&chain=${chain}&order=DESC&limit=100`;
-        console.log(`Trying Moralis Token Swaps: ${apiUrl}`);
-        const response = await fetch(apiUrl);
-        if (response.ok) {
+      // Helper: attempt Moralis token-swaps
+      const attemptTokenSwaps = async () => {
+        try {
+          const apiUrl = `/api/moralis/token-swaps?tokenAddress=${pair.baseToken.address}&chain=${chain}&order=DESC&limit=100`;
+          console.log(`Trying Moralis Token Swaps: ${apiUrl}`);
+          const response = await fetch(apiUrl);
+          if (!response.ok) return false;
           const data = await response.json();
-          if (data.success && data.transactions && data.transactions.length > 0) {
+          if (data.success && Array.isArray(data.transactions) && data.transactions.length > 0) {
             const filtered = normalizeTransactions(data.transactions).filter(isBuySellTx);
-            // Initial load rule: show 60 most recent, uncompressed
             const initial = sortByTimeDesc(filtered).slice(0, 60);
             setTransactions(initial);
-            // keep header quote from initial pair preference
             console.log(`Transactions loaded from ${data.source || 'moralis-token-swaps'}`);
             setLoading(false);
-            return;
-          } else if (data.error) {
-            console.log(`Moralis Token Swaps error: ${data.error}`);
+            return true;
           }
+          return false;
+        } catch {
+          return false;
         }
-      } catch (error) {
-        console.log(`Moralis Token Swaps failed:`, error.message);
-      }
+      };
+
+      // Helper: attempt Moralis pair-swaps by pool address
+      const attemptPairSwaps = async () => {
+        try {
+          const addr = pairAddressToUse || pair.pairAddress;
+          if (!addr) return false;
+          const apiUrl = `/api/moralis/pair-swaps?pairAddress=${addr}&chain=${chain}&order=DESC&limit=100`;
+          console.log(`Trying Moralis Pair Swaps: ${apiUrl}`);
+          const response = await fetch(apiUrl);
+          if (!response.ok) return false;
+          const data = await response.json();
+          if (data.success && Array.isArray(data.transactions) && data.transactions.length > 0) {
+            const filtered = normalizeTransactions(data.transactions).filter(isBuySellTx);
+            const initial = sortByTimeDesc(filtered).slice(0, 60);
+            setTransactions(initial);
+            console.log(`Transactions loaded from ${data.source || 'moralis-pair-swaps'}`);
+            setLoading(false);
+            return true;
+          }
+          return false;
+        } catch {
+          return false;
+        }
+      };
+
+      // Helper: attempt server real-time endpoint (DexScreener-backed)
+      const attemptServerRealtime = async () => {
+        try {
+          const url = `/api/real-time/transactions?address=${pair.baseToken.address}&chain=${chain}&limit=100`;
+          console.log('Trying server real-time transactions:', url);
+          const res = await fetch(url);
+          if (!res.ok) return false;
+          const data = await res.json();
+          if (!data?.success || !Array.isArray(data?.transactions) || data.transactions.length === 0) return false;
+          const filtered = normalizeTransactions(data.transactions).filter(isBuySellTx);
+          const initial = sortByTimeDesc(filtered).slice(0, 60);
+          setTransactions(initial);
+          console.log(`Transactions loaded from ${data.source || 'server-realtime'}`);
+          setLoading(false);
+          return true;
+        } catch {
+          return false;
+        }
+      };
+
+      // Try in order: token-swaps → pair-swaps → server realtime
+      const okToken = await attemptTokenSwaps();
+      if (okToken) return;
+      const okPair = await attemptPairSwaps();
+      if (okPair) return;
+      const okRealtime = await attemptServerRealtime();
+      if (okRealtime) return;
       
       // If all APIs fail, show error
       console.log("All APIs failed, showing error");
@@ -685,7 +735,7 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
             <div>💡 Tips:</div>
             <div>• Check if the token has trading activity on this chain</div>
             <div>• Verify the token contract address is correct</div>
-            <div>• CoinCap API might be temporarily unavailable</div>
+            <div>• APIs might be temporarily unavailable</div>
           </div>
         </div>
       </div>
