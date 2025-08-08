@@ -12,7 +12,8 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
   const [isResizing, setIsResizing] = useState(false);
   const [height, setHeight] = useState(400);
   const [resolvedPairAddress, setResolvedPairAddress] = useState(null);
-  const [pollMs] = useState(20000); // poll every 20 seconds
+  // Base poll 45s to reduce API load; will backoff on failures
+  const [pollMs, setPollMs] = useState(45000);
   const pollTimeoutRef = useRef(null);
   const pollingActiveRef = useRef(false);
   const pollInterval = useRef(null);
@@ -98,10 +99,12 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
     };
   }, [pair, chainId, pollMs]);
 
-  // Refresh when tab becomes visible
+  // Pause polling when tab hidden; resume and refresh on visible
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState === 'visible') {
+        // resume polling and fetch immediately
+        if (!pollingActiveRef.current) return;
         fetchNewTransactions();
       }
     };
@@ -208,6 +211,16 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
       quoteAmt = Math.abs(quoteAmt);
       totalUsd = Math.abs(totalUsd);
 
+      // Decide best maker wallet (prefer any valid address over tx hash)
+      const candidateWallets = [
+        tx.wallet_address, tx.walletAddress, tx.from_address, tx.fromAddress, tx.to_address, tx.toAddress,
+        tx.maker, tx.makerAddress, tx.from, tx.to, tx.sender, tx.receiver
+      ].filter(Boolean);
+      let chosenWallet = '';
+      for (const cand of candidateWallets) {
+        if (typeof cand === 'string' && isAddress(cand)) { chosenWallet = cand; break; }
+      }
+
       return {
         ...tx,
         transaction_type: tType || undefined,
@@ -222,6 +235,8 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
         totalValueUsd: totalUsd || undefined,
         base_quote_price: baseQuotePrice || (priceUsd && quotePriceUsd ? priceUsd / quotePriceUsd : undefined),
         baseQuotePrice: baseQuotePrice || (priceUsd && quotePriceUsd ? priceUsd / quotePriceUsd : undefined),
+        maker_wallet: chosenWallet || undefined,
+        makerWallet: chosenWallet || undefined,
       };
     });
   };
@@ -305,10 +320,10 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
 
       // Helper: attempt Moralis token-swaps
       const attemptTokenSwaps = async () => {
-        try {
-          const apiUrl = `/api/moralis/token-swaps?tokenAddress=${pair.baseToken.address}&chain=${chain}&order=DESC&limit=100`;
-          console.log(`Trying Moralis Token Swaps: ${apiUrl}`);
-          const response = await fetch(apiUrl);
+      try {
+        const apiUrl = `/api/moralis/token-swaps?tokenAddress=${pair.baseToken.address}&chain=${chain}&order=DESC&limit=100`;
+        console.log(`Trying Moralis Token Swaps: ${apiUrl}`);
+        const response = await fetch(apiUrl);
           if (!response.ok) return false;
           const data = await response.json();
           if (data.success && Array.isArray(data.transactions) && data.transactions.length > 0) {
@@ -449,6 +464,8 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
         if (!response.ok) {
           console.warn(`Real-time API non-OK ${response.status} — using fallback`);
           await fetchNewTransactionsFallback(chain);
+          // backoff a bit on failure
+          setPollMs((prev) => Math.min(prev * 1.5, 120000));
           return;
         }
 
@@ -481,13 +498,17 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
               setNewTransactionIds(new Set());
             }, 5000);
           }
+          // success: gently reduce backoff to baseline
+          setPollMs((prev) => Math.max(45000, Math.floor(prev / 1.2)));
         }
       } catch (error) {
         console.warn("Error polling for new real-time transactions (using fallback)", error);
         await fetchNewTransactionsFallback(chain);
+        setPollMs((prev) => Math.min(prev * 1.5, 120000));
       }
     } catch (err) {
       console.warn("Error polling for new Blockchain transactions:", err);
+      setPollMs((prev) => Math.min(prev * 1.5, 120000));
     }
   };
 
@@ -811,9 +832,9 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
               // Handle both API response formats (snake_case and camelCase)
               const txHash = tx.transaction_hash || tx.transactionHash;
               // Ensure maker shows a wallet, not a tx hash
-              let walletAddress = tx.wallet_address || tx.walletAddress || tx.maker || tx.makerAddress;
-              if (isTxHash(walletAddress)) {
-                walletAddress = tx.from_address || tx.fromAddress || tx.to_address || tx.toAddress || '';
+              let walletAddress = tx.maker_wallet || tx.makerWallet || tx.wallet_address || tx.walletAddress || tx.maker || tx.makerAddress || '';
+              if (!walletAddress || isTxHash(walletAddress)) {
+                walletAddress = tx.from_address || tx.fromAddress || tx.to_address || tx.toAddress || walletAddress || '';
               }
               const txType = tx.transaction_type || tx.transactionType;
               const baseTokenAmount = tx.base_token_amount || tx.baseTokenAmount;

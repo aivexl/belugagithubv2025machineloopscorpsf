@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { withCache } from '../../../../lib/memoryCache';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -16,8 +17,10 @@ export async function GET(request) {
   try {
     console.log(`Fetching real-time transactions for ${tokenAddress} on ${chain}`);
 
-    // Try DexScreener first (most reliable for DEX transactions)
-    const transactionData = await fetchFromDexScreener(tokenAddress, chain, limit);
+    // Try DexScreener first (most reliable for DEX transactions) with server cache/dedup
+    const cacheKey = `realtime:ds:${tokenAddress}:${chain}:${limit}`;
+    const ttlMs = 10 * 1000;
+    const transactionData = await withCache(cacheKey, ttlMs, () => fetchFromDexScreener(tokenAddress, chain, limit));
     
     if (transactionData && transactionData.transactions && transactionData.transactions.length > 0) {
       return NextResponse.json({
@@ -103,7 +106,9 @@ async function fetchFromDexScreener(tokenAddress, chain, limit) {
     // Format transactions
     const transactions = pair.txns.slice(0, parseInt(limit)).map(tx => ({
       transaction_hash: tx.hash || tx.txHash || `0x${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}`,
-      wallet_address: tx.from || tx.walletAddress || `0x${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}`,
+      wallet_address: tx.from || tx.fromAddress || tx.maker || tx.walletAddress || tx.to || tx.toAddress || `0x${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}`,
+      from_address: tx.from || tx.fromAddress || undefined,
+      to_address: tx.to || tx.toAddress || undefined,
       transaction_type: tx.type || (tx.amountIn > tx.amountOut ? 'sell' : 'buy'),
       base_token_amount: tx.amountIn ? Math.abs(parseFloat(tx.amountIn)).toFixed(4) : '0',
       quote_token_amount: tx.amountOut ? Math.abs(parseFloat(tx.amountOut)).toFixed(4) : '0',

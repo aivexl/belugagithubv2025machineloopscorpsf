@@ -51,15 +51,15 @@ export async function GET(req: NextRequest) {
     // Back-compat: generic proxy with url param, with short caching
     if (!action) {
       const target = searchParams.get('url');
-      if (!target) {
+    if (!target) {
         return new Response(JSON.stringify({ error: 'Missing action or url param' }), { status: 400 });
-      }
-      let url: URL;
+    }
+    let url: URL;
       try { url = new URL(target); } catch {
-        return new Response(JSON.stringify({ error: 'Invalid URL' }), { status: 400 });
-      }
-      if (url.hostname !== 'api.coingecko.com' || !url.pathname.startsWith('/api/v3/')) {
-        return new Response(JSON.stringify({ error: 'Host not allowed' }), { status: 400 });
+      return new Response(JSON.stringify({ error: 'Invalid URL' }), { status: 400 });
+    }
+    if (url.hostname !== 'api.coingecko.com' || !url.pathname.startsWith('/api/v3/')) {
+      return new Response(JSON.stringify({ error: 'Host not allowed' }), { status: 400 });
       }
       url = withApiKey(url);
       const key = `cg:generic:${url.pathname}?${url.searchParams.toString()}`;

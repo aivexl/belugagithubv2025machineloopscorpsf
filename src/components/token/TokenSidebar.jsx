@@ -327,36 +327,36 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
   }, [token?.symbol, token?.name, token?.address, chainId]);
 
   // Helper to fetch precise period changes from CoinGecko
-  const fetchCgPeriods = async () => {
+    const fetchCgPeriods = async () => {
     if (!coinGeckoId) { setCgPeriodsReady(false); return; }
     try {
       // use 2 days to ensure 24h baseline exists
       const url = `/api/coingecko/proxy?action=market_chart&id=${encodeURIComponent(coinGeckoId)}&vs_currency=usd&days=2&interval=minute`;
       const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) { setCgPeriodsReady(false); return; }
-      const js = await res.json();
-      const prices = Array.isArray(js?.prices) ? js.prices : [];
+        const js = await res.json();
+        const prices = Array.isArray(js?.prices) ? js.prices : [];
       if (prices.length === 0) { setCgPeriodsReady(false); return; }
-      const nowTs = prices[prices.length - 1][0];
-      const getAtMsAgo = (msAgo) => {
-        const target = nowTs - msAgo;
-        for (let i = prices.length - 1; i >= 0; i--) {
-          const [ts, p] = prices[i];
-          if (ts <= target) return p;
-        }
-        return prices[0][1];
-      };
-      const pNow = prices[prices.length - 1][1];
-      const p5m = getAtMsAgo(5 * 60 * 1000);
-      const p1h = getAtMsAgo(60 * 60 * 1000);
-      const p4h = getAtMsAgo(4 * 60 * 60 * 1000);
-      const p24h = getAtMsAgo(24 * 60 * 60 * 1000);
-      const pct = (a, b) => (b ? ((a - b) / b) * 100 : 0);
+        const nowTs = prices[prices.length - 1][0];
+        const getAtMsAgo = (msAgo) => {
+          const target = nowTs - msAgo;
+          for (let i = prices.length - 1; i >= 0; i--) {
+            const [ts, p] = prices[i];
+            if (ts <= target) return p;
+          }
+          return prices[0][1];
+        };
+        const pNow = prices[prices.length - 1][1];
+        const p5m = getAtMsAgo(5 * 60 * 1000);
+        const p1h = getAtMsAgo(60 * 60 * 1000);
+        const p4h = getAtMsAgo(4 * 60 * 60 * 1000);
+        const p24h = getAtMsAgo(24 * 60 * 60 * 1000);
+        const pct = (a, b) => (b ? ((a - b) / b) * 100 : 0);
       const next = { m5: pct(pNow, p5m), h1: pct(pNow, p1h), h4: pct(pNow, p4h), h24: pct(pNow, p24h) };
       setCgPeriodChange(next);
       setCgPeriodsReady(true);
-    } catch (e) {
-      console.warn('CoinGecko market_chart failed', e);
+      } catch (e) {
+        console.warn('CoinGecko market_chart failed', e);
       setCgPeriodsReady(false);
     }
   };
