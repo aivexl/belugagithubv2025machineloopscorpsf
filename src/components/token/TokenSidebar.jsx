@@ -633,8 +633,8 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         };
         setPairStats(next);
         setLastUpdated(new Date());
-        setLoading(false);
-        setIsRefreshing(false);
+          setLoading(false);
+          setIsRefreshing(false);
       };
 
       try {
