@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { withCache } from '../../../lib/memoryCache';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -38,22 +39,22 @@ export async function GET(request) {
 
     while (pageCount < maxPages) {
       const url = `https://deep-index.moralis.io/api/v2.2/erc20/${tokenAddress}/swaps?chain=${safeChain}&order=${order}&limit=${limitPerPage}` + (cursor ? `&cursor=${encodeURIComponent(cursor)}` : '');
-
-      const response = await fetch(url, {
-        headers: {
-          Accept: 'application/json',
-          'X-API-Key': moralisApiKey,
-        },
-        cache: 'no-store',
+      const cacheKey = `moralis:token-swaps:${tokenAddress}:${safeChain}:${order}:${limitPerPage}:${cursor || 'none'}`;
+      const data = await withCache(cacheKey, 10 * 1000, async () => {
+        const response = await fetch(url, {
+          headers: {
+            Accept: 'application/json',
+            'X-API-Key': moralisApiKey,
+          },
+          cache: 'no-store',
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Moralis token swaps API error:', response.status, errorText);
+          throw new Error(String(response.status));
+        }
+        return response.json();
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Moralis token swaps API error:', response.status, errorText);
-        return NextResponse.json({ error: 'Failed to fetch token swaps', status: response.status, details: errorText?.slice(0, 500) }, { status: response.status });
-      }
-
-      const data = await response.json();
       const batch = Array.isArray(data.result) ? data.result : [];
 
       // Transform and push

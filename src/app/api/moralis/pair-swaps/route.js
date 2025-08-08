@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { withCache } from '../../../lib/memoryCache';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -19,28 +20,27 @@ export async function GET(request) {
     }
 
     const url = `https://deep-index.moralis.io/api/v2.2/pairs/${pairAddress}/swaps?chain=${chain}&limit=${limit}&offset=${offset}&order=${order}`;
-    
-    const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/json',
-        'X-API-Key': moralisApiKey,
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Moralis API error:', response.status, errorText);
-      
-      if (response.status === 401) {
-        return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
-      } else if (response.status === 429) {
-        return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
-      } else {
-        return NextResponse.json({ error: 'Failed to fetch pair swaps' }, { status: response.status });
+    const cacheKey = `moralis:pair-swaps:${pairAddress}:${chain}:${limit}:${offset}:${order}`;
+    const data = await withCache(cacheKey, 10 * 1000, async () => {
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'X-API-Key': moralisApiKey,
+        },
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Moralis API error:', response.status, errorText);
+        if (response.status === 401) {
+          throw new Response(JSON.stringify({ error: 'Invalid API key' }), { status: 401 });
+        } else if (response.status === 429) {
+          throw new Response(JSON.stringify({ error: 'Rate limit exceeded' }), { status: 429 });
+        } else {
+          throw new Response(JSON.stringify({ error: 'Failed to fetch pair swaps' }), { status: response.status });
+        }
       }
-    }
-
-    const data = await response.json();
+      return response.json();
+    });
     console.log('Moralis pair swaps raw response:', JSON.stringify(data, null, 2));
 
     // Extract pair info from response metadata (addresses or objects)
