@@ -203,7 +203,6 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         console.log("Fetching token data from CoinGecko API...");
         
         // Prefer resolving by contract address on the correct platform
-        // Use server proxy to avoid CORS/rate limit in browser
         const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
         const apiKeyParam = apiKey ? `&x_cg_demo_api_key=${apiKey}` : '';
         const platform = cgPlatformFromChainId(chainId);
@@ -212,7 +211,7 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         if (platform && token.address && token.address !== "0x0000000000000000000000000000000000000000") {
           try {
             const byContractUrl = `https://api.coingecko.com/api/v3/coins/${platform}/contract/${token.address}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false${apiKeyParam}`;
-            const byContractRes = await fetch(`/api/coingecko/proxy?url=${encodeURIComponent(byContractUrl)}`, { cache: 'no-store' });
+            const byContractRes = await fetch(byContractUrl);
             if (byContractRes.ok) {
               const byContract = await byContractRes.json();
               resolvedId = byContract?.id || null;
@@ -225,7 +224,7 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
           const symbol = token.symbol?.toLowerCase();
           if (symbol) {
             const searchUrl = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(symbol)}${apiKeyParam}`;
-            const searchResponse = await fetch(`/api/coingecko/proxy?url=${encodeURIComponent(searchUrl)}`, { cache: 'no-store' });
+        const searchResponse = await fetch(searchUrl);
         if (searchResponse.ok) {
           const searchData = await searchResponse.json();
               const sym = (token.symbol || '').toLowerCase();
@@ -241,7 +240,7 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         if (resolvedId) {
           setCoinGeckoId(resolvedId);
           const detailUrl = `https://api.coingecko.com/api/v3/coins/${resolvedId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false${apiKeyParam}`;
-            const detailResponse = await fetch(`/api/coingecko/proxy?url=${encodeURIComponent(detailUrl)}`, { cache: 'no-store' });
+            const detailResponse = await fetch(detailUrl);
             if (detailResponse.ok) {
               const coinData = await detailResponse.json();
           setTokenMetadata({
@@ -340,7 +339,7 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
       const apiKeyParam = apiKey ? `&x_cg_demo_api_key=${apiKey}` : '';
       // use 2 days to ensure 24h baseline exists
       const url = `https://api.coingecko.com/api/v3/coins/${encodeURIComponent(coinGeckoId)}/market_chart?vs_currency=usd&days=2&interval=minute${apiKeyParam}`;
-      const res = await fetch(`/api/coingecko/proxy?url=${encodeURIComponent(url)}`, { cache: 'no-store' });
+      const res = await fetch(url);
       if (!res.ok) { setCgPeriodsReady(false); return; }
       const js = await res.json();
       const prices = Array.isArray(js?.prices) ? js.prices : [];
@@ -435,7 +434,7 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
         const apiKeyParam = apiKey ? `&x_cg_demo_api_key=${apiKey}` : '';
         const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(coinGeckoId)}&vs_currencies=usd${apiKeyParam}`;
-        const res = await fetch(`/api/coingecko/proxy?url=${encodeURIComponent(url)}`, { cache: 'no-store' });
+        const res = await fetch(url);
         if (!res.ok) {
           // fallback to Moralis price
           await fetchMoralisPrice();
@@ -649,7 +648,7 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
         if (!id) {
           const platform = cgPlatformFromChainId(chainId);
           if (platform && token?.address) {
-            const byContract = await fetch(`/api/coingecko/proxy?url=${encodeURIComponent(`https://api.coingecko.com/api/v3/coins/${platform}/contract/${token.address}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false${apiKeyParam}`)}`, { cache: 'no-store' });
+            const byContract = await fetch(`https://api.coingecko.com/api/v3/coins/${platform}/contract/${token.address}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false${apiKeyParam}`);
             if (byContract.ok) {
               const js = await byContract.json();
               id = js?.id || null;
@@ -657,7 +656,7 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
           }
           if (!id) {
             const sym = encodeURIComponent(token?.symbol || token?.name || '');
-            const searchRes = await fetch(`/api/coingecko/proxy?url=${encodeURIComponent(`https://api.coingecko.com/api/v3/search?query=${sym}${apiKeyParam}`)}`, { cache: 'no-store' });
+            const searchRes = await fetch(`https://api.coingecko.com/api/v3/search?query=${sym}${apiKeyParam}`);
             if (searchRes.ok) {
               const js = await searchRes.json();
               id = js?.coins?.[0]?.id || null;
