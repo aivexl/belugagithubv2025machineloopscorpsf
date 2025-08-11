@@ -1,11 +1,126 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import GradientText from "./GradientText";
 import { useAuth } from "../hooks/useAuth";
 import LoginModal from "./auth/LoginModal";
 import SignUpModal from "./auth/SignUpModal";
+
+function ProcessedLogo() {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const toLongSideScaledDataUrl = (source: HTMLCanvasElement, targetLongSide: number) => {
+      const longSide = Math.max(source.width, source.height);
+      if (longSide === 0) {
+        return source.toDataURL("image/png");
+      }
+      const scale = targetLongSide / longSide;
+      const output = document.createElement("canvas");
+      output.width = Math.max(1, Math.round(source.width * scale));
+      output.height = Math.max(1, Math.round(source.height * scale));
+      const octx = output.getContext("2d");
+      if (octx) {
+        octx.imageSmoothingEnabled = true;
+        octx.imageSmoothingQuality = "high" as CanvasImageSmoothingQuality;
+        octx.drawImage(
+          source,
+          0,
+          0,
+          source.width,
+          source.height,
+          0,
+          0,
+          output.width,
+          output.height
+        );
+      }
+      return output.toDataURL("image/png");
+    };
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "/Asset/BELUGALOGOAUGUSTV1.png?v=4";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        setDataUrl(null);
+        return;
+      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high" as CanvasImageSmoothingQuality;
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      // 1) Buat warna hampir hitam menjadi transparan
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        if (r < 20 && g < 20 && b < 20) {
+          data[i + 3] = 0;
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+
+      // 2) Hitung bounding box piksel non-transparan
+      let minX = canvas.width;
+      let minY = canvas.height;
+      let maxX = -1;
+      let maxY = -1;
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          const idx = (y * canvas.width + x) * 4;
+          const alpha = data[idx + 3];
+          if (alpha > 10) { // threshold alpha
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+
+      if (maxX >= 0 && maxY >= 0 && minX <= maxX && minY <= maxY) {
+        const cropW = maxX - minX + 1;
+        const cropH = maxY - minY + 1;
+        const cropped = document.createElement("canvas");
+        cropped.width = cropW;
+        cropped.height = cropH;
+        const cctx = cropped.getContext("2d");
+        if (!cctx) {
+          setDataUrl(toLongSideScaledDataUrl(canvas, 3840));
+          return;
+        }
+        cctx.imageSmoothingEnabled = true;
+        cctx.imageSmoothingQuality = "high" as CanvasImageSmoothingQuality;
+        cctx.drawImage(canvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+        setDataUrl(toLongSideScaledDataUrl(cropped, 3840));
+      } else {
+        // Tidak ada piksel non-transparan terdeteksi, pakai hasil tanpa crop
+        setDataUrl(toLongSideScaledDataUrl(canvas, 3840));
+      }
+    };
+    img.onerror = () => setDataUrl(null);
+  }, []);
+
+  if (dataUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={dataUrl} alt="Beluga Logo" className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform" />
+    );
+  }
+
+  // Fallback to original if processing fails
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src="/Asset/BELUGALOGOAUGUSTV1.png?v=4" alt="Beluga Logo" className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform" />;
+}
 
 export default function Navbar() {
   const [navOpen, setNavOpen] = useState(false);
@@ -47,16 +162,16 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-duniacrypto-panel border-b border-gray-800">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-          <div className="flex items-center space-x-3 py-1">
+      <header className="sticky top-0 z-50 bg-black/30 backdrop-blur-lg backdrop-saturate-150 border-b border-white/10">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 md:px-6 md:py-4">
+          <div className="flex items-center space-x-2 md:space-x-3">
             <Link href="/" className="flex items-center space-x-3 group no-underline hover:no-underline focus:no-underline active:no-underline" style={{ textDecoration: 'none' }}>
-              <img src="/Asset/belugalogo2.png" alt="Beluga Logo" className="h-12 w-12 object-contain group-hover:scale-105 transition-transform" />
+              <ProcessedLogo />
               <GradientText
                 colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
                 animationSpeed={2}
                 showBorder={false}
-                className="text-3xl font-bold tracking-tight font-sans leading-relaxed"
+                 className="text-2xl md:text-3xl font-bold tracking-tight font-sans leading-snug"
               >
                 Beluga
               </GradientText>
@@ -80,7 +195,7 @@ export default function Navbar() {
                   placeholder="Search articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-48 px-4 py-2 pl-10 pr-12 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                  className="w-48 px-3 py-1.5 pl-9 pr-11 md:px-4 md:py-2 md:pl-10 md:pr-12 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
                 />
                 {/* Search Icon */}
                 <svg
@@ -146,7 +261,7 @@ export default function Navbar() {
       </header>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-duniacrypto-panel border-t border-gray-800">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-lg backdrop-saturate-150 border-t border-white/10">
         <div className="flex items-center justify-around py-2">
           {/* Home */}
           <Link 

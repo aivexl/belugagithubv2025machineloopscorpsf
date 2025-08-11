@@ -25,9 +25,12 @@ export default function RootLayout({
   return (
     <html lang="id">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/Asset/belugalogo2.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/Asset/belugalogo2.png" />
+        <link rel="icon" href="/favicon.ico?v=4" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/Asset/favicon-32x32.png?v=4" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/Asset/favicon-16x16.png?v=4" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/Asset/apple-touch-icon.png?v=4" />
+        <link rel="manifest" href="/site.webmanifest?v=4" />
+        <meta name="msapplication-config" content="/browserconfig.xml?v=4" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <script
           dangerouslySetInnerHTML={{
