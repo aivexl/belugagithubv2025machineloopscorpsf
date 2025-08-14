@@ -31,9 +31,14 @@ const CoinGeckoTransactionTable = ({ data, loading, error, pagination, onLoadMor
     return () => clearInterval(interval);
   }, []);
 
+  // Basic validators
+  const isHex = (s, len) => typeof s === 'string' && /^0x[0-9a-fA-F]+$/.test(s) && (len ? s.length === len : true);
+  const isAddress = (s) => isHex(s, 42);
+  const isTxHash = (s) => isHex(s, 66);
+
   const formatAddress = (address) => {
     if (!address) return 'N/A';
-    return address;
+    return `${address.slice(0,6)}...${address.slice(-4)}`;
   };
 
   const formatAmount = (amount) => {
@@ -251,7 +256,7 @@ const CoinGeckoTransactionTable = ({ data, loading, error, pagination, onLoadMor
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
                     <div className="flex items-center space-x-2">
                       <span className="text-lg">🐬</span>
-                      <span className="font-medium">{formatAddress(tx.maker)}</span>
+                      {(() => { let maker = tx.maker; if (!maker || !isAddress(maker) || isTxHash(maker)) { maker = tx.from || tx.fromAddress || tx.to || tx.toAddress || maker; } return <span className="font-medium">{formatAddress(maker || '')}</span>; })()}
                     </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-400 hover:text-blue-300 cursor-pointer">

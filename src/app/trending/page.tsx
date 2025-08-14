@@ -106,7 +106,7 @@ const TrendingPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 p-4">
+      <div className="min-h-screen bg-duniacrypto-bg-darker p-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -119,7 +119,7 @@ const TrendingPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900 p-4">
+      <div className="min-h-screen bg-duniacrypto-bg-darker p-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center text-red-400">
             <h2 className="text-xl font-bold mb-2">Error Loading Trending Tokens</h2>
@@ -131,7 +131,7 @@ const TrendingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-duniacrypto-bg-darker">
       <div className="max-w-7xl mx-auto p-4">
         {/* Header */}
         <div className="mb-8">

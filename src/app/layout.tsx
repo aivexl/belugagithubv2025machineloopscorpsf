@@ -6,6 +6,66 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "../contexts/AuthProvider";
 import ConsoleSilencer from "../components/ConsoleSilencer";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Beluga - Platform Crypto Indonesia Terdepan",
+  description: "Beluga adalah platform cryptocurrency Indonesia yang menyediakan berita, analisis, dan informasi terkini tentang dunia crypto dan blockchain.",
+  keywords: "crypto, cryptocurrency, bitcoin, ethereum, blockchain, indonesia, berita crypto, analisis crypto",
+  authors: [{ name: "Beluga Team" }],
+  creator: "Beluga",
+  publisher: "Beluga",
+  metadataBase: new URL(process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000'),
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/Asset/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/Asset/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/Asset/beluganewlogov2-4k-cropped.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
+  openGraph: {
+    title: "Beluga - Platform Crypto Indonesia Terdepan",
+    description: "Platform cryptocurrency Indonesia yang menyediakan berita, analisis, dan informasi terkini tentang dunia crypto dan blockchain.",
+    url: "https://beluga.id",
+    siteName: "Beluga",
+    locale: "id_ID",
+    type: "website",
+    images: [
+      {
+        url: "/Asset/beluganewlogov2-4k-cropped.png",
+        width: 1200,
+        height: 630,
+        alt: "Beluga Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Beluga - Platform Crypto Indonesia Terdepan",
+    description: "Platform cryptocurrency Indonesia yang menyediakan berita, analisis, dan informasi terkini tentang dunia crypto dan blockchain.",
+    images: ["/Asset/beluganewlogov2-4k-cropped.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,13 +85,15 @@ export default function RootLayout({
   return (
     <html lang="id">
       <head>
-        <link rel="icon" href="/favicon.ico?v=4" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/Asset/favicon-32x32.png?v=4" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/Asset/favicon-16x16.png?v=4" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/Asset/apple-touch-icon.png?v=4" />
+        {/* Favicon - match navbar logo using pre-generated 4K cropped PNG and ico (v2) */}
+        <link rel="icon" href="/favicon.ico?v=6" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/Asset/favicon-32x32.png?v=6" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/Asset/favicon-16x16.png?v=6" />
+        <link rel="apple-touch-icon" href="/Asset/beluganewlogov2-4k-cropped.png?v=1" />
         <link rel="manifest" href="/site.webmanifest?v=4" />
         <meta name="msapplication-config" content="/browserconfig.xml?v=4" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        {/* Remove dynamic processing: using built assets */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -60,7 +122,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-900`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-duniacrypto-bg-darker`}
       >
         <ErrorBoundary>
           <AuthProvider>

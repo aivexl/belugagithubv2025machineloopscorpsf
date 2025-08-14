@@ -265,7 +265,7 @@ const TokenPage = () => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-900">
+    <div className="flex flex-col h-full bg-duniacrypto-bg-darker">
       <div className="flex flex-col lg:flex-row h-[70vh]">
         {/* Left side - Chart section */}
         <div className="flex-1 p-4">

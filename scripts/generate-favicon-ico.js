@@ -11,7 +11,23 @@ async function ensureDir(dir) {
 }
 
 async function generateIco() {
-  const input = path.resolve('public/Asset/BELUGALOGOAUGUSTV1.png');
+  // Prefer beluganewlogo.png; support both /Asset and root public
+  const candidateInputs = [
+    path.resolve('public/Asset/beluganewlogov2.png'),
+    path.resolve('public/beluganewlogov2.png'),
+    path.resolve('public/Asset/beluganewlogo.png'),
+    path.resolve('public/beluganewlogo.png'),
+    // legacy fallback
+    path.resolve('public/Asset/BELUGALOGOAUGUSTV1.png'),
+  ];
+  let input = null;
+  for (const p of candidateInputs) {
+    if (fs.existsSync(p)) { input = p; break; }
+  }
+  if (!input) {
+    throw new Error('beluganewlogo.png not found in public/Asset or public/. Please add it first.');
+  }
+
   const outDir = path.resolve('public/Asset');
   const tmpDir = path.resolve('public/Asset/.tmp_fav');
   await ensureDir(outDir);

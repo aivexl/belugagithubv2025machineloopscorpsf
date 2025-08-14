@@ -1,6 +1,7 @@
 {
-  "name": "Beluga",
+  "name": "Beluga - Platform Crypto Indonesia",
   "short_name": "Beluga",
+  "description": "Platform cryptocurrency Indonesia terdepan untuk berita, analisis, dan edukasi crypto terkini",
   "icons": [
     {
       "src": "/Asset/android-chrome-192x192.png?v=4",
@@ -27,9 +28,11 @@
       "purpose": "any maskable"
     }
   ],
-  "theme_color": "#000000",
-  "background_color": "#000000",
-  "display": "standalone"
+  "start_url": "/",
+  "theme_color": "#0a0d12",
+  "background_color": "#0a0d12",
+  "display": "standalone",
+  "orientation": "portrait-primary"
 }
 
 

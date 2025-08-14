@@ -44,6 +44,10 @@ const EnhancedTransactionTable = ({
     return () => clearInterval(interval);
   }, []);
 
+  const isHex = (s, len) => typeof s === 'string' && /^0x[0-9a-fA-F]+$/.test(s) && (len ? s.length === len : true);
+  const isAddress = (s) => isHex(s, 42);
+  const isTxHash = (s) => isHex(s, 66);
+
   const formatAddress = (address) => {
     if (!address) return 'N/A';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;

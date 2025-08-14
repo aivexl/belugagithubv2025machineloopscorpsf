@@ -84,7 +84,8 @@ export async function GET(request) {
             wallet_address: swap.walletAddress,
             from_address: swap.fromAddress || swap.makerAddress || undefined,
             to_address: swap.toAddress || undefined,
-            maker: swap.walletAddress,
+            // Ensure maker always a wallet address
+            maker: swap.walletAddress || swap.fromAddress || swap.toAddress,
             transaction_type: txType,
             base_token_amount: Math.abs(baseAmt),
             quote_token_amount: Math.abs(quoteAmt),
@@ -97,7 +98,7 @@ export async function GET(request) {
             walletAddress: swap.walletAddress,
             fromAddress: swap.fromAddress || swap.makerAddress || undefined,
             toAddress: swap.toAddress || undefined,
-            makerAddress: swap.walletAddress,
+            makerAddress: swap.walletAddress || swap.fromAddress || swap.toAddress,
             transactionType: txType,
             baseTokenAmount: Math.abs(baseAmt),
             quoteTokenAmount: Math.abs(quoteAmt),

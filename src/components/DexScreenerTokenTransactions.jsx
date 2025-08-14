@@ -623,17 +623,14 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
     }
   };
 
-  // Get wallet explorer URL
+  // Get wallet explorer URL (force address page, not tx)
   const getWalletExplorerUrl = (walletAddress) => {
     const explorer = blockExplorers[chainId] || "";
 
     if (!explorer) return "#";
 
-    if (isSolana) {
-      return `${explorer}/account/${walletAddress}`;
-    } else {
-      return `${explorer}/address/${walletAddress}`;
-    }
+    if (isSolana) return `${explorer}/account/${walletAddress}`;
+    return `${explorer}/address/${walletAddress}`;
   };
 
   // Format wallet address (truncate)
@@ -831,10 +828,14 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
             {transactions.map((tx, index) => {
               // Handle both API response formats (snake_case and camelCase)
               const txHash = tx.transaction_hash || tx.transactionHash;
-              // Ensure maker shows a wallet, not a tx hash
-              let walletAddress = tx.maker_wallet || tx.makerWallet || tx.wallet_address || tx.walletAddress || tx.maker || tx.makerAddress || '';
-              if (!walletAddress || isTxHash(walletAddress)) {
-                walletAddress = tx.from_address || tx.fromAddress || tx.to_address || tx.toAddress || walletAddress || '';
+              // Ensure maker shows a wallet (never a tx hash)
+              let walletAddress = tx.maker_wallet || tx.makerWallet || tx.wallet_address || tx.walletAddress || '';
+              if (!walletAddress) {
+                walletAddress = tx.from_address || tx.fromAddress || tx.to_address || tx.toAddress || '';
+              }
+              // Final guard: if still looks like a tx hash or invalid, blank it to avoid wrong links
+              if (!isAddress(walletAddress)) {
+                walletAddress = '';
               }
               const txType = tx.transaction_type || tx.transactionType;
               const baseTokenAmount = tx.base_token_amount || tx.baseTokenAmount;
@@ -885,17 +886,19 @@ const DexScreenerTokenTransactions = ({ pair, chainId, currentPriceUsd }) => {
                     {price.text}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <a
-                      href={getWalletExplorerUrl(walletAddress)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono hover:text-dex-blue flex items-center"
-                    >
-                      <span className="bg-dex-bg-tertiary text-dex-text-primary px-1 rounded mr-1">
-                        🦊
-                      </span>
-                      {formatWalletAddress(walletAddress)}
-                    </a>
+                    {walletAddress ? (
+                      <a
+                        href={getWalletExplorerUrl(walletAddress)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono hover:text-dex-blue flex items-center"
+                      >
+                        <span className="bg-dex-bg-tertiary text-dex-text-primary px-1 rounded mr-1">🦊</span>
+                        {formatWalletAddress(walletAddress)}
+                      </a>
+                    ) : (
+                      <span className="text-dex-text-secondary">-</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <a

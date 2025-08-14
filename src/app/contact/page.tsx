@@ -1,7 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function ContactPage() {
+  useEffect(() => {
+    document.title = "Contact Us - Beluga Crypto Indonesia";
+  }, []);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
 
@@ -31,7 +34,7 @@ export default function ContactPage() {
           <div>
             <label className="block mb-1 font-medium" htmlFor="name">Name</label>
             <input
-              className="w-full px-3 py-2 rounded border border-gray-700 bg-gray-900 text-white"
+              className="w-full px-3 py-2 rounded border border-gray-700 bg-duniacrypto-bg-darker text-white"
               type="text"
               id="name"
               name="name"
@@ -44,7 +47,7 @@ export default function ContactPage() {
           <div>
             <label className="block mb-1 font-medium" htmlFor="email">Email</label>
             <input
-              className="w-full px-3 py-2 rounded border border-gray-700 bg-gray-900 text-white"
+              className="w-full px-3 py-2 rounded border border-gray-700 bg-duniacrypto-bg-darker text-white"
               type="email"
               id="email"
               name="email"
@@ -57,7 +60,7 @@ export default function ContactPage() {
           <div>
             <label className="block mb-1 font-medium" htmlFor="message">Message</label>
             <textarea
-              className="w-full px-3 py-2 rounded border border-gray-700 bg-gray-900 text-white"
+              className="w-full px-3 py-2 rounded border border-gray-700 bg-duniacrypto-bg-darker text-white"
               id="message"
               name="message"
               autoComplete="off"

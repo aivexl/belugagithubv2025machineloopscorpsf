@@ -106,7 +106,8 @@ async function fetchFromDexScreener(tokenAddress, chain, limit) {
     // Format transactions
     const transactions = pair.txns.slice(0, parseInt(limit)).map(tx => ({
       transaction_hash: tx.hash || tx.txHash || `0x${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}`,
-      wallet_address: tx.from || tx.fromAddress || tx.maker || tx.walletAddress || tx.to || tx.toAddress || `0x${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}`,
+      // Prefer from/to/walletAddress only; never pass tx hash as maker/wallet
+      wallet_address: tx.from || tx.fromAddress || tx.walletAddress || tx.to || tx.toAddress || undefined,
       from_address: tx.from || tx.fromAddress || undefined,
       to_address: tx.to || tx.toAddress || undefined,
       transaction_type: tx.type || (tx.amountIn > tx.amountOut ? 'sell' : 'buy'),

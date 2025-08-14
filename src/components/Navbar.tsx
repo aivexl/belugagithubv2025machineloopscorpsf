@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import GradientText from "./GradientText";
@@ -8,118 +8,31 @@ import LoginModal from "./auth/LoginModal";
 import SignUpModal from "./auth/SignUpModal";
 
 function ProcessedLogo() {
-  const [dataUrl, setDataUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const toLongSideScaledDataUrl = (source: HTMLCanvasElement, targetLongSide: number) => {
-      const longSide = Math.max(source.width, source.height);
-      if (longSide === 0) {
-        return source.toDataURL("image/png");
-      }
-      const scale = targetLongSide / longSide;
-      const output = document.createElement("canvas");
-      output.width = Math.max(1, Math.round(source.width * scale));
-      output.height = Math.max(1, Math.round(source.height * scale));
-      const octx = output.getContext("2d");
-      if (octx) {
-        octx.imageSmoothingEnabled = true;
-        octx.imageSmoothingQuality = "high" as CanvasImageSmoothingQuality;
-        octx.drawImage(
-          source,
-          0,
-          0,
-          source.width,
-          source.height,
-          0,
-          0,
-          output.width,
-          output.height
-        );
-      }
-      return output.toDataURL("image/png");
-    };
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = "/Asset/BELUGALOGOAUGUSTV1.png?v=4";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        setDataUrl(null);
-        return;
-      }
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high" as CanvasImageSmoothingQuality;
-      ctx.drawImage(img, 0, 0);
-
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-
-      // 1) Buat warna hampir hitam menjadi transparan
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        if (r < 20 && g < 20 && b < 20) {
-          data[i + 3] = 0;
-        }
-      }
-      ctx.putImageData(imageData, 0, 0);
-
-      // 2) Hitung bounding box piksel non-transparan
-      let minX = canvas.width;
-      let minY = canvas.height;
-      let maxX = -1;
-      let maxY = -1;
-      for (let y = 0; y < canvas.height; y++) {
-        for (let x = 0; x < canvas.width; x++) {
-          const idx = (y * canvas.width + x) * 4;
-          const alpha = data[idx + 3];
-          if (alpha > 10) { // threshold alpha
-            if (x < minX) minX = x;
-            if (y < minY) minY = y;
-            if (x > maxX) maxX = x;
-            if (y > maxY) maxY = y;
-          }
-        }
-      }
-
-      if (maxX >= 0 && maxY >= 0 && minX <= maxX && minY <= maxY) {
-        const cropW = maxX - minX + 1;
-        const cropH = maxY - minY + 1;
-        const cropped = document.createElement("canvas");
-        cropped.width = cropW;
-        cropped.height = cropH;
-        const cctx = cropped.getContext("2d");
-        if (!cctx) {
-          setDataUrl(toLongSideScaledDataUrl(canvas, 3840));
-          return;
-        }
-        cctx.imageSmoothingEnabled = true;
-        cctx.imageSmoothingQuality = "high" as CanvasImageSmoothingQuality;
-        cctx.drawImage(canvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
-        setDataUrl(toLongSideScaledDataUrl(cropped, 3840));
-      } else {
-        // Tidak ada piksel non-transparan terdeteksi, pakai hasil tanpa crop
-        setDataUrl(toLongSideScaledDataUrl(canvas, 3840));
-      }
-    };
-    img.onerror = () => setDataUrl(null);
-  }, []);
-
-  if (dataUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={dataUrl} alt="Beluga Logo" className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform" />
-    );
-  }
-
-  // Fallback to original if processing fails
+  // Use the pre-generated 4K cropped PNG to ensure favicon and navbar match exactly
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src="/Asset/BELUGALOGOAUGUSTV1.png?v=4" alt="Beluga Logo" className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform" />;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/Asset/beluganewlogov2-4k-cropped.png?v=1"
+      alt="Beluga Logo"
+      className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-all duration-300 animate-logo-color-cycle hover:[animation-play-state:paused] hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+      data-fallback="1"
+      onError={(e) => {
+        const img = e.currentTarget as HTMLImageElement & { dataset: { fallback?: string } };
+        const step = img.dataset.fallback || '1';
+        if (step === '1') {
+          img.src = '/Asset/beluganewlogov2.png?v=1';
+          img.dataset.fallback = '2';
+        } else if (step === '2') {
+          img.src = '/Asset/belugalogov2.cropped.transp.4k.png?v=1';
+          img.dataset.fallback = '3';
+        } else if (step === '3') {
+          img.src = '/Asset/beluganewlogo.png?v=1';
+          img.dataset.fallback = '4';
+        }
+      }}
+    />
+  );
 }
 
 export default function Navbar() {
@@ -171,7 +84,7 @@ export default function Navbar() {
                 colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
                 animationSpeed={2}
                 showBorder={false}
-                 className="text-2xl md:text-3xl font-bold tracking-tight font-sans leading-snug"
+                 className="text-2xl md:text-3xl font-bold tracking-tight font-sans leading-normal pb-0.5"
               >
                 Beluga
               </GradientText>

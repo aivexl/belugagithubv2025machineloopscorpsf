@@ -42,7 +42,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
-      console.log('Auth state changed:', _event, session?.user?.email);
+      // Only log auth changes in development mode
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Auth state changed:', _event, session?.user?.email);
+      }
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);

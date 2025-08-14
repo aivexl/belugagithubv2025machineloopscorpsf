@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
+    "build:logo": "node scripts/crop-logo-4k.js && node scripts/generate-icons.js && node scripts/generate-favicon-ico.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

@@ -1790,7 +1790,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           </div>
           
           {/* Legend */}
-          <div className="absolute bottom-2 left-2 bg-gray-900/80 backdrop-blur-sm rounded-lg p-2 border border-gray-700">
+          <div className="absolute bottom-2 left-2 bg-duniacrypto-bg-darker/80 backdrop-blur-sm rounded-lg p-2 border border-gray-700">
             <div className="flex items-center space-x-4 text-xs text-white">
               <div className="flex items-center space-x-1">
                 <div className="w-3 h-3 bg-emerald-700 rounded"></div>

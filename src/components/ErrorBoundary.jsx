@@ -23,7 +23,7 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-duniacrypto-bg-darker flex items-center justify-center p-4">
           <div className="bg-gray-800 rounded-lg border border-red-600 p-6 max-w-md w-full">
             <div className="text-center">
               <div className="text-red-400 text-4xl mb-4">⚠️</div>
@@ -48,7 +48,7 @@ class ErrorBoundary extends React.Component {
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="mt-4 text-left">
                   <summary className="text-gray-400 cursor-pointer text-sm">Error Details</summary>
-                  <pre className="text-xs text-red-300 mt-2 bg-gray-900 p-2 rounded overflow-auto">
+                  <pre className="text-xs text-red-300 mt-2 bg-duniacrypto-bg-darker p-2 rounded overflow-auto">
                     {this.state.error.toString()}
                   </pre>
                 </details>

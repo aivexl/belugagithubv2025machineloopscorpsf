@@ -14,6 +14,10 @@
   --color-green: #16c784;
   --color-red: #ea3943;
   --color-blue: #4878ff;
+  /* Scrollbar theme */
+  --scrollbar-track: #0a0d12;           /* blends with page background */
+  --scrollbar-thumb: #2a3343;           /* subtle dark thumb */
+  --scrollbar-thumb-hover: #3a4357;     /* slightly lighter on hover */
 }
 
 html, body {
@@ -21,12 +25,37 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', Arial, sans-serif;
-  background: #0D1117;
+  background: #0a0d12;  /* Darker than Daily Recap panel (#141722) */
   color: #fff;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* Global dark, minimal scrollbar (modern theme) */
+* {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 9999px;
+  border: 2px solid var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
 }
 
 a {
@@ -68,6 +97,131 @@ a:hover {
   animation: slide-in 0.3s ease-out forwards;
 }
 
+/* Logo Color Animation - Cycling through specified colors */
+@keyframes logoColorCycle {
+  0% {
+    filter: hue-rotate(140deg) saturate(1.8) brightness(0.9);
+    /* Targeting #00bf63 - Green */
+  }
+  12.5% {
+    filter: hue-rotate(100deg) saturate(1.6) brightness(1.1);
+    /* Targeting #7ed957 - Light Green */
+  }
+  25% {
+    filter: hue-rotate(75deg) saturate(1.4) brightness(1.3);
+    /* Targeting #c1ff72 - Yellow Green */
+  }
+  37.5% {
+    filter: hue-rotate(185deg) saturate(1.5) brightness(1.1);
+    /* Targeting #0cc0df - Cyan */
+  }
+  50% {
+    filter: hue-rotate(0deg) saturate(1) brightness(1);
+    /* Original logo color */
+  }
+  62.5% {
+    filter: hue-rotate(225deg) saturate(1.4) brightness(1.2);
+    /* Targeting #5170ff - Blue */
+  }
+  75% {
+    filter: hue-rotate(355deg) saturate(1.6) brightness(1.1);
+    /* Targeting #ff3131 - Red */
+  }
+  87.5% {
+    filter: hue-rotate(50deg) saturate(1.5) brightness(1.3);
+    /* Targeting #ffde59 - Yellow */
+  }
+  100% {
+    filter: hue-rotate(140deg) saturate(1.8) brightness(0.9);
+    /* Back to #00bf63 - Green for smooth loop */
+  }
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  .logo-color-animation {
+    animation: logoColorCycle 48s ease-in-out infinite;
+  }
+}
+
+.logo-color-animation {
+  transition: filter 0.4s ease, transform 0.3s ease;
+  transform-origin: center;
+  will-change: filter, transform;
+}
+
+.logo-color-animation:hover {
+  animation-play-state: paused;
+  filter: hue-rotate(0deg) saturate(1.2) brightness(1.15) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+}
+
+/* Fallback for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .logo-color-animation {
+    animation: none;
+    filter: hue-rotate(0deg) saturate(1.1) brightness(1.05);
+  }
+  
+  .logo-color-animation:hover {
+    filter: hue-rotate(15deg) saturate(1.3) brightness(1.2) drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
+  }
+}
+
+/* Crypto Ticker Animation - Simplified and Robust */
+@keyframes cryptoTickerScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-1 * var(--ticker-width, 800px)));
+  }
+}
+
+.crypto-ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: cryptoTickerScroll var(--animation-duration, 30s) linear infinite;
+  /* GPU acceleration for smooth performance */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  /* Prevent animation glitches */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.crypto-ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.5rem;
+  min-width: max-content;
+  flex-shrink: 0;
+  /* Prevent layout shifts */
+  contain: layout style;
+  /* Optimize text rendering */
+  text-rendering: optimizeSpeed;
+}
+
+/* Pause animation on hover for better UX */
+.crypto-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+/* Responsive animation speed */
+@media (max-width: 768px) {
+  .crypto-ticker-track {
+    animation-duration: calc(var(--animation-duration, 30s) * 0.8);
+  }
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .crypto-ticker-track {
+    animation-duration: calc(var(--animation-duration, 30s) * 3);
+  }
+}
+
 /* Mobile menu slide-up animation */
 @keyframes slide-up {
   from {
@@ -92,27 +246,29 @@ a:hover {
   display: none;  /* Safari and Chrome */
 }
 
-/* Custom scrollbar styling */
+/* Optional utility: even thinner minimal scrollbar for specific containers */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 3px;
+  width: 6px;
+  height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--scrollbar-track);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(31, 41, 55, 0.6);
-  border-radius: 1.5px;
+  background: var(--scrollbar-thumb);
+  border-radius: 9999px;
+  border: 2px solid var(--scrollbar-track);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(31, 41, 55, 0.9);
+  background: var(--scrollbar-thumb-hover);
 }
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(31, 41, 55, 0.6) transparent;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 } 
 
 @layer base {

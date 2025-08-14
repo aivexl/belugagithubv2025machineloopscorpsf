@@ -38,21 +38,41 @@ const DexScreenerTransactionTable = ({ data, loading, error, pagination, onLoadM
     return formatDistanceToNow(date, { addSuffix: true });
   };
 
+  // Basic validators
+  const isHex = (s, len) => typeof s === 'string' && /^0x[0-9a-fA-F]+$/.test(s) && (len ? s.length === len : true);
+  const isAddress = (s) => isHex(s, 42);
+  const isTxHash = (s) => isHex(s, 66);
+
   const getExplorerUrl = (address, chainName) => {
     if (!address) return '#';
-    
-    const explorers = {
-      'ethereum': `https://etherscan.io/address/${address}`,
-      'bsc': `https://bscscan.com/address/${address}`,
-      'polygon': `https://polygonscan.com/address/${address}`,
-      'avalanche': `https://snowtrace.io/address/${address}`,
-      'fantom': `https://ftmscan.com/address/${address}`,
-      'arbitrum': `https://arbiscan.io/address/${address}`,
-      'optimism': `https://optimistic.etherscan.io/address/${address}`,
-      'base': `https://basescan.org/address/${address}`,
-    };
-    
-    return explorers[chainName?.toLowerCase()] || `https://etherscan.io/address/${address}`;
+    const base = {
+      ethereum: 'https://etherscan.io',
+      bsc: 'https://bscscan.com',
+      polygon: 'https://polygonscan.com',
+      avalanche: 'https://snowtrace.io',
+      fantom: 'https://ftmscan.com',
+      arbitrum: 'https://arbiscan.io',
+      optimism: 'https://optimistic.etherscan.io',
+      base: 'https://basescan.org',
+    }[chainName?.toLowerCase()] || 'https://etherscan.io';
+    const path = isTxHash(address) ? 'tx' : 'address';
+    return `${base}/${path}/${address}`;
+  };
+
+  // Maker should ALWAYS open an address page, never /tx
+  const getAddressExplorerUrl = (address, chainName) => {
+    if (!address) return '#';
+    const base = {
+      ethereum: 'https://etherscan.io',
+      bsc: 'https://bscscan.com',
+      polygon: 'https://polygonscan.com',
+      avalanche: 'https://snowtrace.io',
+      fantom: 'https://ftmscan.com',
+      arbitrum: 'https://arbiscan.io',
+      optimism: 'https://optimistic.etherscan.io',
+      base: 'https://basescan.org',
+    }[chainName?.toLowerCase()] || 'https://etherscan.io';
+    return `${base}/address/${address}`;
   };
 
   const handleSort = (field) => {
@@ -168,7 +188,14 @@ const DexScreenerTransactionTable = ({ data, loading, error, pagination, onLoadM
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
-              {sortedData.map((tx, index) => (
+              {sortedData.map((tx, index) => {
+                // Ensure maker shows a wallet (fall back to from/to; never a tx hash)
+                let maker = tx.maker || tx.wallet_address || tx.walletAddress || '';
+                if (!maker || !isAddress(maker) || isTxHash(maker)) {
+                  maker = tx.from || tx.fromAddress || tx.to || tx.toAddress || '';
+                }
+                if (!isAddress(maker)) maker = '';
+                return (
                 <tr key={index} className="hover:bg-gray-700">
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
                     {formatTime(tx.timestamp)}
@@ -194,17 +221,21 @@ const DexScreenerTransactionTable = ({ data, loading, error, pagination, onLoadM
                     {formatValue(tx.valueUsd)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-400 hover:text-blue-300 cursor-pointer">
-                    <a 
-                      href={getExplorerUrl(tx.maker, cryptoMapping?.chainName)} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="hover:underline"
-                    >
-                      {formatAddress(tx.maker)}
-                    </a>
+                    {maker ? (
+                      <a 
+                        href={getAddressExplorerUrl(maker, cryptoMapping?.chainName)} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {formatAddress(maker)}
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
                   </td>
                 </tr>
-              ))}
+              );})}
             </tbody>
           </table>
         </div>

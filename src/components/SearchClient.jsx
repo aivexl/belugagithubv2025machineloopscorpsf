@@ -100,7 +100,7 @@ export default function SearchClient({ query: initialQuery = '' }) {
               placeholder="Search articles..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 pl-12 pr-16 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              className="w-full px-4 py-3 pl-12 pr-16 bg-duniacrypto-bg-darker border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200"
             />
             {/* Search Icon */}
             <svg

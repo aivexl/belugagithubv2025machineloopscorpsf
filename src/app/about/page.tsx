@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About Us - Beluga Crypto Indonesia",
+  description: "Pelajari lebih lanjut tentang Beluga, platform cryptocurrency Indonesia terdepan yang menghadirkan informasi dan edukasi terbaik.",
+};
+
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-duniacrypto-bg-darker">
       <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">About Dunia Crypto</h1>

@@ -3,6 +3,10 @@
 import React from "react";
 import CryptoTicker from "./CryptoTicker";
 import SubscribeContainer from "./SubscribeContainer";
+import MarketOverview from "./MarketOverview";
+import BtcEthPercentageChart from "./BtcEthPercentageChart";
+import Top10MarketCap from "./Top10MarketCap";
+import Top100Trending from "./Top100Trending";
 import DailyRecap from "./DailyRecap";
 import NewsSlider from "./NewsSlider";
 import { CoinGeckoProvider } from "./CoinGeckoContext";
@@ -37,7 +41,11 @@ export default function HomeClient({ articles = [] }) {
           <NewsFeedServer articles={articles} />
         </section>
         <aside className="col-span-1 space-y-4 md:gap-6">
+          <MarketOverview />
+          <BtcEthPercentageChart />
           <SubscribeContainer />
+          <Top10MarketCap />
+          <Top100Trending />
         </aside>
       </main>
     </CoinGeckoProvider>

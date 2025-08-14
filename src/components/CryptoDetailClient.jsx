@@ -253,7 +253,7 @@ export default function CryptoDetailClient({ cryptoId }) {
   if (loading) {
     return (
       <CoinGeckoProvider>
-        <div className="min-h-screen bg-duniacrypto-bg">
+        <div className="min-h-screen bg-duniacrypto-bg-darker">
           <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
             <div className="animate-pulse">
               <div className="h-6 sm:h-8 bg-gray-700 rounded w-1/3 sm:w-1/4 mb-4 sm:mb-6"></div>
@@ -285,7 +285,7 @@ export default function CryptoDetailClient({ cryptoId }) {
   if (error) {
     return (
       <CoinGeckoProvider>
-        <div className="min-h-screen bg-duniacrypto-bg">
+        <div className="min-h-screen bg-duniacrypto-bg-darker">
           <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
             <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 sm:p-6 text-center">
               <h2 className="text-red-400 font-bold text-lg sm:text-xl mb-3 sm:mb-4">Error Loading Crypto Data</h2>
@@ -314,7 +314,7 @@ export default function CryptoDetailClient({ cryptoId }) {
   if (!coinData) {
     return (
       <CoinGeckoProvider>
-        <div className="min-h-screen bg-duniacrypto-bg">
+        <div className="min-h-screen bg-duniacrypto-bg-darker">
           <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
             <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4 sm:p-6 text-center">
               <h2 className="text-yellow-400 font-bold text-lg sm:text-xl mb-3 sm:mb-4">Crypto Not Found</h2>
@@ -336,7 +336,7 @@ export default function CryptoDetailClient({ cryptoId }) {
 
   return (
     <CoinGeckoProvider>
-      <div className="min-h-screen bg-duniacrypto-bg">
+      <div className="min-h-screen bg-duniacrypto-bg-darker">
         {/* Header */}
         <div className="bg-duniacrypto-panel border-b border-gray-700">
           <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
