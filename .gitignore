@@ -41,3 +41,6 @@ temp-dexscreener-fresh/
 # Temporary files
 *.tmp
 *.temp
+
+# Development cache
+.cache/

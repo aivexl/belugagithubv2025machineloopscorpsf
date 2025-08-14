@@ -4,11 +4,48 @@ import React, { useContext, useEffect, useState, useRef, type ReactNode } from '
 import { COINS_URL, GLOBAL_URL } from './CoinGeckoUtils';
 import CoinGeckoContext from './CoinGeckoContextContext';
 
-// Simple in-memory cache for API responses
+// Simple in-memory cache for API responses (production/fallback)
 const cache = new Map();
 const CACHE_TTL = 30 * 1000; // 30 seconds cache
 
+// Import dev cache functions (client-side compatible)
+let devCacheEnabled = false;
+let getDevCache: any = null;
+let setDevCache: any = null;
+
+// Initialize dev cache only on client and in development
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  try {
+    // Dynamically import dev cache functions
+    import('../lib/devCacheClient').then(module => {
+      getDevCache = module.getDevCache;
+      setDevCache = module.setDevCache;
+      devCacheEnabled = true;
+      console.log('[DEV CACHE] Development cache system enabled');
+    }).catch(() => {
+      console.log('[DEV CACHE] Dev cache not available, using standard cache');
+    });
+  } catch (error) {
+    console.log('[DEV CACHE] Dev cache initialization failed, using standard cache');
+  }
+}
+
 const cachedFetch = async (url: string) => {
+  const cacheKey = url.split('/api/coingecko')[1] || url;
+  
+  // Try dev cache first (development only)
+  if (devCacheEnabled && getDevCache) {
+    try {
+      const devCachedData = await getDevCache(cacheKey);
+      if (devCachedData) {
+        return devCachedData;
+      }
+    } catch (error) {
+      console.warn('[DEV CACHE] Error accessing dev cache, falling back to API:', error.message);
+    }
+  }
+  
+  // Fallback to in-memory cache
   const now = Date.now();
   const cached = cache.get(url);
   
@@ -16,6 +53,8 @@ const cachedFetch = async (url: string) => {
     return cached.data;
   }
   
+  // Fetch from API
+  console.log(`[API CALL] Fetching ${cacheKey}`);
   const response = await fetch(url, {
     headers: {
       'Cache-Control': 'public, max-age=30',
@@ -25,7 +64,18 @@ const cachedFetch = async (url: string) => {
   if (!response.ok) throw new Error(`Failed to fetch ${url}`);
   
   const data = await response.json();
+  
+  // Store in both caches
   cache.set(url, { data, timestamp: now });
+  
+  // Store in dev cache (development only)
+  if (devCacheEnabled && setDevCache) {
+    try {
+      await setDevCache(cacheKey, data);
+    } catch (error) {
+      console.warn('[DEV CACHE] Failed to store in dev cache:', error.message);
+    }
+  }
   
   return data;
 };
@@ -75,8 +125,15 @@ export const CoinGeckoProvider: React.FC<{ children: ReactNode }> = ({ children 
   useEffect(() => {
     fetchAll();
     
-    // Reduced update frequency for better performance - every 60 seconds
-    const interval = setInterval(() => fetchAll(true), 60 * 1000);
+    // Different intervals for dev vs production
+    const isDev = process.env.NODE_ENV === 'development';
+    const intervalTime = isDev 
+      ? 5 * 60 * 1000  // 5 minutes in development (will use cache)
+      : 60 * 1000;     // 60 seconds in production
+    
+    console.log(`[COINGECKO] Update interval: ${isDev ? '5 minutes (dev with cache)' : '60 seconds (production)'}`);
+    
+    const interval = setInterval(() => fetchAll(true), intervalTime);
     
     return () => {
       clearInterval(interval);

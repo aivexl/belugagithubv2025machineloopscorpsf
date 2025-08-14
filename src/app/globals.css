@@ -247,6 +247,24 @@ a:hover {
   animation: slide-up 0.3s ease-out;
 }
 
+/* Tablet menu fade-in animation */
+@keyframes fade-in-scale {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@media (min-width: 768px) {
+  .animate-slide-up {
+    animation: fade-in-scale 0.2s ease-out;
+  }
+}
+
 /* Hide scrollbar for mobile menu */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
@@ -255,6 +273,108 @@ a:hover {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Safari and Chrome */
+}
+
+/* Tablet navbar overflow styling */
+.tablet-nav-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tablet-nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Enhanced tablet responsiveness - Beautiful Design */
+@media (min-width: 768px) and (max-width: 1279px) {
+  /* Beautiful tablet navbar with proper proportions */
+  .tablet-beautiful-nav {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 0;
+    gap: 2rem;
+  }
+  
+  /* Navigation links with beautiful sizing and hover effects */
+  .tablet-nav-link-beautiful {
+    font-size: clamp(0.875rem, 2.5vw, 1.125rem);
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    position: relative;
+  }
+  
+  .tablet-nav-link-beautiful:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15);
+  }
+  
+  /* Beautiful search bar for tablet */
+  .tablet-search-beautiful {
+    width: clamp(8rem, 25vw, 12rem);
+    height: 3rem;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Beautiful auth buttons for tablet */
+  .tablet-auth-beautiful {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    font-weight: 600;
+    padding: clamp(0.625rem, 2vw, 0.875rem) clamp(1rem, 3vw, 1.5rem);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .tablet-auth-beautiful:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.25);
+  }
+}
+
+/* Smooth animations for tablet interactions */
+@media (min-width: 768px) and (max-width: 1279px) {
+  /* Scale animations */
+  .tablet-scale-hover:hover {
+    transform: scale(1.05);
+  }
+  
+  .tablet-scale-hover:active {
+    transform: scale(0.95);
+  }
+  
+  /* Glow effects for interactive elements */
+  .tablet-glow-blue:hover {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  
+  .tablet-glow-red:hover {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  }
+}
+
+/* Specific breakpoint fixes for different tablet sizes */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Standard tablet (768px - 1023px) */
+  .tablet-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  /* Large tablet / small desktop (1024px - 1279px) */
+  .tablet-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
 }
 
 /* Optional utility: even thinner minimal scrollbar for specific containers */

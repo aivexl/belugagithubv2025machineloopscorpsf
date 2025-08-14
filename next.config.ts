@@ -82,7 +82,8 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/:path*',
+        // Exclude Next.js internal assets from strict headers
+        source: '/((?!_next/).*)',
         headers: [
           {
             key: 'X-Content-Type-Options',

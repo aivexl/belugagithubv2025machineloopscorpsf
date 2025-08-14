@@ -59,7 +59,10 @@ export default function CryptoTicker() {
     const updateAnimation = () => {
       const width = calculateWidth();
       ticker.style.setProperty('--ticker-width', `${width}px`);
-      ticker.style.setProperty('--animation-duration', '30s'); // Fixed duration for consistency
+      // Slower, consistent speed across widths using pixels/second
+      const SPEED_PX_PER_SEC = 20; // lower = slower
+      const durationSeconds = Math.max(Math.round(width / SPEED_PX_PER_SEC), 40); // ensure a minimum
+      ticker.style.setProperty('--animation-duration', `${durationSeconds}s`);
     };
 
     // Initial setup
@@ -98,7 +101,7 @@ export default function CryptoTicker() {
   }
 
   return (
-    <div className="relative overflow-hidden w-full bg-duniacrypto-panel border-b border-gray-800 py-2">
+    <div className="relative overflow-hidden w-full bg-duniacrypto-panel border-b border-gray-800 py-2 md:py-3">
       <div
         ref={tickerRef}
         className="crypto-ticker-track"

@@ -150,6 +150,16 @@ export default function RootLayout({
                       registrations.forEach(function(reg) { reg.unregister(); });
                     })
                     .catch(function(err) { console.log('SW unregister error:', err); });
+                  // Also clear caches that may hold old _next assets
+                  if (window.caches) {
+                    caches.keys().then(function(keys) {
+                      keys.forEach(function(key) {
+                        if (key.includes('next') || key.includes('workbox')) {
+                          caches.delete(key);
+                        }
+                      });
+                    });
+                  }
                 }
               }
             `,
@@ -165,7 +175,7 @@ export default function RootLayout({
               <ConsoleSilencer />
               <PerformanceMonitor />
               <Navbar />
-              <main className="flex-1">
+              <main className="flex-1 pb-20 xl:pb-0">
                 {children}
               </main>
               <Footer />
