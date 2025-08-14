@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "../components/Navbar";
@@ -96,9 +97,6 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//assets.coingecko.com" />
         <link rel="dns-prefetch" href="//api.coingecko.com" />
         
-        {/* Preload critical resources */}
-        <link rel="preload" href="/Asset/beluganewlogov2.png" as="image" type="image/png" />
-        
         {/* Favicon - match navbar logo using pre-generated 4K cropped PNG and ico (v2) */}
         <link rel="icon" href="/favicon.ico?v=6" />
         <link rel="icon" type="image/png" sizes="32x32" href="/Asset/favicon-32x32.png?v=6" />
@@ -132,17 +130,27 @@ export default function RootLayout({
                 }
               });
 
-              // Register Service Worker for caching
+              // Service Worker: enable only in production, disable/unregister in development
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                      console.log('SW registered: ', registration);
+                const __ENV__ = '${process.env.NODE_ENV || 'development'}';
+                if (__ENV__ === 'production') {
+                  window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js')
+                      .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                      })
+                      .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                      });
+                  });
+                } else {
+                  // Unregister any existing service workers during development to avoid stale caches
+                  navigator.serviceWorker.getRegistrations()
+                    .then(function(registrations) {
+                      registrations.forEach(function(reg) { reg.unregister(); });
                     })
-                    .catch(function(registrationError) {
-                      console.log('SW registration failed: ', registrationError);
-                    });
-                });
+                    .catch(function(err) { console.log('SW unregister error:', err); });
+                }
               }
             `,
           }}

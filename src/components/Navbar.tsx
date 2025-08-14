@@ -9,14 +9,17 @@ import LoginModal from "./auth/LoginModal";
 import SignUpModal from "./auth/SignUpModal";
 
 function ProcessedLogo() {
-  // Use the appropriately sized logo (669x514) instead of 4K for better performance
+  // Use an intrinsic size that matches the displayed size to avoid hydration diff
+  // Display height is 40px (mobile) and 48px (md). Use width that preserves aspect ratio ~1.302 (669/514)
+  const intrinsicWidth = 62;  // 48 * 1.302 ≈ 62
+  const intrinsicHeight = 48;
   return (
     <Image
       src="/Asset/beluganewlogov2.png"
       alt="Beluga Logo"
-      width={669}
-      height={514}
-      priority
+      width={intrinsicWidth}
+      height={intrinsicHeight}
+      // Do not mark as priority to avoid implicit preloading in dev which can trigger preload warnings
       className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-all duration-300 animate-logo-color-cycle hover:[animation-play-state:paused] hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
       style={{ width: 'auto', height: 'auto' }}
       sizes="(max-width: 768px) 40px, 48px"
