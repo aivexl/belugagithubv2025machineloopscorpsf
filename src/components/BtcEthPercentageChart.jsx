@@ -11,10 +11,13 @@ export default function BtcEthPercentageChart() {
 	const [error, setError] = useState(null);
 	const [badgePct, setBadgePct] = useState({ btc: 0, eth: 0 });
     const { coins } = useCoinGecko();
-    const [today, setToday] = useState(new Date());
+    const [today, setToday] = useState(null); // Start with null to avoid hydration mismatch
 
     // Auto-update today's date at local midnight so labels stay accurate
     useEffect(() => {
+        // Initialize date on client-side only
+        setToday(new Date());
+        
         let timerId;
         const schedule = () => {
             const now = new Date();
@@ -95,9 +98,9 @@ export default function BtcEthPercentageChart() {
 			} catch (e) {
 				if (!cancelled) {
 					setError("Unable to load BTC/ETH chart");
-					// Fallback demo data (flat lines)
-					const now = Date.now();
-					const mk = Array.from({ length: 24 }, (_, i) => [now - (24 - i) * 3600_000, i - 12]);
+					// Fallback demo data (flat lines) - use static timestamps to avoid hydration mismatch
+					const baseTime = 1700000000000; // Fixed timestamp
+					const mk = Array.from({ length: 24 }, (_, i) => [baseTime + i * 3600_000, i - 12]);
 					setSeries({ btc: mk, eth: mk.map(([t, v]) => [t, v * 0.6]) });
 				}
 			} finally {
@@ -239,7 +242,7 @@ export default function BtcEthPercentageChart() {
 							{r.toUpperCase()}
 						</button>
 					))}
-                    <span className="hidden sm:inline text-[11px] text-gray-400">{today.toLocaleDateString(undefined,{ day:'2-digit', month:'short', year:'numeric' })}</span>
+                    <span className="hidden sm:inline text-[11px] text-gray-400">{today?.toLocaleDateString('en-US',{ day:'2-digit', month:'short', year:'numeric' }) || ''}</span>
 				</div>
 			</div>
 			<div className="relative">
@@ -349,15 +352,15 @@ export default function BtcEthPercentageChart() {
                                 };
                                 const fmtDay = (ms) => {
                                     const d = new Date(ms);
-                                    return d.toLocaleDateString(undefined, { weekday: 'short' });
+                                    return d.toLocaleDateString('en-US', { weekday: 'short' });
                                 };
                                 const fmtDate = (ms) => {
                                     const d = new Date(ms);
-                                    return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
+                                    return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
                                 };
                                 const fmtMonth = (ms) => {
                                     const d = new Date(ms);
-                                    return d.toLocaleDateString(undefined, { month: 'short' });
+                                    return d.toLocaleDateString('en-US', { month: 'short' });
                                 };
 
                                 if (range === '24h') {
@@ -393,10 +396,12 @@ export default function BtcEthPercentageChart() {
                                         ticksMajor.push({ t, label: fmtMonth(t) });
                                         m += 1; if (m > 11) { m = 0; y += 1; }
                                     }
-                                    // Add today's date label near the end, without changing the line
-                                    const tToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-                                    const labelToday = today.toLocaleDateString(undefined,{ day:'2-digit', month:'short' });
-                                    ticksMajor.push({ t: Math.min(x1, tToday), label: labelToday, isToday: true });
+                                    // Add today's date label near the end, without changing the line (only if today is available)
+                                    if (today) {
+                                        const tToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+                                        const labelToday = today.toLocaleDateString('en-US',{ day:'2-digit', month:'short' });
+                                        ticksMajor.push({ t: Math.min(x1, tToday), label: labelToday, isToday: true });
+                                    }
                                 }
 
                                 return (

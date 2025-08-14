@@ -65,12 +65,16 @@ export default function CryptoTicker() {
     // Initial setup
     requestAnimationFrame(updateAnimation);
     
-    // Update on window resize
+    // Update on window resize (with safety check)
     const handleResize = () => requestAnimationFrame(updateAnimation);
-    window.addEventListener('resize', handleResize);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+    }
     
     return () => {
-      window.removeEventListener('resize', handleResize);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('resize', handleResize);
+      }
     };
   }, [coins]);
 
@@ -135,7 +139,7 @@ export default function CryptoTicker() {
                     !isFlashUp && !isFlashDown && 'text-white'
                   )}
                 >
-                  ${typeof coin.current_price === 'number' ? coin.current_price.toLocaleString(undefined, {
+                  ${typeof coin.current_price === 'number' ? coin.current_price.toLocaleString('en-US', {
                     minimumFractionDigits: coin.current_price < 1 ? 4 : 2,
                     maximumFractionDigits: coin.current_price < 1 ? 6 : 2
                   }) : '0'}
