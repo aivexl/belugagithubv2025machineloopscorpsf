@@ -24,9 +24,13 @@ const nextConfig: NextConfig = {
   
   // Performance optimizations
   experimental: {
-    optimizeCss: true,
+    // Disable optimizeCss for now as it requires additional dependencies
+    // optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@vercel/analytics'],
   },
+  
+  // Fix Supabase Edge Runtime warnings
+  serverExternalPackages: ['@supabase/supabase-js'],
   
   // Enhanced webpack configuration
   webpack: (config, { dev, isServer }) => {
@@ -44,16 +48,16 @@ const nextConfig: NextConfig = {
       config.optimization.usedExports = true;
       config.optimization.sideEffects = false;
       
-      // Bundle analyzer (optional)
-      if (process.env.ANALYZE === 'true') {
-        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-        config.plugins.push(
-          new BundleAnalyzerPlugin({
-            analyzerMode: 'static',
-            openAnalyzer: false,
-          })
-        );
-      }
+      // Bundle analyzer (optional) - disabled for production builds
+      // if (process.env.ANALYZE === 'true') {
+      //   const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+      //   config.plugins.push(
+      //     new BundleAnalyzerPlugin({
+      //       analyzerMode: 'static',
+      //       openAnalyzer: false,
+      //     })
+      //   );
+      // }
     }
     
     // Reduce bundle size
