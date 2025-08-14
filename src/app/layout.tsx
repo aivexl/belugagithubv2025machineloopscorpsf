@@ -6,6 +6,7 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "../contexts/AuthProvider";
 import ConsoleSilencer from "../components/ConsoleSilencer";
+import PerformanceMonitor from "../components/PerformanceMonitor";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
       { url: "/Asset/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
     apple: [
-      { url: "/Asset/beluganewlogov2-4k-cropped.png", sizes: "180x180", type: "image/png" },
+      { url: "/Asset/beluganewlogov2.png", sizes: "180x180", type: "image/png" },
     ],
   },
   manifest: "/site.webmanifest",
@@ -41,9 +42,9 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/Asset/beluganewlogov2-4k-cropped.png",
-        width: 1200,
-        height: 630,
+        url: "/Asset/beluganewlogov2.png",
+        width: 669,
+        height: 514,
         alt: "Beluga Logo",
       },
     ],
@@ -52,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Beluga - Platform Crypto Indonesia Terdepan",
     description: "Platform cryptocurrency Indonesia yang menyediakan berita, analisis, dan informasi terkini tentang dunia crypto dan blockchain.",
-    images: ["/Asset/beluganewlogov2-4k-cropped.png"],
+    images: ["/Asset/beluganewlogov2.png"],
   },
   robots: {
     index: true,
@@ -70,11 +71,15 @@ export const metadata: Metadata = {
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  preload: false,
 });
 
 export default function RootLayout({
@@ -85,11 +90,20 @@ export default function RootLayout({
   return (
     <html lang="id">
       <head>
+        {/* DNS Prefetch for performance */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//cdn.sanity.io" />
+        <link rel="dns-prefetch" href="//assets.coingecko.com" />
+        <link rel="dns-prefetch" href="//api.coingecko.com" />
+        
+        {/* Preload critical resources */}
+        <link rel="preload" href="/Asset/beluganewlogov2.png" as="image" type="image/png" />
+        
         {/* Favicon - match navbar logo using pre-generated 4K cropped PNG and ico (v2) */}
         <link rel="icon" href="/favicon.ico?v=6" />
         <link rel="icon" type="image/png" sizes="32x32" href="/Asset/favicon-32x32.png?v=6" />
         <link rel="icon" type="image/png" sizes="16x16" href="/Asset/favicon-16x16.png?v=6" />
-        <link rel="apple-touch-icon" href="/Asset/beluganewlogov2-4k-cropped.png?v=1" />
+        <link rel="apple-touch-icon" href="/Asset/beluganewlogov2.png?v=1" />
         <link rel="manifest" href="/site.webmanifest?v=4" />
         <meta name="msapplication-config" content="/browserconfig.xml?v=4" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -117,6 +131,19 @@ export default function RootLayout({
                   return false;
                 }
               });
+
+              // Register Service Worker for caching
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                      console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                      console.log('SW registration failed: ', registrationError);
+                    });
+                });
+              }
             `,
           }}
         />
@@ -128,6 +155,7 @@ export default function RootLayout({
           <AuthProvider>
             <div className="min-h-screen flex flex-col">
               <ConsoleSilencer />
+              <PerformanceMonitor />
               <Navbar />
               <main className="flex-1">
                 {children}

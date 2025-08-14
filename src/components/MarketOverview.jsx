@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useCoinGecko } from './CoinGeckoContext';
 
 function formatNumber(num) {
@@ -116,7 +117,14 @@ export default function MarketOverview() {
             <div className="mt-0.5 grid grid-cols-2 gap-x-3 md:gap-x-4">
               <div className="flex items-start gap-1 min-w-0">
                 <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#F7931A]/20 ring-1 ring-gray-700 shrink-0">
-                  <img src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png?1547033579" alt="BTC" className="w-3.5 h-3.5" onError={(e) => { e.currentTarget.src = '/Asset/duniacrypto.png'; }} />
+                  <Image 
+                    src="https://assets.coingecko.com/coins/images/1/small/bitcoin.png" 
+                    alt="BTC" 
+                    width={14} 
+                    height={14} 
+                    className="w-3.5 h-3.5"
+                    loading="lazy"
+                  />
                 </span>
                 <div className="min-w-0">
                   <div className="text-white font-semibold text-[10px] sm:text-[11px] leading-tight whitespace-nowrap">{(market_cap_percentage?.btc ?? 0).toFixed(2)}%</div>
@@ -125,7 +133,14 @@ export default function MarketOverview() {
               </div>
               <div className="flex items-start gap-1 min-w-0">
                 <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-400/20 ring-1 ring-gray-700 shrink-0">
-                  <img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" alt="ETH" className="w-3.5 h-3.5" onError={(e) => { e.currentTarget.src = '/Asset/duniacrypto.png'; }} />
+                  <Image 
+                    src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" 
+                    alt="ETH" 
+                    width={14} 
+                    height={14} 
+                    className="w-3.5 h-3.5"
+                    loading="lazy"
+                  />
                 </span>
                 <div className="min-w-0">
                   <div className="text-white font-semibold text-[10px] sm:text-[11px] leading-tight whitespace-nowrap">{(market_cap_percentage?.eth ?? 0).toFixed(2)}%</div>

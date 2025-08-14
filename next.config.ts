@@ -9,24 +9,92 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // Image optimization
+  // Enhanced image optimization
   images: {
     domains: ['cdn.sanity.io', 'assets.coingecko.com'],
     formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 31536000, // 1 year
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
-  // Compression
+  // Enhanced compression and performance
   compress: true,
+  poweredByHeader: false,
   
-  // Simple webpack configuration
-  webpack: (config, { dev }) => {
+  // Performance optimizations
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@vercel/analytics'],
+  },
+  
+  // Enhanced webpack configuration
+  webpack: (config, { dev, isServer }) => {
+    // Development optimizations
     if (dev) {
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
       };
     }
+    
+    // Production optimizations
+    if (!dev) {
+      // Enable tree shaking
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = false;
+      
+      // Bundle analyzer (optional)
+      if (process.env.ANALYZE === 'true') {
+        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+        config.plugins.push(
+          new BundleAnalyzerPlugin({
+            analyzerMode: 'static',
+            openAnalyzer: false,
+          })
+        );
+      }
+    }
+    
+    // Reduce bundle size
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': './src',
+    };
+    
     return config;
+  },
+  
+  // Headers for better caching and security
+  async headers() {
+    return [
+      {
+        source: '/Asset/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+    ];
   },
 };
 

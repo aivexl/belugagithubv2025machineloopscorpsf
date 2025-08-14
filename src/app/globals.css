@@ -27,34 +27,45 @@ html, body {
   font-family: 'Segoe UI', Arial, sans-serif;
   background: #0a0d12;  /* Darker than Daily Recap panel (#141722) */
   color: #fff;
+  /* Performance optimizations */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+  /* Prevent layout shift */
+  overflow-x: hidden;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* Global dark, minimal scrollbar (modern theme) */
-* {
+/* Optimized scrollbar styles - applied only where needed */
+.custom-scrollbar,
+.custom-scrollbar * {
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); /* Firefox */
 }
 
-*::-webkit-scrollbar {
+.custom-scrollbar::-webkit-scrollbar,
+.custom-scrollbar *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-*::-webkit-scrollbar-track {
+.custom-scrollbar::-webkit-scrollbar-track,
+.custom-scrollbar *::-webkit-scrollbar-track {
   background: var(--scrollbar-track);
 }
 
-*::-webkit-scrollbar-thumb {
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.custom-scrollbar *::-webkit-scrollbar-thumb {
   background-color: var(--scrollbar-thumb);
   border-radius: 9999px;
   border: 2px solid var(--scrollbar-track);
 }
 
-*::-webkit-scrollbar-thumb:hover {
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar *::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-thumb-hover);
 }
 

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import GradientText from "./GradientText";
 import { useAuth } from "../hooks/useAuth";
@@ -8,29 +9,17 @@ import LoginModal from "./auth/LoginModal";
 import SignUpModal from "./auth/SignUpModal";
 
 function ProcessedLogo() {
-  // Use the pre-generated 4K cropped PNG to ensure favicon and navbar match exactly
-  // eslint-disable-next-line @next/next/no-img-element
+  // Use the appropriately sized logo (669x514) instead of 4K for better performance
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src="/Asset/beluganewlogov2-4k-cropped.png?v=1"
+    <Image
+      src="/Asset/beluganewlogov2.png"
       alt="Beluga Logo"
+      width={669}
+      height={514}
+      priority
       className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-all duration-300 animate-logo-color-cycle hover:[animation-play-state:paused] hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
-      data-fallback="1"
-      onError={(e) => {
-        const img = e.currentTarget as HTMLImageElement & { dataset: { fallback?: string } };
-        const step = img.dataset.fallback || '1';
-        if (step === '1') {
-          img.src = '/Asset/beluganewlogov2.png?v=1';
-          img.dataset.fallback = '2';
-        } else if (step === '2') {
-          img.src = '/Asset/belugalogov2.cropped.transp.4k.png?v=1';
-          img.dataset.fallback = '3';
-        } else if (step === '3') {
-          img.src = '/Asset/beluganewlogo.png?v=1';
-          img.dataset.fallback = '4';
-        }
-      }}
+      style={{ width: 'auto', height: 'auto' }}
+      sizes="(max-width: 768px) 40px, 48px"
     />
   );
 }

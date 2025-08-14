@@ -1,16 +1,36 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
+import dynamic from "next/dynamic";
 import CryptoTicker from "./CryptoTicker";
-import SubscribeContainer from "./SubscribeContainer";
 import MarketOverview from "./MarketOverview";
-import BtcEthPercentageChart from "./BtcEthPercentageChart";
-import Top10MarketCap from "./Top10MarketCap";
-import Top100Trending from "./Top100Trending";
-import DailyRecap from "./DailyRecap";
 import NewsSlider from "./NewsSlider";
 import { CoinGeckoProvider } from "./CoinGeckoContext";
 import NewsFeedServer from "./NewsFeedServer";
+
+// Dynamic imports for better code splitting
+const BtcEthPercentageChart = dynamic(() => import("./BtcEthPercentageChart"), {
+  loading: () => <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-64" />,
+  ssr: false
+});
+
+const SubscribeContainer = dynamic(() => import("./SubscribeContainer"), {
+  loading: () => <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-32" />,
+});
+
+const Top10MarketCap = dynamic(() => import("./Top10MarketCap"), {
+  loading: () => <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-96" />,
+  ssr: false
+});
+
+const Top100Trending = dynamic(() => import("./Top100Trending"), {
+  loading: () => <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-96" />,
+  ssr: false
+});
+
+const DailyRecap = dynamic(() => import("./DailyRecap"), {
+  loading: () => <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-64" />,
+});
 
 export default function HomeClient({ articles = [] }) {
   return (
@@ -42,10 +62,18 @@ export default function HomeClient({ articles = [] }) {
         </section>
         <aside className="col-span-1 space-y-4 md:gap-6">
           <MarketOverview />
-          <BtcEthPercentageChart />
-          <SubscribeContainer />
-          <Top10MarketCap />
-          <Top100Trending />
+          <Suspense fallback={<div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-64" />}>
+            <BtcEthPercentageChart />
+          </Suspense>
+          <Suspense fallback={<div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-32" />}>
+            <SubscribeContainer />
+          </Suspense>
+          <Suspense fallback={<div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-96" />}>
+            <Top10MarketCap />
+          </Suspense>
+          <Suspense fallback={<div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-96" />}>
+            <Top100Trending />
+          </Suspense>
         </aside>
       </main>
     </CoinGeckoProvider>
