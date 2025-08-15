@@ -268,3 +268,89 @@ export default function AcademyClient({ articles = [] }) {
     </div>
   );
 } 
+} 
+                      </p>
+
+                    )}
+
+                    
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-1">
+                        {article.topic && (
+                          <span className="px-2 py-1 bg-blue-900/50 text-blue-300 text-xs rounded">
+                            {article.topic}
+                            </span>
+
+
+                          )}
+
+                        {article.blockchain && (
+                          <span className="px-2 py-1 bg-purple-900/50 text-purple-300 text-xs rounded">
+                            {article.blockchain}
+                            </span>
+
+
+                          )}
+
+
+                        </div>
+
+
+                    </div>
+
+
+                  </div>
+
+
+                </Link>
+
+
+              ))}
+
+
+            </div>
+
+            
+            
+            {/* Load More Button */}
+
+
+            {displayCount < filteredArticles.length && (
+              <div className="text-center">
+
+
+                <button
+
+
+                  onClick={() => setDisplayCount(prev => prev + 9)}
+                  className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+
+
+                  Lihat Lebih Banyak ({filteredArticles.length - displayCount} tersisa)
+                </button>
+
+
+              </div>
+
+
+            )}
+
+
+          </>
+
+
+        )}
+
+
+      </section>
+
+
+    </div>
+
+
+  );
+
+
+} 

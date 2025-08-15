@@ -323,7 +323,7 @@ export default function AssetClient() {
               </div>
             </div>
             
-                         <div className={`bg-duniacrypto-panel border border-gray-700 ${viewMode === 'heatmap' ? 'p-1' : 'px-3 sm:px-4 md:px-6 lg:px-8'}`}>
+            <div className={`bg-duniacrypto-panel border border-gray-700 ${viewMode === 'heatmap' ? 'p-1' : 'px-2'}`}>
 
               {viewMode === 'table' ? (
                 <CryptoTableWithSearch 
@@ -676,71 +676,6 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
   const [loading, setLoading] = useState(true);
   const [sortColumn, setSortColumn] = useState('market_cap'); // Default sorting by market cap
   const [sortDirection, setSortDirection] = useState('desc'); // Default descending when sorting is activated
-  const [chartData, setChartData] = useState({}); // Store chart data for each coin
-
-  // Function to generate chart path from price data
-  const generateChartPath = (prices, width = 48, height = 24) => {
-    if (!prices || prices.length < 2) {
-      // Fallback to default path if no data
-      return "M0,16 L6,13 L12,19 L18,11 L24,21 L30,16 L36,22 L42,13 L48,16";
-    }
-
-    const step = width / (prices.length - 1);
-    let path = `M0,${height / 2}`;
-    
-    prices.forEach((price, index) => {
-      if (index === 0) return; // Skip first point as it's already in the path
-      
-      const x = index * step;
-      // Normalize price to fit in chart height (0-24)
-      const minPrice = Math.min(...prices);
-      const maxPrice = Math.max(...prices);
-      const priceRange = maxPrice - minPrice;
-      
-      let y;
-      if (priceRange === 0) {
-        y = height / 2; // Center if all prices are the same
-      } else {
-        y = height - ((price - minPrice) / priceRange) * height;
-        y = Math.max(2, Math.min(height - 2, y)); // Keep within bounds
-      }
-      
-      path += ` L${x},${y}`;
-    });
-    
-    return path;
-  };
-
-  // Function to fetch chart data for a specific coin
-  const fetchChartData = async (coinId) => {
-    try {
-      const response = await fetch(`/api/coingecko/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1`);
-      if (response.ok) {
-        const data = await response.json();
-        const prices = data.prices?.map(point => point[1]) || [];
-        return prices;
-      }
-    } catch (error) {
-      console.error(`Error fetching chart data for ${coinId}:`, error);
-    }
-    return null;
-  };
-
-  // Function to get chart data for a coin (with caching)
-  const getChartData = async (coinId) => {
-    if (chartData[coinId]) {
-      return chartData[coinId];
-    }
-    
-    const prices = await fetchChartData(coinId);
-    if (prices) {
-      setChartData(prev => ({
-        ...prev,
-        [coinId]: prices
-      }));
-    }
-    return prices;
-  };
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -810,26 +745,6 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         
         const data = await response.json();
         setCoins(data);
-        
-        // Fetch chart data for each coin
-        const fetchAllChartData = async () => {
-          const chartPromises = data.slice(0, 10).map(async (coin) => {
-            const prices = await fetchChartData(coin.id);
-            if (prices) {
-              setChartData(prev => ({
-                ...prev,
-                [coin.id]: prices
-              }));
-            }
-          });
-          
-          // Fetch chart data in parallel with a small delay to avoid rate limiting
-          await Promise.all(chartPromises.map((promise, index) => 
-            new Promise(resolve => setTimeout(() => promise.then(resolve), index * 100))
-          ));
-        };
-        
-        fetchAllChartData();
       } catch (error) {
         console.error('Error fetching coins:', error);
         // Provide fallback data if API call fails
@@ -1342,7 +1257,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
               </td>
               <td className="py-1 px-2 text-center chart-cell">
                 <div className="w-16 h-8 rounded flex items-center justify-center overflow-hidden mx-auto chart-container">
-                  {/* Dynamic Line Chart with Real Data */}
+                  {/* Perfectly Centered Line Chart */}
                   <svg 
                     className="w-full h-full chart-svg" 
                     viewBox="0 0 48 24" 
@@ -1365,9 +1280,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                     <line x1="0" y1="16" x2="48" y2="16" stroke="#374151" strokeWidth="0.3" opacity="0.5" />
                     <line x1="0" y1="22" x2="48" y2="22" stroke="#374151" strokeWidth="0.3" opacity="0.5" />
                     
-                    {/* Dynamic Price Line Chart */}
+                    {/* Price Line Chart - perfectly centered with balanced vertical range */}
                     <path
-                      d={chartData[coin.id] ? generateChartPath(chartData[coin.id]) : "M0,16 L6,13 L12,19 L18,11 L24,21 L30,16 L36,22 L42,13 L48,16"}
+                      d="M0,16 L6,13 L12,19 L18,11 L24,21 L30,16 L36,22 L42,13 L48,16"
                       fill="none"
                       stroke={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'}
                       strokeWidth="1.2"
@@ -1375,6 +1290,17 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                       strokeLinejoin="round"
                       clipPath={`url(#chart-clip-${coin.id})`}
                     />
+                    
+                    {/* Price Points - perfectly centered and aligned with the line */}
+                    <circle cx="0" cy="16" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="6" cy="13" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="12" cy="19" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="18" cy="11" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="24" cy="21" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="30" cy="16" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="36" cy="22" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="42" cy="13" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="48" cy="16" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
                   </svg>
                 </div>
               </td>
