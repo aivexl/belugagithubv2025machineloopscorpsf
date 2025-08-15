@@ -685,52 +685,27 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       return "M0,16 L6,13 L12,19 L18,11 L24,21 L30,16 L36,22 L42,13 L48,16";
     }
 
-    // Ensure we have reasonable number of points (max 8 for smooth chart)
-    const maxPoints = 8;
-    let processedPrices = prices;
+    const step = width / (prices.length - 1);
+    let path = `M0,${height / 2}`;
     
-    if (prices.length > maxPoints) {
-      // Sample prices to get max 8 points
-      const step = Math.floor(prices.length / maxPoints);
-      processedPrices = [];
-      for (let i = 0; i < prices.length; i += step) {
-        if (processedPrices.length < maxPoints) {
-          processedPrices.push(prices[i]);
-        }
-      }
-      // Always include the last price
-      if (processedPrices.length < maxPoints && prices.length > 0) {
-        processedPrices.push(prices[prices.length - 1]);
-      }
-    }
-
-    const step = width / (processedPrices.length - 1);
-    let path = "";
-    
-    processedPrices.forEach((price, index) => {
-      const x = index * step;
+    prices.forEach((price, index) => {
+      if (index === 0) return; // Skip first point as it's already in the path
       
-      // Normalize price to fit in chart height with padding
-      const minPrice = Math.min(...processedPrices);
-      const maxPrice = Math.max(...processedPrices);
+      const x = index * step;
+      // Normalize price to fit in chart height (0-24)
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
       const priceRange = maxPrice - minPrice;
       
       let y;
       if (priceRange === 0) {
         y = height / 2; // Center if all prices are the same
       } else {
-        // Add padding to prevent chart from touching edges
-        const padding = height * 0.15; // 15% padding
-        const availableHeight = height - (padding * 2);
-        y = padding + ((maxPrice - price) / priceRange) * availableHeight;
-        y = Math.max(padding, Math.min(height - padding, y)); // Keep within bounds
+        y = height - ((price - minPrice) / priceRange) * height;
+        y = Math.max(2, Math.min(height - 2, y)); // Keep within bounds
       }
       
-      if (index === 0) {
-        path = `M${x},${y}`;
-      } else {
-        path += ` L${x},${y}`;
-      }
+      path += ` L${x},${y}`;
     });
     
     return path;
@@ -739,28 +714,11 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
   // Function to fetch chart data for a specific coin
   const fetchChartData = async (coinId) => {
     try {
-      const response = await fetch(`/api/coingecko/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1&interval=hourly`);
+      const response = await fetch(`/api/coingecko/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=1`);
       if (response.ok) {
         const data = await response.json();
         const prices = data.prices?.map(point => point[1]) || [];
-        
-        // Sample data every 3 hours to reduce noise (24 hours / 3 = 8 data points)
-        const sampledPrices = [];
-        const totalPoints = prices.length;
-        const step = Math.max(1, Math.floor(totalPoints / 8)); // Get 8 data points
-        
-        for (let i = 0; i < totalPoints; i += step) {
-          if (sampledPrices.length < 8) {
-            sampledPrices.push(prices[i]);
-          }
-        }
-        
-        // Ensure we have at least 2 points for the chart
-        if (sampledPrices.length < 2) {
-          sampledPrices.push(prices[prices.length - 1]);
-        }
-        
-        return sampledPrices;
+        return prices;
       }
     } catch (error) {
       console.error(`Error fetching chart data for ${coinId}:`, error);
