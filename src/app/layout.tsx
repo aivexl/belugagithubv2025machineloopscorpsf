@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "../contexts/AuthProvider";
+
 import ConsoleSilencer from "../components/ConsoleSilencer";
 import PerformanceMonitor from "../components/PerformanceMonitor";
 import type { Metadata } from "next";
@@ -175,7 +176,7 @@ export default function RootLayout({
               <ConsoleSilencer />
               <PerformanceMonitor />
               <Navbar />
-              <main className="flex-1 pb-20 xl:pb-0">
+              <main className="flex-1 pb-20 xl:pb-0 xl:ml-20">
                 {children}
               </main>
               <Footer />

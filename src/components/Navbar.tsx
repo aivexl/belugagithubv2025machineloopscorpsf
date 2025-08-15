@@ -7,6 +7,20 @@ import GradientText from "./GradientText";
 import { useAuth } from "../hooks/useAuth";
 import LoginModal from "./auth/LoginModal";
 import SignUpModal from "./auth/SignUpModal";
+import { 
+  AiOutlineHome,
+  AiOutlineExperiment,
+  AiOutlineRead,
+  AiOutlineSwap,
+  AiOutlineGift,
+  AiOutlineRocket,
+  AiOutlineBook,
+  AiOutlineInfoCircle,
+  AiOutlinePhone
+} from "react-icons/ai";
+import { FaBitcoin } from "react-icons/fa";
+import { HiAcademicCap, HiOutlineCash } from "react-icons/hi";
+
 
 function ProcessedLogo() {
   // Mobile/Tablet: Keep larger size, Desktop: Smaller for proportion
@@ -32,6 +46,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSignUpModal, setShowSignUpModal] = useState(false);
+
   const headerRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -98,41 +113,228 @@ export default function Navbar() {
       {/* Spacer for fixed navbar - dynamic height to avoid gaps/overlap */}
       <div style={{ height: 'var(--nav-height, 64px)' }} aria-hidden="true"></div>
       
-      <header ref={headerRef} className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-xl backdrop-saturate-150 border-b border-white/10 shadow-lg">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-6 lg:px-8 py-2 sm:py-3 md:py-3 lg:py-4 tablet-container">
-          {/* Logo Section - Larger, more prominent on mobile/tablet */}
-          <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 flex-shrink-0">
+      {/* Desktop Sidebar - Only visible on desktop */}
+      <aside className="hidden xl:block fixed left-0 top-0 h-full w-20 z-40 bg-black/40 backdrop-blur-xl backdrop-saturate-150 shadow-lg">
+        <div className="flex flex-col items-center space-y-1" style={{ paddingTop: 'calc(var(--nav-height, 64px) + 1rem)' }}>
+          {/* Home */}
+          <Link 
+            href="/" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <AiOutlineHome className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">Home</span>
+          </Link>
+
+          {/* Academy */}
+          <Link 
+            href="/academy" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/academy')
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <HiAcademicCap className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">Academy</span>
+          </Link>
+
+          {/* Research */}
+          <Link 
+            href="/research" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/research') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <AiOutlineExperiment className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">Research</span>
+          </Link>
+
+          {/* Newsroom */}
+          <Link 
+            href="/newsroom" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/newsroom') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <AiOutlineRead className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">Newsroom</span>
+          </Link>
+
+          {/* Asset */}
+          <Link 
+            href="/asset" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/asset') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <FaBitcoin className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">Asset</span>
+          </Link>
+
+          {/* Beluga AI */}
+          <Link 
+            href="/beluga-ai" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/beluga-ai') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <Image 
+              src="/Asset/aistar.png" 
+              alt="AI" 
+              width={20} 
+              height={20} 
+              className="mb-0.5 brightness-0 invert" 
+            />
+            <span className="text-[10px] font-medium text-center leading-tight">Beluga AI</span>
+          </Link>
+
+          {/* Exchanges */}
+          <Link 
+            href="/exchanges" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/exchanges') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <AiOutlineSwap className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">Exchanges</span>
+          </Link>
+
+          {/* Airdrop */}
+          <Link 
+            href="/airdrop" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/airdrop') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <AiOutlineGift className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">Airdrop</span>
+          </Link>
+
+          {/* ICO/IDO */}
+          <Link 
+            href="/ico-ido" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/ico-ido') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <AiOutlineRocket className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">ICO/IDO</span>
+          </Link>
+
+          {/* Fundraising */}
+          <Link 
+            href="/fundraising" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/fundraising') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <HiOutlineCash className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">Fundraising</span>
+          </Link>
+
+          {/* Kamus WEB3 */}
+          <Link 
+            href="/kamus" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/kamus') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <AiOutlineBook className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">Kamus WEB3</span>
+          </Link>
+
+          {/* About */}
+          <Link 
+            href="/about" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/about') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <AiOutlineInfoCircle className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">About</span>
+          </Link>
+
+          {/* Contact */}
+          <Link 
+            href="/contact" 
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
+              isActive('/contact') 
+                ? 'bg-blue-600 text-white' 
+                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+            }`}
+          >
+            <AiOutlinePhone className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px] font-medium text-center leading-tight">Contact</span>
+          </Link>
+        </div>
+      </aside>
+
+      {/* Desktop Logo - Positioned at border between sidebar and navbar */}
+      <div className="hidden xl:block fixed left-14 top-4 z-[60]">
+        <Link href="/" className="flex items-center space-x-2 group no-underline hover:no-underline focus:no-underline active:no-underline" style={{ textDecoration: 'none' }}>
+          <ProcessedLogo />
+          <GradientText
+            colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
+            animationSpeed={2}
+            showBorder={false}
+            className="text-3xl font-bold tracking-tight font-sans leading-normal pb-0.5"
+          >
+            Beluga
+          </GradientText>
+        </Link>
+      </div>
+
+      <header ref={headerRef} className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-xl backdrop-saturate-150 shadow-lg xl:left-20">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-6 lg:px-8 py-2 sm:py-3 md:py-3 lg:py-4 tablet-container xl:justify-start xl:space-x-8">
+          {/* Logo Section - Mobile/Tablet */}
+          <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 flex-shrink-0 xl:hidden">
             <Link href="/" className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 group no-underline hover:no-underline focus:no-underline active:no-underline" style={{ textDecoration: 'none' }}>
               <ProcessedLogo />
               <GradientText
                 colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
                 animationSpeed={2}
                 showBorder={false}
-                className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl xl:text-3xl font-bold tracking-tight font-sans leading-normal pb-0.5"
+                className="text-2xl sm:text-3xl md:text-3xl lg:text-4xl font-bold tracking-tight font-sans leading-normal pb-0.5"
               >
                 Beluga
               </GradientText>
             </Link>
           </div>
 
-          {/* Desktop Navigation - XL and above */}
-          <nav className="hidden xl:flex items-center space-x-6">
-            <Link href="/" className="text-white font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline" style={{borderRadius: 16, textDecoration: 'none'}}>Home</Link>
-            <Link href="/newsroom" className="text-white font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline" style={{borderRadius: 16, textDecoration: 'none'}}>Newsroom</Link>
-            <Link href="/academy" className="text-white font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline" style={{borderRadius: 16, textDecoration: 'none'}}>Academy</Link>
-            <Link href="/kamus" className="text-white font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline" style={{borderRadius: 16, textDecoration: 'none'}}>Kamus WEB3</Link>
-            <Link href="/about" className="text-white font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline" style={{borderRadius: 16, textDecoration: 'none'}}>About</Link>
-            <Link href="/contact" className="text-white font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline" style={{borderRadius: 16, textDecoration: 'none'}}>Contact</Link>
-            
-            {/* Search Bar - Desktop */}
-            <form onSubmit={handleSearch} className="relative flex-shrink-0">
+          {/* Desktop Search Bar - Centered */}
+          <div className="hidden xl:flex flex-1 justify-center">
+            <form onSubmit={handleSearch} className="relative w-full max-w-md">
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-48 px-4 py-2 pl-10 pr-12 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                  className="w-full px-4 py-2 pl-10 pr-12 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
                 />
                 {/* Search Icon */}
                 <svg
@@ -161,9 +363,10 @@ export default function Navbar() {
                 </button>
               </div>
             </form>
+          </div>
 
-            {/* Auth Buttons - Desktop */}
-            <div className="flex items-center space-x-3">
+          {/* Desktop Auth Buttons - Right side */}
+          <div className="hidden xl:flex items-center space-x-3 flex-shrink-0">
               {user ? (
                 <div className="flex items-center space-x-3">
                   <span className="text-gray-300 text-sm">
@@ -193,9 +396,6 @@ export default function Navbar() {
                 </>
               )}
             </div>
-          </nav>
-
-
         </div>
       </header>
 
@@ -414,6 +614,8 @@ export default function Navbar() {
           setShowLoginModal(true);
         }}
       />
+
+
     </>
   );
 } 

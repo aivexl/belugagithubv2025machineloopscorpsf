@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { CoinGeckoProvider } from "./CoinGeckoContext";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/id';
@@ -72,84 +71,91 @@ export default function NewsroomClient({ articles = [] }) {
   // Use dummy articles if no articles from Sanity
   const allArticles = articles.length > 0 ? articles : dummyNewsroomArticles;
   const displayedArticles = allArticles.slice(0, displayCount);
-  const hasMore = displayCount < allArticles.length;
 
   const handleLoadMore = () => {
     setDisplayCount(prev => Math.min(prev + 3, allArticles.length));
   };
 
   return (
-    <CoinGeckoProvider>
-      {/* Main Layout - Responsive width */}
-      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-6">
-        {/* Header - Responsive */}
-        <div className="relative mb-8 md:mb-12">
-          {/* Background Full Width */}
-          <div className="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-r from-cyan-900/20 via-blue-900/20 to-purple-900/20 rounded-xl border border-cyan-500/30 backdrop-blur-sm"></div>
-          {/* Content */}
-          <div className="relative text-center py-8 md:py-12 px-4 md:px-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Newsroom</h1>
-            <p className="text-lg md:text-xl lg:text-2xl text-gray-300">
-              Berita terbaru seputar cryptocurrency dan blockchain
-            </p>
-          </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Articles Section */}
+      <section>
+        <div className="mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-white">
+            Berita Terbaru
+          </h2>
         </div>
         
-        {/* Articles List - Responsive layout */}
         {displayedArticles.length > 0 ? (
           <>
-            <div className="space-y-4 mb-8 md:mb-12">
+            {/* Articles Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {displayedArticles.map((article) => (
                 <a 
                   key={article._id}
-                  href={`/newsroom/${article.slug.current}`}
-                  className="block bg-duniacrypto-panel rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 group border border-gray-800 cursor-pointer transform hover:scale-[1.02] no-underline hover:no-underline focus:no-underline active:no-underline"
+                  href={`/newsroom/${article.slug?.current || article.slug}`}
+                  className="no-underline hover:no-underline focus:no-underline active:no-underline"
                 >
-                  {/* Article Content - Responsive layout */}
-                  <div className="flex flex-col md:flex-row">
-                    {/* Article Image - Responsive width */}
-                    <div className="relative aspect-[4/3] w-full md:w-48 lg:w-60 xl:w-72 h-auto overflow-hidden flex-shrink-0">
+                  <div className="bg-duniacrypto-panel border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors group h-full flex flex-col">
+                    {/* Article Image */}
+                    <div className="aspect-video bg-gray-800 overflow-hidden">
                       <img
                         src={article.imageUrl || '/Asset/duniacrypto.png'}
                         alt={article.image?.alt || article.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-                      <div className="absolute top-2 left-2">
-                        <span className="inline-block px-2 py-1 rounded-full bg-blue-700 text-white font-bold text-xs tracking-wide shadow-lg">
+                    </div>
+
+                    {/* Article Content */}
+                    <div className="p-4 flex flex-col flex-1">
+                      {/* Category Badge & Date */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="px-2 py-1 text-xs font-medium rounded text-white bg-blue-600">
                           News
                         </span>
+                        {article.publishedAt && (
+                          <span className="text-xs text-gray-400">
+                            {dayjs(article.publishedAt).fromNow()}
+                          </span>
+                        )}
                       </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    
-                    {/* Article Content - Responsive padding */}
-                    <div className="flex-1 p-4 md:p-5 min-w-0">
-                      <h2 className="text-base md:text-lg font-bold text-white mb-2 line-clamp-1 group-hover:text-duniacrypto-green transition-colors duration-300 leading-tight">
+
+                      {/* Title */}
+                      <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors min-h-[3.5rem]">
                         {article.title}
-                      </h2>
-                      
-                      {article.excerpt && (
-                        <p className="text-gray-300 text-sm mb-3 line-clamp-2 leading-relaxed">
-                          {article.excerpt}
-                        </p>
-                      )}
-                      
-                      <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-gray-800">
-                        <span className="font-medium">{article.source || 'Dunia Crypto'}</span>
-                        <span>{article.publishedAt ? dayjs(article.publishedAt).fromNow() : 'Baru saja'}</span>
+                      </h3>
+
+                      {/* Excerpt - Fixed height */}
+                      <div className="flex-1 mb-3">
+                        {article.excerpt ? (
+                          <p className="text-gray-400 text-sm line-clamp-3">
+                            {article.excerpt}
+                          </p>
+                        ) : (
+                          <p className="text-gray-500 text-sm italic">
+                            No excerpt available
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Source - Fixed at bottom */}
+                      <div className="flex flex-wrap gap-1 mt-auto">
+                        <span className="px-2 py-1 bg-gray-700 text-gray-400 text-xs rounded">
+                          {article.source || 'Dunia Crypto'}
+                        </span>
                       </div>
                     </div>
                   </div>
                 </a>
               ))}
             </div>
-            
+
             {/* Load More Button */}
-            {hasMore && (
+            {displayCount < allArticles.length && (
               <div className="text-center">
                 <button
                   onClick={handleLoadMore}
-                  className="bg-duniacrypto-green hover:bg-green-600 text-white font-semibold py-3 md:py-4 px-8 md:px-10 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-base md:text-lg"
+                  className="mt-4 w-full py-2 rounded bg-duniacrypto-green text-black font-bold hover:bg-green-400 transition"
                 >
                   Load More
                 </button>
@@ -157,16 +163,16 @@ export default function NewsroomClient({ articles = [] }) {
             )}
           </>
         ) : (
-          <div className="bg-duniacrypto-panel rounded-lg shadow p-8 md:p-12 text-center">
-            <h3 className="text-xl md:text-2xl font-semibold text-white mb-4">
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-lg mb-4">
               Belum ada artikel Newsroom
-            </h3>
-            <p className="text-gray-400 text-base md:text-lg">
+            </div>
+            <p className="text-gray-500">
               Artikel Newsroom akan muncul di sini setelah ditambahkan melalui Sanity Studio.
             </p>
           </div>
         )}
-      </main>
-    </CoinGeckoProvider>
+      </section>
+    </div>
   );
 } 

@@ -2,6 +2,7 @@ import React from 'react';
 import { getArticlesByCategory, addImageUrls } from '../../utils/sanity';
 import type { SanityArticleWithImage } from '../../utils/sanity';
 import AcademyClient from '../../components/AcademyClient';
+import AcademyPageLayout from '../../components/AcademyPageLayout';
 
 export default async function AcademyPage() {
   let articles: SanityArticleWithImage[] = [];
@@ -13,5 +14,9 @@ export default async function AcademyPage() {
     console.error('Error fetching academy articles:', error);
   }
 
-  return <AcademyClient articles={articles} />;
+  return (
+    <AcademyPageLayout>
+      <AcademyClient articles={articles} />
+    </AcademyPageLayout>
+  );
 } 

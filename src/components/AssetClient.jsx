@@ -147,21 +147,21 @@ export default function AssetClient() {
       <CryptoTicker />
       
       {/* Main Layout */}
-      <main className="w-full py-4 sm:py-6 md:py-8">
+       <main className="w-full py-2 sm:py-3 md:py-4 lg:py-6">
         
         {/* Market Overview - Always Visible */}
-        <section className="mb-4 sm:mb-6 md:mb-8 px-3 sm:px-4 md:px-6 lg:px-8">
+        <section className="mb-3 sm:mb-4 md:mb-6 px-3 sm:px-4 md:px-6 lg:px-8">
           <MarketOverviewRedesigned />
         </section>
 
         {/* Horizontal Menu Navigation */}
-        <div className="mb-3 sm:mb-4 md:mb-6 px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex gap-1 sm:gap-2 md:gap-6 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-hide">
+        <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex gap-2 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-hide">
             {menuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className={`px-2 sm:px-3 md:px-6 py-1.5 sm:py-2 md:py-3 rounded-md sm:rounded-lg font-bold text-xs sm:text-sm md:text-lg transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
+                className={`px-3 py-1.5 rounded-md font-bold text-xs transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
                   activeSection === item.id
                     ? 'bg-blue-600 text-white shadow-lg'
                     : 'bg-duniacrypto-panel text-gray-300 hover:bg-gray-800 hover:text-white border border-gray-700'
@@ -176,17 +176,17 @@ export default function AssetClient() {
 
         {/* Search Bar for Top 100 */}
         {activeSection === 'top-100' && (
-          <div className="mb-3 sm:mb-4 md:mb-6 px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8">
             <div className="relative">
               <input
                 type="text"
                 placeholder="Search cryptocurrencies..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-3 pl-8 sm:pl-10 md:pl-12 pr-3 sm:pr-4 bg-duniacrypto-panel border border-gray-700 rounded-md sm:rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-xs sm:text-sm md:text-lg"
+                className="w-full px-3 py-1.5 pl-8 pr-3 bg-duniacrypto-panel border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200 text-xs"
               />
               <svg
-                className="absolute left-2 sm:left-3 md:left-4 top-1/2 transform -translate-y-1/2 w-3 sm:w-4 md:w-5 h-3 sm:h-4 md:h-5 text-gray-400"
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -204,26 +204,26 @@ export default function AssetClient() {
 
         {/* Content Sections */}
         {activeSection === 'top-100' && (
-          <section className="mb-6 sm:mb-8 md:mb-12">
-            <div className="mb-3 sm:mb-4 md:mb-6 px-3 sm:px-4 md:px-6 lg:px-8">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-3 sm:mb-4">
+          <section className="mb-3 sm:mb-4 md:mb-6">
+            <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8">
+              <h2 className="text-sm sm:text-base md:text-lg font-bold text-white mb-2 sm:mb-3">
                 Top 100 Cryptocurrencies
               </h2>
               
               {/* Filter Controls */}
-              <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+              <div className="flex items-center gap-2">
                 {/* Filter Button */}
                 <div className="relative">
                   <button
                     onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-duniacrypto-panel border border-gray-700 rounded-lg text-white hover:bg-gray-800 transition-all duration-200 text-sm"
+                    className="flex items-center space-x-2 px-2 py-1 bg-duniacrypto-panel border border-gray-700 rounded-lg text-white hover:bg-gray-800 transition-all duration-200 text-xs"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                     </svg>
                     <span>Filter</span>
                     <svg
-                      className={`w-4 h-4 transition-transform duration-200 ${showFilterDropdown ? 'rotate-180' : ''}`}
+                      className={`w-3 h-3 transition-transform duration-200 ${showFilterDropdown ? 'rotate-180' : ''}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -237,14 +237,14 @@ export default function AssetClient() {
                 <div className="relative date-range-filter">
                   <button
                     onClick={() => setShowDateRangeFilter(!showDateRangeFilter)}
-                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-duniacrypto-panel border border-gray-700 rounded-lg text-white hover:bg-gray-800 transition-all duration-200 text-sm"
+                    className="flex items-center space-x-2 px-2 py-1 bg-duniacrypto-panel border border-gray-700 rounded-lg text-white hover:bg-gray-800 transition-all duration-200 text-xs"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span>{dateRangeOptions.find(opt => opt.id === dateRange)?.label || '24h'}</span>
                     <svg
-                      className={`w-4 h-4 transition-transform duration-200 ${showDateRangeFilter ? 'rotate-180' : ''}`}
+                      className={`w-3 h-3 transition-transform duration-200 ${showDateRangeFilter ? 'rotate-180' : ''}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -279,17 +279,17 @@ export default function AssetClient() {
                 </div>
 
                 {/* View Mode Toggle */}
-                <div className="flex items-center bg-duniacrypto-panel border border-gray-700 rounded-lg p-1">
+                <div className="flex items-center bg-duniacrypto-panel border border-gray-700 rounded-lg p-0.5">
                   <button
                     onClick={() => setViewMode('table')}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    className={`px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
                       viewMode === 'table'
                         ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-gray-300 hover:text-white hover:bg-gray-700'
                     }`}
                   >
                     <div className="flex items-center space-x-1">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                       </svg>
                       <span className="hidden sm:inline">Table</span>
@@ -297,7 +297,7 @@ export default function AssetClient() {
                   </button>
                   <button
                     onClick={() => setViewMode('heatmap')}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    className={`px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
                       viewMode === 'heatmap'
                         ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-gray-300 hover:text-white hover:bg-gray-700'
@@ -305,7 +305,7 @@ export default function AssetClient() {
                   >
                     <div className="flex items-center space-x-1">
                       {/* Heatmap Icon - Grid of squares */}
-                      <div className="w-4 h-4 grid grid-cols-3 gap-0.5">
+                      <div className="w-3 h-3 grid grid-cols-3 gap-0.5">
                         <div className="w-full h-full bg-current rounded-sm opacity-100"></div>
                         <div className="w-full h-full bg-current rounded-sm opacity-80"></div>
                         <div className="w-full h-full bg-current rounded-sm opacity-60"></div>
@@ -323,7 +323,7 @@ export default function AssetClient() {
               </div>
             </div>
             
-            <div className={`bg-duniacrypto-panel border border-gray-700 ${viewMode === 'heatmap' ? 'p-1 sm:p-2' : 'px-2 sm:px-4 md:px-6'}`}>
+                         <div className={`bg-duniacrypto-panel border border-gray-700 ${viewMode === 'heatmap' ? 'p-1' : 'px-3 sm:px-4 md:px-6 lg:px-8'}`}>
 
               {viewMode === 'table' ? (
                 <CryptoTableWithSearch 
@@ -518,11 +518,11 @@ export default function AssetClient() {
         )}
 
         {activeSection === 'trending' && (
-          <section className="mb-6 sm:mb-8 md:mb-12">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-3 sm:mb-4 md:mb-6">
+          <section className="mb-3 sm:mb-4 md:mb-6">
+            <h2 className="text-sm sm:text-base md:text-lg font-bold text-white mb-2 sm:mb-3">
               Trending Coins
             </h2>
-            <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-3 sm:p-4 md:p-6">
+            <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-2">
                               <TrendingCoins100 
                   onCoinClick={(coin) => {
                     // Navigate to detail page instead of showing overlay
@@ -534,11 +534,11 @@ export default function AssetClient() {
         )}
 
         {activeSection === 'sectors' && (
-          <section className="mb-6 sm:mb-8 md:mb-12">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-3 sm:mb-4 md:mb-6">
+          <section className="mb-3 sm:mb-4 md:mb-6">
+            <h2 className="text-sm sm:text-base md:text-lg font-bold text-white mb-2 sm:mb-3">
               Crypto Sectors
             </h2>
-            <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-3 sm:p-4 md:p-6">
+            <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-2">
               <CryptoSectors />
             </div>
           </section>
@@ -633,11 +633,11 @@ function MarketOverviewRedesigned() {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-1 sm:gap-2 md:gap-4">
+    <div className="grid grid-cols-3 gap-1 sm:gap-2 md:gap-3 lg:gap-4">
       {/* Box 1: Market Cap */}
-      <div className="bg-duniacrypto-panel rounded-md sm:rounded-lg border border-gray-700 p-1.5 sm:p-2 md:p-4 flex flex-col justify-center min-h-[3rem] sm:min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[5rem]">
+      <div className="bg-duniacrypto-panel rounded-md sm:rounded-lg border border-gray-700 p-1.5 sm:p-2 md:p-3 lg:p-4 flex flex-col justify-center min-h-[2.5rem] sm:min-h-[3rem] md:min-h-[3.5rem] lg:min-h-[4rem]">
         <h3 className="text-xs font-semibold text-gray-300 mb-0.5 sm:mb-1 md:mb-1.5">Market Cap</h3>
-        <div className="text-xs sm:text-sm md:text-base font-bold text-white mb-0.5 md:mb-1 leading-tight">
+        <div className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-white mb-0.5 md:mb-1 leading-tight">
           {formatNumber(marketData.total_market_cap?.usd || 0)}
         </div>
         <div className="text-xs text-gray-400 leading-tight">
@@ -646,9 +646,9 @@ function MarketOverviewRedesigned() {
       </div>
 
       {/* Box 2: 24h Volume */}
-      <div className="bg-duniacrypto-panel rounded-md sm:rounded-lg border border-gray-700 p-1.5 sm:p-2 md:p-4 flex flex-col justify-center min-h-[3rem] sm:min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[5rem]">
+      <div className="bg-duniacrypto-panel rounded-md sm:rounded-lg border border-gray-700 p-1.5 sm:p-2 md:p-3 lg:p-4 flex flex-col justify-center min-h-[2.5rem] sm:min-h-[3rem] md:min-h-[3.5rem] lg:min-h-[4rem]">
         <h3 className="text-xs font-semibold text-gray-300 mb-0.5 sm:mb-1 md:mb-1.5">Volume</h3>
-        <div className="text-xs sm:text-sm md:text-base font-bold text-white mb-0.5 md:mb-1 leading-tight">
+        <div className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-white mb-0.5 md:mb-1 leading-tight">
           {formatNumber(marketData.total_volume?.usd || 0)}
         </div>
         <div className="text-xs text-gray-400 leading-tight">
@@ -657,9 +657,9 @@ function MarketOverviewRedesigned() {
       </div>
 
       {/* Box 3: Market Dominance */}
-      <div className="bg-duniacrypto-panel rounded-md sm:rounded-lg border border-gray-700 p-1.5 sm:p-2 md:p-4 flex flex-col justify-center min-h-[3rem] sm:min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[5rem]">
+      <div className="bg-duniacrypto-panel rounded-md sm:rounded-lg border border-gray-700 p-1.5 sm:p-2 md:p-3 lg:p-4 flex flex-col justify-center min-h-[2.5rem] sm:min-h-[3rem] md:min-h-[3.5rem] lg:min-h-[4rem]">
         <h3 className="text-xs font-semibold text-gray-300 mb-0.5 sm:mb-1 md:mb-1.5">Dominance</h3>
-        <div className="text-xs sm:text-sm md:text-base font-bold text-white mb-0.5 md:mb-1 leading-tight">
+        <div className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-white mb-0.5 md:mb-1 leading-tight">
           BTC: {(marketData.market_cap_percentage?.btc || 0).toFixed(1)}%
         </div>
         <div className="text-xs text-gray-400 leading-tight">
@@ -1070,6 +1070,14 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                     dateRange === '1y' ? b.price_change_percentage_1y_in_currency :
                     b.price_change_percentage_24h || 0;
             break;
+          case '7d':
+            aValue = a.price_change_percentage_7d_in_currency || 0;
+            bValue = b.price_change_percentage_7d_in_currency || 0;
+            break;
+          case '30d':
+            aValue = a.price_change_percentage_30d_in_currency || 0;
+            bValue = b.price_change_percentage_30d_in_currency || 0;
+            break;
           case 'market_cap':
           default:
             aValue = a.market_cap || 0;
@@ -1113,11 +1121,11 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-xs sm:text-sm md:text-base">
+      <table className="w-full text-xs">
         <thead>
-          <tr className="border-b border-gray-700">
+          <tr className="border-b border-gray-700 h-10">
             <th 
-              className={`text-left py-1.5 sm:py-2 md:py-3 px-0.5 sm:px-1 md:px-2 lg:px-4 font-semibold text-xs sm:text-sm cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'rank' ? 'text-blue-400' : 'text-gray-300'}`}
+              className={`text-left py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'rank' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('rank')}
             >
               <div className="flex items-center space-x-1">
@@ -1126,7 +1134,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
               </div>
             </th>
             <th 
-              className={`text-left py-1.5 sm:py-2 md:py-3 px-0.5 sm:px-1 md:px-2 lg:px-4 font-semibold text-xs sm:text-sm cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'name' ? 'text-blue-400' : 'text-gray-300'}`}
+              className={`text-left py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'name' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('name')}
             >
               <div className="flex items-center space-x-1">
@@ -1135,7 +1143,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
               </div>
             </th>
             <th 
-              className={`text-right py-1.5 sm:py-2 md:py-3 px-0.5 sm:px-1 md:px-2 lg:px-4 font-semibold text-xs sm:text-sm cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'price' ? 'text-blue-400' : 'text-gray-300'}`}
+              className={`text-right py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'price' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('price')}
             >
               <div className="flex items-center justify-end space-x-1">
@@ -1144,7 +1152,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
               </div>
             </th>
             <th 
-              className={`text-right py-1.5 sm:py-2 md:py-3 px-0.5 sm:px-1 md:px-2 lg:px-4 font-semibold text-xs sm:text-sm cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'percentage' ? 'text-blue-400' : 'text-gray-300'}`}
+              className={`text-right py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'percentage' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('percentage')}
             >
               <div className="flex items-center justify-end space-x-1">
@@ -1158,7 +1166,30 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
               </div>
             </th>
             <th 
-              className={`text-right py-1.5 sm:py-2 md:py-3 px-0.5 sm:px-1 md:px-2 lg:px-4 font-semibold text-xs sm:text-sm cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'market_cap' ? 'text-blue-400' : 'text-gray-300'}`}
+              className={`text-right py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === '7d' ? 'text-blue-400' : 'text-gray-300'}`}
+              onClick={() => handleSort('7d')}
+            >
+              <div className="flex items-center justify-end space-x-1">
+                <span>7d %</span>
+                {getSortIcon('7d')}
+              </div>
+            </th>
+            <th 
+              className={`text-right py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === '30d' ? 'text-blue-400' : 'text-gray-300'}`}
+              onClick={() => handleSort('30d')}
+            >
+              <div className="flex items-center justify-end space-x-1">
+                <span>30d %</span>
+                {getSortIcon('30d')}
+              </div>
+            </th>
+            <th 
+              className={`text-center py-1 px-2 font-semibold text-xs text-gray-300`}
+            >
+              <span>Chart</span>
+            </th>
+            <th 
+              className={`text-right py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'market_cap' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('market_cap')}
             >
               <div className="flex items-center justify-end space-x-1">
@@ -1172,41 +1203,44 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           {(filteredCoins || []).map((coin, index) => (
             <tr 
               key={coin.id} 
-              className="border-b border-gray-800 hover:bg-gray-800/50 hover:bg-blue-900/20 transition-all duration-200 cursor-pointer group"
+              className="border-b border-gray-800 hover:bg-blue-900/20 transition-all duration-200 cursor-pointer group h-12"
               onClick={() => onCoinClick && onCoinClick(coin)}
             >
-              <td className="py-1.5 sm:py-2 md:py-3 px-0.5 sm:px-1 md:px-2 lg:px-4 text-gray-400 font-medium text-xs sm:text-sm group-hover:text-blue-400 transition-colors">
+              <td className="py-1 px-2 text-gray-400 font-medium text-xs group-hover:text-blue-400 transition-colors">
                 {index + 1}
               </td>
-              <td className="py-1.5 sm:py-2 md:py-3 px-0.5 sm:px-1 md:px-2 lg:px-4">
-                <div className="flex items-center space-x-0.5 sm:space-x-1 md:space-x-2 lg:space-x-3">
+              <td className="py-1 px-2">
+                <div className="flex items-center space-x-2">
                   <img
                     src={coin.image}
                     alt={coin.symbol}
-                    className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-8 lg:h-8 rounded-full flex-shrink-0"
+                    className="w-5 h-5 rounded-full flex-shrink-0"
                     onError={(e) => {
                       e.target.onerror = null; // Prevent infinite loop
                       e.target.src = '/Asset/duniacrypto.png';
                     }}
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium text-white text-xs sm:text-sm md:text-base truncate group-hover:text-blue-400 transition-colors">
+                    <div className="font-medium text-white text-xs truncate group-hover:text-blue-400 transition-colors">
                       {coin.symbol.toUpperCase()}
+                    </div>
+                    <div className="text-gray-400 text-xs truncate">
+                      {coin.name}
                     </div>
                   </div>
                   {/* Click indicator */}
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   </div>
                 </div>
               </td>
-              <td className="py-1.5 sm:py-2 md:py-3 px-0.5 sm:px-1 md:px-2 lg:px-4 text-right font-medium text-white text-xs sm:text-sm md:text-base">
+              <td className="py-1 px-2 text-right font-medium text-white text-xs">
                 {formatPrice(coin.current_price)}
               </td>
-              <td className="py-1.5 sm:py-2 md:py-3 px-0.5 sm:px-1 md:px-2 lg:px-4 text-right font-medium text-xs sm:text-sm md:text-base">
+              <td className="py-1 px-2 text-right font-medium text-xs">
                 {formatPercentage(
                   dateRange === '1h' ? coin.price_change_percentage_1h_in_currency :
                   dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
@@ -1215,7 +1249,62 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                   coin.price_change_percentage_24h
                 )}
               </td>
-              <td className="py-1.5 sm:py-2 md:py-3 px-0.5 sm:px-1 md:px-2 lg:px-4 text-right font-medium text-white text-xs sm:text-sm md:text-base">
+              <td className="py-1 px-2 text-right font-medium text-xs">
+                {formatPercentage(coin.price_change_percentage_7d_in_currency)}
+              </td>
+              <td className="py-1 px-2 text-right font-medium text-xs">
+                {formatPercentage(coin.price_change_percentage_30d_in_currency)}
+              </td>
+              <td className="py-1 px-2 text-center chart-cell">
+                <div className="w-16 h-8 rounded flex items-center justify-center overflow-hidden mx-auto chart-container">
+                  {/* Perfectly Centered Line Chart */}
+                  <svg 
+                    className="w-full h-full chart-svg" 
+                    viewBox="0 0 48 24" 
+                    preserveAspectRatio="xMidYMid meet"
+                    style={{ display: 'block' }}
+                  >
+                    {/* Chart Area - perfectly centered */}
+                    <defs>
+                      <clipPath id={`chart-clip-${coin.id}`}>
+                        <rect x="0" y="0" width="48" height="24" />
+                      </clipPath>
+                    </defs>
+                    
+                    {/* Background - full container */}
+                    <rect x="0" y="0" width="48" height="24" fill="transparent" />
+                    
+                    {/* Subtle Grid Lines - perfectly centered and evenly distributed */}
+                    <line x1="0" y1="4" x2="48" y2="4" stroke="#374151" strokeWidth="0.3" opacity="0.5" />
+                    <line x1="0" y1="10" x2="48" y2="10" stroke="#374151" strokeWidth="0.3" opacity="0.5" />
+                    <line x1="0" y1="16" x2="48" y2="16" stroke="#374151" strokeWidth="0.3" opacity="0.5" />
+                    <line x1="0" y1="22" x2="48" y2="22" stroke="#374151" strokeWidth="0.3" opacity="0.5" />
+                    
+                    {/* Price Line Chart - perfectly centered with balanced vertical range */}
+                    <path
+                      d="M0,16 L6,13 L12,19 L18,11 L24,21 L30,16 L36,22 L42,13 L48,16"
+                      fill="none"
+                      stroke={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'}
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      clipPath={`url(#chart-clip-${coin.id})`}
+                    />
+                    
+                    {/* Price Points - perfectly centered and aligned with the line */}
+                    <circle cx="0" cy="16" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="6" cy="13" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="12" cy="19" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="18" cy="11" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="24" cy="21" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="30" cy="16" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="36" cy="22" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="42" cy="13" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                    <circle cx="48" cy="16" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
+                  </svg>
+                </div>
+              </td>
+              <td className="py-1 px-2 text-right font-medium text-white text-xs">
                 {formatMarketCap(coin.market_cap)}
               </td>
             </tr>
@@ -1260,7 +1349,7 @@ function TrendingCoins100({ onCoinClick }) {
       {(trendingCoins || []).map((coin, index) => (
         <div 
           key={index} 
-          className="bg-gray-800 rounded-md sm:rounded-lg p-2 sm:p-3 md:p-4 border border-gray-700 hover:border-gray-600 hover:border-blue-500 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group"
+          className="bg-gray-800 rounded-md sm:rounded-lg p-2 sm:p-3 md:p-4 border border-gray-700 hover:border-blue-500 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group"
           onClick={() => onCoinClick && onCoinClick(coin.item)}
         >
           <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
