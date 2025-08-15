@@ -294,7 +294,7 @@ export default function Navbar() {
       </aside>
 
       {/* Desktop Logo - Positioned at border between sidebar and navbar */}
-      <div className="hidden xl:block fixed left-14 top-4 z-[60]">
+      <div className="hidden xl:block fixed left-20 top-4 z-[60]">
         <Link href="/" className="flex items-center space-x-2 group no-underline hover:no-underline focus:no-underline active:no-underline" style={{ textDecoration: 'none' }}>
           <ProcessedLogo />
           <GradientText

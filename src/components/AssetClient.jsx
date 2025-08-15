@@ -149,13 +149,13 @@ export default function AssetClient() {
       {/* Main Layout */}
        <main className="w-full py-2 sm:py-3 md:py-4 lg:py-6">
         
-        {/* Market Overview - Always Visible */}
-        <section className="mb-3 sm:mb-4 md:mb-6 px-3 sm:px-4 md:px-6 lg:px-8">
+                 {/* Market Overview - Always Visible */}
+         <section className="mb-3 sm:mb-4 md:mb-6 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
           <MarketOverviewRedesigned />
         </section>
 
-        {/* Horizontal Menu Navigation */}
-        <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8">
+                 {/* Horizontal Menu Navigation */}
+         <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
           <div className="flex gap-2 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-hide">
             {menuItems.map((item) => (
               <button
@@ -174,9 +174,9 @@ export default function AssetClient() {
         </div>
 
 
-        {/* Search Bar for Top 100 */}
-        {activeSection === 'top-100' && (
-          <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8">
+                 {/* Search Bar for Top 100 */}
+         {activeSection === 'top-100' && (
+           <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
             <div className="relative">
               <input
                 type="text"
@@ -205,13 +205,13 @@ export default function AssetClient() {
         {/* Content Sections */}
         {activeSection === 'top-100' && (
           <section className="mb-3 sm:mb-4 md:mb-6">
-            <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8">
-              <h2 className="text-sm sm:text-base md:text-lg font-bold text-white mb-2 sm:mb-3">
-                Top 100 Cryptocurrencies
-              </h2>
+                         <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
+               <h2 className="text-sm sm:text-base md:text-lg font-bold text-white mb-2 sm:mb-3">
+                 Top 100 Cryptocurrencies
+               </h2>
               
-              {/* Filter Controls */}
-              <div className="flex items-center gap-2">
+                             {/* Filter Controls */}
+               <div className="flex items-center gap-2 max-w-6xl mx-auto">
                 {/* Filter Button */}
                 <div className="relative">
                   <button
@@ -323,7 +323,7 @@ export default function AssetClient() {
               </div>
             </div>
             
-            <div className={`bg-duniacrypto-panel border border-gray-700 ${viewMode === 'heatmap' ? 'p-1' : 'px-2'}`}>
+                         <div className={`bg-duniacrypto-panel border border-gray-700 max-w-6xl mx-auto ${viewMode === 'heatmap' ? 'p-1' : 'px-2'}`}>
 
               {viewMode === 'table' ? (
                 <CryptoTableWithSearch 
@@ -1121,7 +1121,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-xs">
+      <table className="w-full max-w-6xl mx-auto text-xs">
         <thead>
           <tr className="border-b border-gray-700 h-10">
             <th 
