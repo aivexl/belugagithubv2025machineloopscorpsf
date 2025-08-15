@@ -31,7 +31,7 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
 }
 
 const cachedFetch = async (url: string) => {
-  const cacheKey = url.split('/api/coingecko')[1] || url;
+  const cacheKey = url.split('api.coingecko.com')[1] || url;
   
   // Try dev cache first (development only)
   if (devCacheEnabled && getDevCache) {

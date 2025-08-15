@@ -666,3 +666,48 @@ a:hover {
   height: 100%;
   margin: 0 auto;
 }
+
+/* Desktop Logo Positioning - Ensure visibility in production builds */
+:root {
+  --sidebar-width: 80px;
+  --logo-left-position: calc(var(--sidebar-width) + 0px);
+}
+
+.desktop-logo {
+  position: fixed !important;
+  left: var(--logo-left-position) !important;
+  top: 1rem !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+}
+
+/* Force logo visibility in all build environments */
+.desktop-logo * {
+  pointer-events: auto !important;
+}
+
+/* Additional logo visibility rules for production builds */
+.desktop-logo {
+  position: fixed !important;
+  left: var(--logo-left-position) !important;
+  top: 1rem !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+  transform: translateZ(0) !important;
+  will-change: transform !important;
+}
+
+/* Ensure logo is above all other elements */
+.desktop-logo,
+.desktop-logo * {
+  z-index: 9999 !important;
+  position: relative !important;
+}
+
+/* Force logo container to be above sidebar and navbar */
+.desktop-logo {
+  z-index: 99999 !important;
+  position: fixed !important;
+  left: 80px !important;
+  top: 16px !important;
+}

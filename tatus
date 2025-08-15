@@ -6,3 +6,8 @@
 [33m7e424d8[m Refactor crypto table: move Market Cap to left side, improve layout proportions, fix chart centering and remove background, adjust table container width to match search bar
 [33m80a2c2a[m feat(dev-cache): add 24h CoinGecko dev cache; fix headers for _next assets; nav(top): fixed with dynamic spacer to avoid overlap; desktop-only sizing tweaks; ticker: slower speed; docs: add cache & navbar notes
 [33m8dd58b5[m Fix Vercel build errors - disable CSS optimization and fix Supabase warnings
+[33mc2af23e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix chart alignment and remove background - Perfect centering with CSS flexbox, remove chart background for cleaner look
+[33mf22ec3a[m update chart  line
+[33m9234d70[m Fix: Replace static line charts with dynamic CoinGecko API data - Add real-time chart data fetching from CoinGecko API - Generate unique SVG paths for each coin based on actual price data - Implement chart data caching and parallel fetching - Remove static chart paths that were identical for all coins - Maintain existing design and dimensions while using real data
+[33m0fd0839[m Refactor crypto table: move Market Cap to left side, improve layout proportions, fix chart centering and remove background
+[33m7e424d8[m Refactor crypto table: move Market Cap to left side, improve layout proportions, fix chart centering and remove background, adjust table container width to match search bar

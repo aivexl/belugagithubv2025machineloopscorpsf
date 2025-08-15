@@ -149,12 +149,12 @@ export default function AssetClient() {
       {/* Main Layout */}
        <main className="w-full py-2 sm:py-3 md:py-4 lg:py-6">
         
-                 {/* Market Overview - Always Visible */}
+        {/* Market Overview - Always Visible */}
          <section className="mb-3 sm:mb-4 md:mb-6 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
           <MarketOverviewRedesigned />
         </section>
 
-                 {/* Horizontal Menu Navigation */}
+        {/* Horizontal Menu Navigation */}
          <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
           <div className="flex gap-2 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-hide">
             {menuItems.map((item) => (
@@ -174,8 +174,8 @@ export default function AssetClient() {
         </div>
 
 
-                 {/* Search Bar for Top 100 */}
-         {activeSection === 'top-100' && (
+        {/* Search Bar for Top 100 */}
+        {activeSection === 'top-100' && (
            <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
             <div className="relative">
               <input
@@ -207,10 +207,10 @@ export default function AssetClient() {
           <section className="mb-3 sm:mb-4 md:mb-6">
                          <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
                <h2 className="text-sm sm:text-base md:text-lg font-bold text-white mb-2 sm:mb-3">
-                 Top 100 Cryptocurrencies
-               </h2>
+                Top 100 Cryptocurrencies
+              </h2>
               
-                             {/* Filter Controls */}
+              {/* Filter Controls */}
                <div className="flex items-center gap-2 max-w-6xl mx-auto">
                 {/* Filter Button */}
                 <div className="relative">
@@ -569,7 +569,7 @@ function MarketOverviewRedesigned() {
   useEffect(() => {
     const fetchMarketData = async () => {
       try {
-        const response = await fetch('/api/coingecko/api/v3/global');
+        const response = await fetch('https://api.coingecko.com/api/v3/global');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -718,7 +718,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         
         while (retryCount < maxRetries) {
           try {
-            response = await fetch('/api/coingecko/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=25&page=1&price_change_percentage=24h');
+            response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&price_change_percentage=24h');
             
             if (response.status === 431) {
               retryCount++;
@@ -782,6 +782,57 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
             total_supply: 120000000,
             max_supply: null,
             ath: 4800
+          },
+          {
+            id: 'tether',
+            symbol: 'usdt',
+            name: 'Tether',
+            current_price: 1.001,
+            market_cap: 95000000000,
+            market_cap_rank: 3,
+            price_change_percentage_1h_in_currency: 0.0,
+            price_change_percentage_24h: 0.0,
+            price_change_percentage_7d_in_currency: 0.1,
+            price_change_percentage_30d_in_currency: 0.2,
+            price_change_percentage_1y_in_currency: 0.5,
+            circulating_supply: 95000000000,
+            total_supply: 95000000000,
+            max_supply: null,
+            ath: 1.32
+          },
+          {
+            id: 'solana',
+            symbol: 'sol',
+            name: 'Solana',
+            current_price: 194.95,
+            market_cap: 85000000000,
+            market_cap_rank: 4,
+            price_change_percentage_1h_in_currency: -0.8,
+            price_change_percentage_24h: -3.7,
+            price_change_percentage_7d_in_currency: -5.2,
+            price_change_percentage_30d_in_currency: 12.8,
+            price_change_percentage_1y_in_currency: 45.7,
+            circulating_supply: 435000000,
+            total_supply: 535000000,
+            max_supply: null,
+            ath: 260
+          },
+          {
+            id: 'xrp',
+            symbol: 'xrp',
+            name: 'XRP',
+            current_price: 3.11,
+            market_cap: 75000000000,
+            market_cap_rank: 5,
+            price_change_percentage_1h_in_currency: -0.5,
+            price_change_percentage_24h: -2.1,
+            price_change_percentage_7d_in_currency: -1.8,
+            price_change_percentage_30d_in_currency: 8.5,
+            price_change_percentage_1y_in_currency: 25.3,
+            circulating_supply: 24000000000,
+            total_supply: 100000000000,
+            max_supply: 100000000000,
+            ath: 3.84
           }
         ]);
       } finally {
@@ -1323,7 +1374,7 @@ function TrendingCoins100({ onCoinClick }) {
   useEffect(() => {
     const fetchTrendingCoins = async () => {
       try {
-        const response = await fetch('/api/coingecko/search/trending');
+        const response = await fetch('https://api.coingecko.com/api/v3/search/trending');
         const data = await response.json();
         setTrendingCoins(data.coins || []);
       } catch (error) {
@@ -1451,7 +1502,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       try {
         console.log('Fetching coins for heatmap...');
         // Single API call with reasonable limit to avoid rate limiting
-        const response = await fetch('/api/coingecko/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=25&page=1&price_change_percentage=1h,24h,7d,30d,1y');
+        const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=25&page=1&price_change_percentage=1h,24h,7d,30d,1y');
         
         if (!response.ok) {
           if (response.status === 429) {

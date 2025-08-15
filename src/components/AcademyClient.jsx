@@ -10,7 +10,7 @@ export default function AcademyClient() {
   const [loading, setLoading] = useState(true);
   const [displayCount, setDisplayCount] = useState(9);
   const { activeLevel, activeTopic, activeNetwork } = useAcademyFilters();
-
+  
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -94,8 +94,8 @@ export default function AcademyClient() {
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-200"
                     />
-                  </div>
-                )}
+        </div>
+      )}
 
                 {/* Content */}
                 <div className="p-4 flex-1 flex flex-col">
@@ -104,24 +104,24 @@ export default function AcademyClient() {
                     {article.level && (
                       <span className="px-2 py-1 bg-green-900/50 text-green-300 text-xs rounded">
                         {Array.isArray(article.level) ? article.level[0] : article.level}
-                      </span>
+            </span>
                     )}
                     {article.topics && Array.isArray(article.topics) && article.topics.map((topic, index) => (
                       <span key={index} className="px-2 py-1 bg-blue-900/50 text-blue-300 text-xs rounded">
-                        {topic}
+              {topic}
                       </span>
                     ))}
                     {article.networks && Array.isArray(article.networks) && article.networks.map((network, index) => (
                       <span key={index} className="px-2 py-1 bg-purple-900/50 text-purple-300 text-xs rounded">
                         {network}
-                      </span>
-                    ))}
-                  </div>
+            </span>
+          ))}
+        </div>
 
                   {/* Title */}
                   <h3 className="text-lg font-semibold text-white mb-2 min-h-[3.5rem] group-hover:text-blue-400 transition-colors">
-                    {article.title}
-                  </h3>
+                      {article.title}
+                      </h3>
 
                   {/* Description */}
                   <p className="text-gray-300 text-sm flex-1">
@@ -134,25 +134,25 @@ export default function AcademyClient() {
                     {article.publishedAt && (
                       <span className="ml-2">
                         {new Date(article.publishedAt).toLocaleDateString()}
-                      </span>
-                    )}
+                            </span>
+                          )}
+                        </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Load More Button */}
+                </Link>
+              ))}
+            </div>
+            
+            {/* Load More Button */}
         {displayCount < filteredArticles.length && (
           <div className="text-center mt-8">
-            <button
+                <button
               onClick={() => setDisplayCount(prev => Math.min(prev + 3, filteredArticles.length))}
               className="px-8 py-3 bg-duniacrypto-green text-black rounded-lg hover:bg-green-400 transition-colors font-medium"
-            >
+                >
               Load More ({filteredArticles.length - displayCount} remaining)
-            </button>
-          </div>
+                </button>
+              </div>
         )}
       </section>
     </div>
