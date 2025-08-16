@@ -58,6 +58,8 @@ const cachedFetch = async (url: string) => {
   const response = await fetch(url, {
     headers: {
       'Cache-Control': 'public, max-age=30',
+      'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
+      'Accept': 'application/json'
     }
   });
   

@@ -26,7 +26,12 @@ export default function Top100Trending() {
       setError(null);
       
       // Use price change percentage 24h desc as a proxy for trending
-              const response = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=volume_desc&per_page=${coinsPerPage}&page=${page}&sparkline=false&price_change_percentage=24h`);
+      const response = await fetch(`/api/coingecko-proxy/coins/markets?vs_currency=usd&order=volume_desc&per_page=${coinsPerPage}&page=${page}&sparkline=false&price_change_percentage=24h`, {
+        headers: {
+          'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
+          'Accept': 'application/json'
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch trending coins');
       
       const data = await response.json();

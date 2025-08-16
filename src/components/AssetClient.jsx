@@ -569,7 +569,12 @@ function MarketOverviewRedesigned() {
   useEffect(() => {
     const fetchMarketData = async () => {
       try {
-        const response = await fetch('https://api.coingecko.com/api/v3/global');
+        		const response = await fetch('/api/coingecko-proxy/global', {
+			headers: {
+				'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
+				'Accept': 'application/json'
+			}
+		});
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -718,7 +723,12 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         
         while (retryCount < maxRetries) {
           try {
-            response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&price_change_percentage=24h');
+            			response = await fetch('/api/coingecko-proxy/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&price_change_percentage=24h', {
+				headers: {
+					'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
+					'Accept': 'application/json'
+				}
+			});
             
             if (response.status === 431) {
               retryCount++;
@@ -1374,7 +1384,12 @@ function TrendingCoins100({ onCoinClick }) {
   useEffect(() => {
     const fetchTrendingCoins = async () => {
       try {
-        const response = await fetch('https://api.coingecko.com/api/v3/search/trending');
+        		const response = await fetch('/api/coingecko-proxy/search/trending', {
+			headers: {
+				'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
+				'Accept': 'application/json'
+			}
+		});
         const data = await response.json();
         setTrendingCoins(data.coins || []);
       } catch (error) {
@@ -1502,7 +1517,12 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       try {
         console.log('Fetching coins for heatmap...');
         // Single API call with reasonable limit to avoid rate limiting
-        const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=25&page=1&price_change_percentage=1h,24h,7d,30d,1y');
+        const response = await fetch('/api/coingecko-proxy/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=25&page=1&price_change_percentage=1h,24h,7d,30d,1y', {
+          headers: {
+            'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
+            'Accept': 'application/json'
+          }
+        });
         
         if (!response.ok) {
           if (response.status === 429) {

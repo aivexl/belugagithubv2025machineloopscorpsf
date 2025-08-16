@@ -108,8 +108,13 @@ const TokenInfo = ({ token, pair, timeFrame, chainId }) => {
         const apiKeyParam = coingeckoApiKey ? `&x_cg_demo_api_key=${coingeckoApiKey}` : '';
         
         // First try to search by symbol
-        const searchUrl = `https://api.coingecko.com/api/v3/search?query=${symbol}${apiKeyParam}`;
-        const searchResponse = await fetch(searchUrl);
+        		const searchUrl = `/api/coingecko-proxy/search?query=${symbol}`;
+                  const searchResponse = await fetch(searchUrl, {
+            headers: {
+              'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
+              'Accept': 'application/json'
+            }
+          });
         
         if (searchResponse.ok) {
           const searchData = await searchResponse.json();
@@ -119,8 +124,13 @@ const TokenInfo = ({ token, pair, timeFrame, chainId }) => {
             const coinId = searchData.coins[0].id;
             
             // Now get detailed data for this coin
-            const detailUrl = `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false${apiKeyParam}`;
-            const detailResponse = await fetch(detailUrl);
+            		const detailUrl = `/api/coingecko-proxy/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`;
+                          const detailResponse = await fetch(detailUrl, {
+                headers: {
+                  'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
+                  'Accept': 'application/json'
+                }
+              });
             
             if (detailResponse.ok) {
               const coinData = await detailResponse.json();
