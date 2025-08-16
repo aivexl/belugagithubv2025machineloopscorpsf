@@ -47,6 +47,10 @@ module.exports = {
         // Keep important CSS rules
         keyframes: true,
         fontFace: true,
+        // Additional safety measures
+        variables: true,
+        html: true,
+        css: true,
       }],
       'cssnano'
     ] : []),
