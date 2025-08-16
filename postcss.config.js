@@ -26,7 +26,20 @@ module.exports = {
           'line-clamp-3',
           'scrollbar-hide',
           'custom-scrollbar',
+          // Additional classes that might be used
+          /^(w|h|p|m|flex|grid|hidden|block|inline|relative|absolute)/,
+          /^(top|right|bottom|left|z-)/,
+          /^(rounded|overflow|cursor|select)/,
+          /^(opacity|scale|rotate|skew|translate)/,
+          // Chart and component specific
+          /^(chart|canvas|svg|path|line|area)/,
+          /^(duniacrypto|dex)-/,
         ],
+        // Ensure critical CSS is not purged
+        rejected: true,
+        // Keep important CSS rules
+        keyframes: true,
+        fontFace: true,
       }],
       'cssnano'
     ] : []),

@@ -48,6 +48,16 @@ const nextConfig: NextConfig = {
       config.optimization.usedExports = true;
       config.optimization.sideEffects = false;
       
+      // Ensure CSS is properly processed
+      config.module.rules.push({
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          'postcss-loader'
+        ]
+      });
+      
       // Bundle analyzer (optional) - disabled for production builds
       // if (process.env.ANALYZE === 'true') {
       //   const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
@@ -100,6 +110,14 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+  },
+  
+  // Ensure consistent output
+  output: 'standalone',
+  
+  // Environment-specific configurations
+  env: {
+    CUSTOM_KEY: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   },
 };
 
