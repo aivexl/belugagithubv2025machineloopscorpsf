@@ -34,9 +34,16 @@ module.exports = {
           // Chart and component specific
           /^(chart|canvas|svg|path|line|area)/,
           /^(duniacrypto|dex)-/,
+          // Gradient and animation classes
+          /^gradient-/,
+          /^animate-/,
+          /^bg-gradient-/,
+          /^from-/,
+          /^to-/,
+          /^via-/,
         ],
         // Ensure critical CSS is not purged
-        rejected: true,
+        rejected: false,
         // Keep important CSS rules
         keyframes: true,
         fontFace: true,

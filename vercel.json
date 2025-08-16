@@ -17,5 +17,8 @@
   "env": {
     "NODE_ENV": "production",
     "NEXT_PUBLIC_APP_ENV": "production"
-  }
+  },
+  "buildCommand": "npm run build",
+  "installCommand": "npm ci",
+  "framework": "nextjs"
 } 

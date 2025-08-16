@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
   },
   
   // Fix Supabase Edge Runtime warnings
-  serverExternalPackages: ['@supabase/supabase-js'],
+  serverExternalPackages: ['@supabase/supabase-js', '@supabase/ssr'],
   
   // Enhanced webpack configuration
   webpack: (config, { dev, isServer }) => {
@@ -47,16 +47,6 @@ const nextConfig: NextConfig = {
       // Enable tree shaking
       config.optimization.usedExports = true;
       config.optimization.sideEffects = false;
-      
-      // Ensure CSS is properly processed
-      config.module.rules.push({
-        test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          'postcss-loader'
-        ]
-      });
       
       // Bundle analyzer (optional) - disabled for production builds
       // if (process.env.ANALYZE === 'true') {

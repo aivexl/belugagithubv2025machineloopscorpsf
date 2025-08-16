@@ -8,6 +8,7 @@
     "build": "next build",
     "build:production": "node scripts/build-production.js",
     "build:vercel": "cross-env NODE_ENV=production NEXT_PUBLIC_APP_ENV=production next build",
+    "build:clean": "Remove-Item -Recurse -Force .next; npm run build",
     "start": "next start",
     "lint": "next lint",
     "clean": "Remove-Item -Recurse -Force .next; npm run dev",
