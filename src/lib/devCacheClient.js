@@ -4,6 +4,9 @@
 const DEV_CACHE_KEY = 'coingecko-dev-cache';
 const DEV_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 jam dalam milliseconds
 
+// Export whether dev cache is enabled
+export const devCacheEnabled = process.env.NODE_ENV === 'development' && typeof window !== 'undefined';
+
 // Check if cache is valid (within 24 hours)
 function isCacheValid(timestamp) {
   if (!timestamp) return false;

@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 
-const API_KEY = process.env.NEXT_PUBLIC_MORALIS_API_KEY;
-
 const TokenInfo = ({ token, pair, timeFrame, chainId }) => {
   const [tokenMetadata, setTokenMetadata] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,8 +32,9 @@ const TokenInfo = ({ token, pair, timeFrame, chainId }) => {
       const moralisApiKey = process.env.NEXT_PUBLIC_MORALIS_API_KEY;
       
       if (!moralisApiKey) {
-        console.warn("Moralis API key not found, using CoinGecko API directly");
-        await fetchFromCoinGecko();
+        console.warn("Moralis API key not found, using fallback data");
+        setTokenMetadata(generateFallbackMetadata());
+        setLoading(false);
         return;
       }
 
@@ -59,8 +58,9 @@ const TokenInfo = ({ token, pair, timeFrame, chainId }) => {
         });
 
         if (!response.ok) {
-          console.warn(`Moralis API error: ${response.status}, trying CoinGecko API`);
-          await fetchFromCoinGecko();
+          console.warn(`Moralis API error: ${response.status}, using fallback data`);
+          setTokenMetadata(generateFallbackMetadata());
+          setLoading(false);
           return;
         }
 
@@ -79,208 +79,129 @@ const TokenInfo = ({ token, pair, timeFrame, chainId }) => {
         setLoading(false);
       } catch (err) {
         console.error("Error fetching token metadata from Moralis:", err);
-        console.log("Falling back to CoinGecko API");
-        await fetchFromCoinGecko();
+        console.log("Using fallback data");
+        setTokenMetadata(generateFallbackMetadata());
+        setLoading(false);
       }
     };
 
-    // Fallback function to fetch from CoinGecko
-    const fetchFromCoinGecko = async () => {
-      try {
-        console.log("Fetching token data from CoinGecko API...");
-        
-        const symbol = token.symbol?.toLowerCase();
-        if (!symbol) {
-          setTokenMetadata({
-            name: token.name,
-            symbol: token.symbol,
-            logo: token.logo,
+    // Generate fallback metadata when API fails
+    const generateFallbackMetadata = () => {
+      return {
+        name: token.name || "Unknown Token",
+        symbol: token.symbol || "UNKNOWN",
+        logo: token.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(token.name || "Token")}&background=1f2937&color=fff&size=64&bold=true`,
             website: null,
             twitter: null,
             telegram: null,
-            discord: null,
-          });
-          setLoading(false);
-          return;
-        }
-
-        const coingeckoApiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
-        const apiKeyParam = coingeckoApiKey ? `&x_cg_demo_api_key=${coingeckoApiKey}` : '';
-        
-        // First try to search by symbol
-        		const searchUrl = `/api/coingecko-proxy/search?query=${symbol}`;
-                  const searchResponse = await fetch(searchUrl, {
-            headers: {
-              'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
-              'Accept': 'application/json'
-            }
-          });
-        
-        if (searchResponse.ok) {
-          const searchData = await searchResponse.json();
-          
-          if (searchData.coins && searchData.coins.length > 0) {
-            // Get the first matching coin
-            const coinId = searchData.coins[0].id;
-            
-            // Now get detailed data for this coin
-            		const detailUrl = `/api/coingecko-proxy/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`;
-                          const detailResponse = await fetch(detailUrl, {
-                headers: {
-                  'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
-                  'Accept': 'application/json'
-                }
-              });
-            
-            if (detailResponse.ok) {
-              const coinData = await detailResponse.json();
-              
-              setTokenMetadata({
-                name: coinData.name || token.name,
-                symbol: coinData.symbol?.toUpperCase() || token.symbol,
-                logo: coinData.image?.large || coinData.image?.small || token.logo,
-                website: coinData.links?.homepage?.[0] || null,
-                twitter: coinData.links?.twitter_screen_name ? `https://twitter.com/${coinData.links.twitter_screen_name}` : null,
-                telegram: coinData.links?.telegram_channel_identifier ? `https://t.me/${coinData.links.telegram_channel_identifier}` : null,
-                discord: coinData.links?.repos_url?.github?.[0] || null,
-                market_cap: coinData.market_data?.market_cap?.usd || 0,
-                volume_24h: coinData.market_data?.total_volume?.usd || 0,
-                price_change_24h: coinData.market_data?.price_change_percentage_24h || 0,
-                totalSupply: coinData.market_data?.total_supply || 0,
-                circulatingSupply: coinData.market_data?.circulating_supply || 0,
-              });
-              setLoading(false);
-              return;
-            }
-          }
-        }
-        
-        // Fallback: use basic token info
-        setTokenMetadata({
-          name: token.name,
-          symbol: token.symbol,
-          logo: token.logo,
-          website: null,
-          twitter: null,
-          telegram: null,
-          discord: null,
-        });
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching from CoinGecko:", err);
-        // Use basic token info as final fallback
-        setTokenMetadata({
-          name: token.name,
-          symbol: token.symbol,
-          logo: token.logo,
-          website: null,
-          twitter: null,
-          telegram: null,
-          discord: null,
-        });
-        setLoading(false);
-      }
+        description: "Token information temporarily unavailable",
+        totalSupply: "N/A",
+        decimals: token.decimals || 18,
+        verified: false
+      };
     };
 
     fetchTokenMetadata();
   }, [token, chainId]);
 
-  const formatPrice = (price) => {
-    if (!price || price === 0) return "$0.00";
-    return "$" + price.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 6,
-    });
-  };
-
+  // Helper functions
   const formatNumber = (num) => {
-    if (!num || num === 0) return "0";
+    if (!num && num !== 0) return "N/A";
     if (num >= 1e12) return (num / 1e12).toFixed(2) + "T";
     if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
     if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
     if (num >= 1e3) return (num / 1e3).toFixed(2) + "K";
-    return num.toString();
+    return num.toLocaleString();
   };
 
-  const formatPercentChange = (value) => {
-    if (!value && value !== 0) return "0.00%";
-    const num = parseFloat(value);
-    if (isNaN(num)) return "0.00%";
-    const isPositive = num >= 0;
-    return (
-      <span className={isPositive ? "text-green-400" : "text-red-400"}>
-        {isPositive ? "+" : ""}{num.toFixed(2)}%
-      </span>
-    );
+  const formatPercentChange = (change) => {
+    if (!change && change !== 0) return "0.00%";
+    const formatted = change.toFixed(2);
+    return `${change >= 0 ? "+" : ""}${formatted}%`;
   };
 
   const shortenAddress = (address) => {
-    if (!address) return "";
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+    if (!address) return "N/A";
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const getExplorerUrl = (address, type = "address") => {
-    const explorer = blockExplorers[chainId];
-    if (!explorer) return "#";
-    return `${explorer}/${type}/${address}`;
+  const getExplorerUrl = (address) => {
+    if (!address) return "#";
+    const explorer = blockExplorers[chainId] || "https://etherscan.io";
+    return `${explorer}/token/${address}`;
   };
 
   if (loading) {
     return (
-      <div className="p-4">
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-          <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
+      <div className="bg-duniacrypto-panel border border-gray-700 rounded-lg p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 bg-gray-700 rounded w-1/3"></div>
           <div className="space-y-2">
-            <div className="h-3 bg-gray-700 rounded"></div>
-            <div className="h-3 bg-gray-700 rounded"></div>
-            <div className="h-3 bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-700 rounded w-5/6"></div>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!token) {
+  if (error) {
     return (
-      <div className="p-4 text-center text-gray-400">
-        No token information available
+      <div className="bg-duniacrypto-panel border border-gray-700 rounded-lg p-6">
+        <div className="text-center text-gray-400">
+          <p>Failed to load token information</p>
+          <p className="text-sm mt-2">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="bg-duniacrypto-panel border border-gray-700 rounded-lg p-6 space-y-6">
       {/* Token Header */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-4">
         <img
-          src={token.logo || tokenMetadata?.logo || "/images/token-default.svg"}
+          src={tokenMetadata?.logo || token.logo}
           alt={token.name}
-          className="w-12 h-12 rounded-full"
+          className="w-16 h-16 rounded-full"
           onError={(e) => {
-            e.target.onError = null;
-            e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzM0Mzk0NyIvPjwvc3ZnPg==";
+            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(token.name)}&background=1f2937&color=fff&size=64&bold=true`;
           }}
         />
         <div>
-          <h2 className="text-xl font-bold text-white">{token.name}</h2>
+          <h2 className="text-2xl font-bold text-white">{token.name}</h2>
           <p className="text-gray-400">{token.symbol}</p>
+          {tokenMetadata?.verified && (
+            <span className="inline-block bg-blue-500 text-white text-xs px-2 py-1 rounded mt-1">
+              Verified
+            </span>
+          )}
         </div>
       </div>
 
       {/* Price Information */}
       {pair && (
-        <div className="space-y-3">
-          <div>
-            <div className="text-2xl font-bold text-white">
-              {formatPrice(pair.usdPrice)}
+        <div className="bg-gray-800 rounded-lg p-4">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <div className="text-gray-400">Price</div>
+              <div className="text-white font-medium text-lg">
+                ${formatNumber(pair.usdPrice || 0)}
+              </div>
             </div>
-            <div className="text-sm">
-              {formatPercentChange(pair.usdPrice24hrPercentChange)}
+          <div>
+              <div className="text-gray-400">24h Change</div>
+              <div className={`font-medium ${
+                (pair.usdPrice24hrPercentChange || 0) >= 0 
+                  ? "text-duniacrypto-green" 
+                  : "text-duniacrypto-red"
+              }`}>
+                {formatPercentChange(pair.usdPrice24hrPercentChange || 0)}
+            </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-2 gap-4 text-sm mt-4">
             <div>
               <div className="text-gray-400">Market Cap</div>
               <div className="text-white font-medium">
@@ -310,19 +231,21 @@ const TokenInfo = ({ token, pair, timeFrame, chainId }) => {
               </span>
               <button
                 onClick={() => navigator.clipboard.writeText(token.address)}
-                className="text-blue-400 hover:text-blue-300"
-                title="Copy address"
+                className="text-blue-400 hover:text-blue-300 text-xs"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
+                Copy
               </button>
             </div>
           </div>
 
           <div className="flex justify-between">
+            <span className="text-gray-400">Network</span>
+            <span className="text-white">{chainId}</span>
+          </div>
+
+          <div className="flex justify-between">
             <span className="text-gray-400">Decimals</span>
-            <span className="text-white">{token.decimals || tokenMetadata?.decimals || "18"}</span>
+            <span className="text-white">{tokenMetadata?.decimals || token.decimals || "N/A"}</span>
           </div>
 
           {tokenMetadata?.totalSupply && (
@@ -332,6 +255,15 @@ const TokenInfo = ({ token, pair, timeFrame, chainId }) => {
             </div>
           )}
         </div>
+
+        {/* Description */}
+        {tokenMetadata?.description && (
+          <div className="pt-3 border-t border-gray-700">
+            <div className="text-gray-300 text-sm leading-relaxed">
+              {tokenMetadata.description}
+            </div>
+          </div>
+        )}
 
         {/* Links */}
         <div className="pt-3 border-t border-gray-700">
@@ -352,6 +284,26 @@ const TokenInfo = ({ token, pair, timeFrame, chainId }) => {
                 className="text-blue-400 hover:text-blue-300 text-sm"
               >
                 Website
+              </a>
+            )}
+            {tokenMetadata?.twitter && (
+              <a
+                href={tokenMetadata.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 text-sm"
+              >
+                Twitter
+              </a>
+            )}
+            {tokenMetadata?.telegram && (
+              <a
+                href={tokenMetadata.telegram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 text-sm"
+              >
+                Telegram
               </a>
             )}
           </div>

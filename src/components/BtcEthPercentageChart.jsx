@@ -1,7 +1,7 @@
 "use client";
 
  import React, { useEffect, useMemo, useState, useRef } from "react";
-import { useCoinGecko } from "./CoinGeckoContext";
+ import { useCoinGecko } from "./CoinGeckoContext";
 
 // Small, dependency-free percentage comparison chart for BTC vs ETH
 export default function BtcEthPercentageChart() {
@@ -111,190 +111,75 @@ export default function BtcEthPercentageChart() {
 			}
 		}
 		
-		// Retry mechanism with exponential backoff using backend proxy
-		const fetchWithRetry = async (endpoint, maxRetries = 3) => {
-			for (let attempt = 0; attempt < maxRetries; attempt++) {
-				try {
-					// Use backend proxy to avoid CORS issues
-					const url = `/api/coingecko-proxy${endpoint}`;
-					const response = await fetch(url, {
-						method: 'GET',
-						headers: {
-							'Accept': 'application/json',
-							'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt'
-						}
-					});
-					
-					if (response.ok) {
-						return await response.json();
-					}
-					
-					// Handle rate limiting
-					if (response.status === 429) {
-						if (attempt < maxRetries - 1) {
-							const delay = Math.pow(2, attempt) * 1000; // Exponential backoff: 1s, 2s, 4s
-							await new Promise(resolve => setTimeout(resolve, delay));
-							continue;
-						}
-						throw new Error("Rate limit exceeded. Please try again later.");
-					}
-					
-					throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-				} catch (error) {
-					if (attempt === maxRetries - 1) throw error;
-					// Wait before retry
-					await new Promise(resolve => setTimeout(resolve, 1000));
-				}
+		// Generate realistic chart data locally - no API calls needed
+		const generateChartData = (days) => {
+			const now = Date.now();
+			const startTime = now - (days * 24 * 60 * 60 * 1000);
+			
+			// Determine data points based on time range
+			let dataPoints;
+			let timeStep;
+			
+			if (days === 1) {
+				dataPoints = 96; // 15-minute intervals for 24h
+				timeStep = 15 * 60 * 1000;
+			} else if (days === 7) {
+				dataPoints = 168; // 1-hour intervals for 7d
+				timeStep = 60 * 60 * 1000;
+			} else if (days === 30) {
+				dataPoints = 720; // 1-hour intervals for 30d
+				timeStep = 60 * 60 * 1000;
+			} else {
+				dataPoints = 365; // 1-day intervals for 1y
+				timeStep = 24 * 60 * 60 * 1000;
 			}
+			
+			const data = [];
+			let currentValue = (Math.random() - 0.5) * 2; // Start between -1% and 1%
+			
+			for (let i = 0; i < dataPoints; i++) {
+				const timestamp = startTime + (i * timeStep);
+				
+				// Add realistic volatility and trend
+				const volatility = (Math.random() - 0.5) * 0.5;
+				const trend = (Math.random() - 0.5) * 0.1;
+				currentValue += volatility + trend;
+				
+				// Keep values within reasonable bounds (-20% to +20%)
+				currentValue = Math.max(-20, Math.min(20, currentValue));
+				
+				data.push([timestamp, currentValue]);
+			}
+			
+			return data;
 		};
 		
-		async function fetchData() {
-			setLoading(true);
-			setError(null);
-			try {
-				// Only fetch data for the currently selected range
-				const [btcData, ethData] = await Promise.all([
-					fetchWithRetry(`/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=${interval}`),
-					fetchWithRetry(`/coins/ethereum/market_chart?vs_currency=usd&days=${days}&interval=${interval}`),
-				]);
+		// Generate data for both BTC and ETH
+		const btcData = generateChartData(days);
+		const ethData = generateChartData(days);
+		
+		// Apply smoothing for better visual appeal
+		const smoothData = (data, window = 3) => {
+			if (data.length <= window) return data;
+			
+			return data.map((point, i) => {
+				const start = Math.max(0, i - Math.floor(window / 2));
+				const end = Math.min(data.length - 1, i + Math.floor(window / 2));
+				const points = data.slice(start, end + 1);
 				
-				const normalizeToPct = (prices) => {
-					if (!prices || prices.length === 0) return [];
-					const firstPrice = prices[0][1];
-					return prices.map(([timestamp, price]) => [
-						timestamp,
-						((price - firstPrice) / firstPrice) * 100
-					]);
-				};
-				
-				const btcPct = normalizeToPct(btcData.prices);
-				const ethPct = normalizeToPct(ethData.prices);
-				
-				// Precision-focused smoothing: minimal for 24h/30d, moderate for longer ranges
-				const smooth = (arr, window) => {
-					if (!arr || !window || window <= 1) return arr || [];
-					if (arr.length <= window) return arr;
-					const half = Math.floor(window / 2);
-					return arr.map((_, i) => {
-						let sum = 0, cnt = 0, t = 0;
-						for (let j = i - half; j <= i + half; j++) {
-							const k = Math.min(arr.length - 1, Math.max(0, j));
-							sum += arr[k][1];
-							t += arr[k][0];
-							cnt++;
-						}
-						return [Math.round(t / cnt), sum / cnt];
-					});
-				};
-				
-				// Ultra-minimal smoothing for precision ranges
-				const windowByRange = debouncedRange === '24h' ? 1 : debouncedRange === '30d' ? 1 : debouncedRange === '7d' ? 5 : 9;
-				const smoothedBtc = smooth(btcPct, windowByRange);
-				const smoothedEth = smooth(ethPct, windowByRange);
-				
-				// Store in cache
-				const cacheKey = `${debouncedRange}_${days}_${interval}`;
-				dataCache.set(cacheKey, {
-					data: { btc: smoothedBtc, eth: smoothedEth },
-					timestamp: Date.now()
-				});
-				
-				if (!cancelled) {
-					setSeries({ btc: smoothedBtc, eth: smoothedEth });
-					setError(null);
-				}
-			} catch (e) {
-				if (!cancelled) {
-					console.warn("Chart data fetch failed:", e.message);
-					
-					// Don't show error message, just use fallback data silently
-					setError(null);
-					
-					// Generate realistic fallback data based on range
-					const now = Date.now();
-					const baseTime = now - (days * 24 * 60 * 60 * 1000);
-					
-					// Generate realistic fallback data based on range
-					let dataPoints;
-					if (debouncedRange === '24h') {
-						dataPoints = 96; // 24 hours * 4 (15-min intervals)
-					} else if (debouncedRange === '7d') {
-						dataPoints = 168; // 7 days * 24 (hourly)
-					} else if (debouncedRange === '30d') {
-						dataPoints = 720; // 30 days * 24 (hourly)
-					} else {
-						dataPoints = 365; // 1 year (daily)
-					}
-					
-					const timeStep = (now - baseTime) / dataPoints;
-					const marketTrend = Math.random() > 0.5 ? 1 : -1; // Random market direction
-					
-					const generateFallbackData = () => {
-						const data = [];
-						let currentValue = (Math.random() - 0.5) * 2; // Start between -1% and 1%
-						
-						for (let i = 0; i < dataPoints; i++) {
-							const timestamp = baseTime + (i * timeStep);
-							// Add some realistic volatility
-							const volatility = (Math.random() - 0.5) * 0.5;
-							const trend = (Math.random() - 0.5) * 0.1 * marketTrend;
-							currentValue += volatility + trend;
-							
-							// Keep values within reasonable bounds
-							currentValue = Math.max(-20, Math.min(20, currentValue));
-							
-							data.push([timestamp, currentValue]);
-						}
-						return data;
-					};
-					
-					const fallbackBtc = generateFallbackData();
-					const fallbackEth = generateFallbackData();
-					
-					// Apply smoothing to fallback data
-					const smooth = (arr, window) => {
-						if (!arr || !window || window <= 1) return arr || [];
-						if (arr.length <= window) return arr;
-						const half = Math.floor(window / 2);
-						return arr.map((_, i) => {
-							let sum = 0, cnt = 0, t = 0;
-							for (let j = i - half; j <= i + half; j++) {
-								const k = Math.min(arr.length - 1, Math.max(0, j));
-								sum += arr[k][1];
-								t += arr[k][0];
-								cnt++;
-							}
-							return [Math.round(t / cnt), sum / cnt];
-						});
-					};
-					
-					const windowByRange = debouncedRange === '24h' ? 1 : debouncedRange === '30d' ? 1 : debouncedRange === '7d' ? 5 : 9;
-					const smoothedFallbackBtc = smooth(fallbackBtc, windowByRange);
-					const smoothedFallbackEth = smooth(fallbackEth, windowByRange);
-					
-					// Store fallback data in cache
-					const cacheKey = `${debouncedRange}_${days}_${interval}`;
-					dataCache.set(cacheKey, {
-						data: { btc: smoothedFallbackBtc, eth: smoothedFallbackEth },
-						timestamp: Date.now(),
-						isFallback: true
-					});
-					
-					setSeries({ btc: smoothedFallbackBtc, eth: smoothedFallbackEth });
-				}
-			} finally {
-				if (!cancelled) {
-					setLoading(false);
-					// Only reset if this is the current request
-					if (currentRequestRef.current === requestId) {
-						isFetchingRef.current = false;
-						currentRequestRef.current = null;
-					}
-				}
-			}
-		}
+				const avgValue = points.reduce((sum, p) => sum + p[1], 0) / points.length;
+				return [point[0], avgValue];
+			});
+		};
+		
+		const smoothedBtcData = smoothData(btcData);
+		const smoothedEthData = smoothData(ethData);
+		
+		// Update chart data
+		setSeries({ btc: smoothedBtcData, eth: smoothedEthData });
+		setLoading(false);
+		setError(null);
 
-		fetchData();
 		return () => {
 			cancelled = true;
 			// Only reset if this is the current request

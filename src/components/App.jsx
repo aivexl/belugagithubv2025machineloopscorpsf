@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CryptoTicker from './CryptoTicker';
 import CryptoTable from './CryptoTable';
-import MarketOverview from './MarketOverview';
+
 import SubscribeContainer from './SubscribeContainer';
 import NewsFeed from './NewsFeed';
 import DailyRecap from './DailyRecap';
@@ -105,8 +105,7 @@ export default function App() {
             <DailyRecap />
             <NewsFeed perPage={30} initialCount={10} loadMoreCount={3} showThumbnails={true} noTitle={true} />
           </section>
-          <aside className="col-span-1 space-y-4 md:space-y-6">
-            <MarketOverview />
+          <aside className="col-span-1 space-y-4 md:gap-6">
             <SubscribeContainer />
             <CryptoTable />
             <Mindshare />

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const apiKey = 'CG-1NBArXikTdDPy9GPrpUyEmwt';
+    const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY || process.env.COINGECKO_API_KEY || 'CG-1NBArXikTdDPy9GPrpUyEmwt';
     
     console.log(`[TEST] Testing CoinGecko API key: ${apiKey.substring(0, 8)}...`);
     

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CoinGeckoProvider } from './CoinGeckoContext';
-import MarketOverview from './MarketOverview';
+
 import CryptoTable from './CryptoTable';
 import CryptoTicker from './CryptoTicker';
 
@@ -571,7 +571,6 @@ function MarketOverviewRedesigned() {
       try {
         		const response = await fetch('/api/coingecko-proxy/global', {
 			headers: {
-				'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
 				'Accept': 'application/json'
 			}
 		});
@@ -725,7 +724,6 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           try {
             			response = await fetch('/api/coingecko-proxy/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&price_change_percentage=24h', {
 				headers: {
-					'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
 					'Accept': 'application/json'
 				}
 			});
@@ -1386,7 +1384,6 @@ function TrendingCoins100({ onCoinClick }) {
       try {
         		const response = await fetch('/api/coingecko-proxy/search/trending', {
 			headers: {
-				'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
 				'Accept': 'application/json'
 			}
 		});
@@ -1519,7 +1516,6 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
         // Single API call with reasonable limit to avoid rate limiting
         const response = await fetch('/api/coingecko-proxy/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=25&page=1&price_change_percentage=1h,24h,7d,30d,1y', {
           headers: {
-            'X-CG-Demo-API-Key': 'CG-1NBArXikTdDPy9GPrpUyEmwt',
             'Accept': 'application/json'
           }
         });

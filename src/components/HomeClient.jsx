@@ -3,10 +3,10 @@
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
 import CryptoTicker from "./CryptoTicker";
-import MarketOverview from "./MarketOverview";
+
 import NewsSlider from "./NewsSlider";
-import { CoinGeckoProvider } from "./CoinGeckoContext";
 import NewsFeedServer from "./NewsFeedServer";
+import { CoinGeckoProvider } from "./CoinGeckoContext";
 
 // Dynamic imports for better code splitting
 const BtcEthPercentageChart = dynamic(() => import("./BtcEthPercentageChart"), {
@@ -61,7 +61,6 @@ export default function HomeClient({ articles = [] }) {
           <NewsFeedServer articles={articles} />
         </section>
         <aside className="col-span-1 space-y-4 md:gap-6">
-          <MarketOverview />
           <Suspense fallback={<div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-64" />}>
             <BtcEthPercentageChart />
           </Suspense>
