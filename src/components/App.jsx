@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import CryptoTicker from './CryptoTicker';
 import CryptoTable from './CryptoTable';
-
 import SubscribeContainer from './SubscribeContainer';
 import NewsFeed from './NewsFeed';
 import DailyRecap from './DailyRecap';
 import Mindshare from './Mindshare';
 import NewsSlider from './NewsSlider';
-import StarBorder from './StarBorder';
 import GradientText from './GradientText';
 import { CoinGeckoProvider } from './CoinGeckoContext';
 

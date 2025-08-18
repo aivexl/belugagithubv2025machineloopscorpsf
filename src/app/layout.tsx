@@ -82,7 +82,7 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   display: "swap",
-  preload: false,
+  preload: false, // Disable preloading for non-critical font
 });
 
 export default function RootLayout({
@@ -98,6 +98,11 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//cdn.sanity.io" />
         <link rel="dns-prefetch" href="//assets.coingecko.com" />
         <link rel="dns-prefetch" href="//api.coingecko.com" />
+        
+        {/* Performance optimization */}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="theme-color" content="#141722" />
+        <meta name="color-scheme" content="dark" />
         
         {/* Favicon - match navbar logo using pre-generated 4K cropped PNG and ico (v2) */}
         <link rel="icon" href="/favicon.ico?v=6" />

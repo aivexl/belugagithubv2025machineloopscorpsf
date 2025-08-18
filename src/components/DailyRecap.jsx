@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '../hooks/useAuth';
@@ -16,6 +16,13 @@ const recapItems = [
 export default function DailyRecap() {
   const { user } = useAuth();
   const isLoggedIn = Boolean(user);
+
+  // Conditional preloading for aistar image - only when component is rendered
+  useEffect(() => {
+    // Preload aistar image only when component is actually visible
+    const aistarImg = new Image();
+    aistarImg.src = '/Asset/aistar.png';
+  }, []);
 
   return (
     <div className="bg-duniacrypto-panel rounded-lg shadow p-4">
@@ -44,30 +51,38 @@ export default function DailyRecap() {
         </ul>
       ) : (
         // Not logged in: first item visible; rest blurred with a single blue line at the top and Sign In centered over the blurred area
-        <>
-          {/* First item - visible */}
+        <div className="relative">
+          {/* First item visible */}
           <ul className="list-disc pl-6 text-gray-200 space-y-2">
             <li>{recapItems[0]}</li>
           </ul>
-          {/* Single blue line at the top of blurred section */}
-          <div className="mt-2 border-t-2 border-blue-500" />
-          {/* Blurred items with centered Sign In overlay */}
-          <div className="relative mt-2">
-            <ul className="list-disc pl-6 text-gray-200 space-y-2 filter blur-sm opacity-60 select-none">
-              {recapItems.slice(1).map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-            </ul>
+          
+          {/* Blurred area with blue line */}
+          <div className="mt-2 relative">
+            {/* Blue line at top */}
+            <div className="h-0.5 bg-blue-500 mb-2"></div>
+            
+            {/* Blurred items */}
+            <div className="blur-sm opacity-50">
+              <ul className="list-disc pl-6 text-gray-200 space-y-2">
+                {recapItems.slice(1).map((item, i) => (
+                  <li key={i + 1}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            
+            {/* Sign In overlay */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <Link href="#login" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-4 py-2 rounded-md no-underline hover:no-underline focus:no-underline">
-                Login
+              <Link
+                href="/auth/signin"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-300 font-medium"
+              >
+                Sign In to See More
               </Link>
             </div>
           </div>
-        </>
+        </div>
       )}
-
-      {/* No extra CTA below; Sign In is centered inside blurred block */}
     </div>
   );
 }
