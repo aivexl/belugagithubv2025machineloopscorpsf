@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface TradingViewCoinInfoProps {
   symbol: string;
@@ -8,24 +8,44 @@ interface TradingViewCoinInfoProps {
   showMarketData?: boolean;
 }
 
+interface MarketQuote {
+  price: number;
+  change_percent: number;
+  volume: number;
+  market_cap: number;
+  high_24h: number;
+  low_24h: number;
+  open: number;
+  previous_close: number;
+}
+
+interface ExchangeData {
+  base: string;
+  target: string;
+  market: {
+    name: string;
+    identifier: string;
+  };
+  last: number;
+  volume: number;
+  converted_last: {
+    usd: number;
+  };
+  converted_volume: {
+    usd: number;
+  };
+  trust_score?: number;
+}
+
 export default function TradingViewCoinInfo({ 
   symbol, 
   showExchanges = true 
 }: TradingViewCoinInfoProps) {
-  const [quote, setQuote] = useState<any>(null);
-  const [exchanges, setExchanges] = useState<any[]>([]);
+  const [quote, setQuote] = useState<MarketQuote | null>(null);
+  const [exchanges, setExchanges] = useState<ExchangeData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchMarketData();
-    
-    // Set up real-time updates every 20 seconds
-    const interval = setInterval(fetchMarketData, 20 * 1000);
-    
-    return () => clearInterval(interval);
-  }, [symbol]);
-
-  const fetchMarketData = async () => {
+  const fetchMarketData = useCallback(async () => {
     setLoading(true);
     try {
       // Fetch real-time market data from CoinGecko
@@ -39,7 +59,7 @@ export default function TradingViewCoinInfo({
       
       // Transform CoinGecko data to match our format
       const marketData = data.market_data || {};
-      const transformedQuote = {
+      const transformedQuote: MarketQuote = {
         price: marketData.current_price?.usd || 0,
         change_percent: marketData.price_change_percentage_24h || 0,
         volume: marketData.total_volume?.usd || 0,
@@ -53,7 +73,7 @@ export default function TradingViewCoinInfo({
       setQuote(transformedQuote);
       
       // Get exchanges data
-      const exchangesData = data.tickers?.slice(0, 9) || [];
+      const exchangesData: ExchangeData[] = data.tickers?.slice(0, 9) || [];
       setExchanges(exchangesData);
       
     } catch (error) {
@@ -61,7 +81,16 @@ export default function TradingViewCoinInfo({
     } finally {
       setLoading(false);
     }
-  };
+  }, [symbol]);
+
+  useEffect(() => {
+    fetchMarketData();
+    
+    // Set up real-time updates every 20 seconds
+    const interval = setInterval(fetchMarketData, 20 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [fetchMarketData]);
 
   const formatNumber = (num: number) => {
     if (!num || num === 0) return '0.00';

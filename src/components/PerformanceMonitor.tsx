@@ -42,7 +42,7 @@ export default function PerformanceMonitor() {
 
     try {
       observer.observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] });
-    } catch (e) {
+    } catch {
       // Browser might not support all metrics
       console.log('Performance monitoring not fully supported');
     }
@@ -50,7 +50,7 @@ export default function PerformanceMonitor() {
     // Memory usage monitoring (if supported)
     if ('memory' in performance) {
       const checkMemory = () => {
-        const memory = (performance as any).memory;
+        const memory = (performance as Performance & { memory: { usedJSHeapSize: number; jsHeapSizeLimit: number } }).memory;
         if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
           console.warn('High memory usage detected');
         }

@@ -24,7 +24,6 @@ async function fetchJson(url: URL): Promise<CachedResponse> {
   const upstream = await fetch(url.toString(), {
     headers,
     cache: 'no-store',
-    // @ts-ignore - next options allowed in app router
     next: { revalidate: 0 },
   });
   const body = await upstream.text();

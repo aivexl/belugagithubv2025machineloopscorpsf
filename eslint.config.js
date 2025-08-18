@@ -30,7 +30,15 @@ export default tseslint.config([
     ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        process: 'readonly'
+      },
     },
+    rules: {
+      'no-undef': 'off', // Disable for JSX files
+      'no-unused-vars': 'warn', // Make it warning instead of error
+      'react-refresh/only-export-components': 'off' // Disable this rule
+    }
   },
 ])

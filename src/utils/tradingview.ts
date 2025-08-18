@@ -235,7 +235,18 @@ class TradingViewService {
     }
   }
 
-  async getMarketData(symbol: string, resolution: string = '1D', limit: number = 100): Promise<any> {
+  async getMarketData(symbol: string, resolution: string = '1D', limit: number = 100): Promise<{
+    symbol: string;
+    resolution: string;
+    data: Array<{
+      time: number;
+      open: number;
+      high: number;
+      low: number;
+      close: number;
+      volume: number;
+    }>;
+  } | null> {
     try {
       const response = await fetch(`${this.baseUrl}/crypto/history`, {
         method: 'POST',
