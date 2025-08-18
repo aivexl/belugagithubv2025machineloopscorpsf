@@ -145,9 +145,10 @@ export async function GET(req: NextRequest) {
       });
     }
     return new Response(data.body, { status: data.status, headers: { 'content-type': data.contentType } });
-  } catch (e: any) {
+  } catch (e) {
+    const err = e as unknown as { message?: string };
     return new Response(
-      JSON.stringify({ error: 'Proxy failed', detail: e?.message || String(e) }),
+      JSON.stringify({ error: 'Proxy failed', detail: err?.message || String(e) }),
       { status: 500 }
     );
   }
