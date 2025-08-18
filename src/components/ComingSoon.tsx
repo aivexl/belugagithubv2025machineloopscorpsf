@@ -56,7 +56,7 @@ export default function ComingSoon({
       rotate: 0,
       transition: {
         duration: 0.8,
-        ease: "easeOut"
+        ease: "easeOut" as const
       }
     },
     hover: {
@@ -64,7 +64,7 @@ export default function ComingSoon({
       rotate: 5,
       transition: {
         duration: 0.3,
-        ease: "easeInOut"
+        ease: "easeInOut" as const
       }
     }
   };

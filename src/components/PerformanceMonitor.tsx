@@ -2,6 +2,16 @@
 
 import { useEffect } from 'react';
 
+// Type definitions for performance entries
+interface FirstInputEntry extends PerformanceEntry {
+  processingStart: number;
+  startTime: number;
+}
+
+interface LayoutShiftEntry extends PerformanceEntry {
+  value: number;
+}
+
 export default function PerformanceMonitor() {
   useEffect(() => {
     // Only run in production
@@ -17,11 +27,15 @@ export default function PerformanceMonitor() {
         }
         
         if (entry.entryType === 'first-input') {
-          console.log('FID:', entry.processingStart - entry.startTime);
+          const firstInputEntry = entry as FirstInputEntry;
+          if (firstInputEntry.processingStart && firstInputEntry.startTime) {
+            console.log('FID:', firstInputEntry.processingStart - firstInputEntry.startTime);
+          }
         }
         
         if (entry.entryType === 'layout-shift') {
-          console.log('CLS:', entry.value);
+          const layoutShiftEntry = entry as LayoutShiftEntry;
+          console.log('CLS:', layoutShiftEntry.value);
         }
       }
     });

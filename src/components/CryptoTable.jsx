@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import StarBorder from './StarBorder';
-import { useCoinGecko } from '../CoinGeckoContext';
+import { useCoinGecko } from './CoinGeckoContext';
 import CryptoIcon from './CryptoIcon';
 
 const columns = [

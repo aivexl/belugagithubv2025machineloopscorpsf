@@ -1,4 +1,16 @@
 // TradingView API Service
+
+// Add this interface for API responses
+interface TradingViewApiResponse {
+  error?: string;
+  [key: string]: TradingViewQuote | null | string | undefined;
+}
+
+interface TradingViewSymbolResponse {
+  error?: string;
+  [key: string]: TradingViewSymbol | null | string | undefined;
+}
+
 export interface TradingViewSymbol {
   symbol: string;
   full_name: string;
@@ -146,7 +158,7 @@ class TradingViewService {
         throw new Error(`Symbol info failed: ${response.status}`);
       }
 
-      const data: { error?: string; [key: string]: any } = await response.json();
+      const data: TradingViewSymbolResponse = await response.json();
       console.log('TradingView: Symbol info data:', data);
       
       // Handle the case where the proxy returns a 404 response as 200 with error field
@@ -154,7 +166,8 @@ class TradingViewService {
         return null;
       }
       
-      return data[symbol] || null;
+      const result = data[symbol];
+      return typeof result === 'object' && result !== null ? result : null;
     } catch (error) {
       console.error('TradingView symbol info error:', error);
       return null;
@@ -169,14 +182,15 @@ class TradingViewService {
         throw new Error(`Quote failed: ${response.status}`);
       }
 
-      const data: { error?: string; [key: string]: TradingViewQuote | null } = await response.json();
+      const data: TradingViewApiResponse = await response.json();
       
       // Handle the case where the proxy returns a 404 response as 200 with error field
       if (data.error && data.error === 'Symbol not found') {
         return null;
       }
       
-      return data[symbol] || null;
+      const result = data[symbol];
+      return typeof result === 'object' && result !== null ? result : null;
     } catch (error) {
       console.error('TradingView quote error:', error);
       return null;

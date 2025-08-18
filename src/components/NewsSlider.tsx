@@ -17,7 +17,7 @@ type NewsSliderProps = {
 
 const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
   const [current, setCurrent] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Convert Sanity articles to slider format
   const sliderArticles = articles.slice(0, 5).map((article) => ({
