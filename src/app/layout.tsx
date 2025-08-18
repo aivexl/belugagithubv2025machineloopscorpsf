@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ErrorBoundary from "../components/ErrorBoundary";
+import GlobalErrorHandler from "../components/GlobalErrorHandler";
 import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "../contexts/AuthProvider";
 
@@ -172,6 +173,7 @@ export default function RootLayout({
       >
         <ErrorBoundary>
           <AuthProvider>
+            <GlobalErrorHandler />
             <div className="min-h-screen flex flex-col">
               <ConsoleSilencer />
               <PerformanceMonitor />

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import StarBorder from './StarBorder';
 import { useCoinGecko } from '../CoinGeckoContext';
-import CryptoIcon from './CryptoIcon';
 
 const columns = [
   { key: 'market_cap_rank', label: 'No' },
@@ -62,11 +61,7 @@ export default function CryptoTable() {
               <tr key={coin.id} className="border-b border-gray-800 hover:bg-duniacrypto-card transition">
                 <td className="py-1 px-1 md:py-2 md:px-2 font-bold text-center align-middle whitespace-nowrap">{coin.market_cap_rank}</td>
                 <td className="py-1 px-1 md:py-2 md:px-2 flex items-center gap-1 md:gap-2 align-middle whitespace-nowrap">
-                  <CryptoIcon 
-                    symbol={coin.symbol} 
-                    size={20} 
-                    className="mr-1"
-                  />
+                  <img src={coin.image} alt={coin.symbol} className="w-4 h-4 md:w-5 md:h-5 mr-1" />
                   <span className="uppercase font-semibold max-w-[60px] truncate">{coin.symbol}</span>
                 </td>
                 <td className="py-1 px-1 md:py-2 md:px-2 break-words">${coin.current_price?.toLocaleString?.() ?? '-'}</td>

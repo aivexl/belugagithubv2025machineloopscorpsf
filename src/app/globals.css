@@ -711,3 +711,51 @@ a:hover {
   left: 80px !important;
   top: 16px !important;
 }
+
+/* Crypto Ticker Scroll Animation */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 60s linear infinite;
+  display: flex;
+  width: max-content;
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Tablet Container */
+.tablet-container {
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+  .tablet-container {
+    max-width: 1024px;
+    padding: 0 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tablet-container {
+    max-width: 1280px;
+    padding: 0 3rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .tablet-container {
+    max-width: 1536px;
+    padding: 0 4rem;
+  }
+}
