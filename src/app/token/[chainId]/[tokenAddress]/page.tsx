@@ -13,22 +13,7 @@ import TokenHolderInsights from "../../../../components/token/TokenHolderInsight
 
 const API_KEY = process.env.NEXT_PUBLIC_MORALIS_API_KEY;
 
-// Map URL path segments to Moralis chain IDs
-const PATH_TO_CHAIN_ID = {
-  ethereum: "0x1",
-  binance: "0x38",
-  bsc: "0x38",
-  polygon: "0x89",
-  solana: "solana",
-  arbitrum: "0xa4b1",
-  base: "0x2105",
-  avalanche: "0xa86a",
-  optimism: "0xa",
-  linea: "0xe708",
-  fantom: "0xfa",
-  pulse: "0x171",
-  ronin: "0x7e4",
-};
+// Map URL path segments to Moralis chain IDs (used in getApiChainId function)
 
 const TokenPage = () => {
   const params = useParams();

@@ -11,6 +11,10 @@ class ErrorBoundary extends React.Component {
       errorInfo: null,
       retryCount: 0
     };
+    
+    // Bind methods to this
+    this.handleRetry = this.handleRetry.bind(this);
+    this.handleReset = this.handleReset.bind(this);
   }
 
   static getDerivedStateFromError(error) {
@@ -30,7 +34,7 @@ class ErrorBoundary extends React.Component {
     }
   }
 
-  handleRetry = () => {
+  handleRetry() {
     this.setState(prevState => ({
       hasError: false,
       error: null,
@@ -39,7 +43,7 @@ class ErrorBoundary extends React.Component {
     }));
   }
 
-  handleReset = () => {
+  handleReset() {
     this.setState({
       hasError: false,
       error: null,

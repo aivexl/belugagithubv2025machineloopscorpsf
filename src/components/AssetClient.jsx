@@ -1025,7 +1025,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         );
         break;
       }
-      case 'chainlink':
+      case 'chainlink': {
         const linkKeywords = ['link', 'chainlink', 'oracle'];
         filteredCoins = filteredCoins.filter(coin => 
           linkKeywords.some(keyword => 
@@ -1034,7 +1034,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'filecoin':
+      }
+      case 'filecoin': {
         const filKeywords = ['fil', 'filecoin', 'ipfs'];
         filteredCoins = filteredCoins.filter(coin => 
           filKeywords.some(keyword => 
@@ -1043,7 +1044,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'near':
+      }
+      case 'near': {
         const nearKeywords = ['near', 'aurora', 'ref'];
         filteredCoins = filteredCoins.filter(coin => 
           nearKeywords.some(keyword => 
@@ -1052,7 +1054,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'algorand':
+      }
+      case 'algorand': {
         const algoKeywords = ['algo', 'algorand', 'yieldly', 'tinyman'];
         filteredCoins = filteredCoins.filter(coin => 
           algoKeywords.some(keyword => 
@@ -1061,7 +1064,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'stellar':
+      }
+      case 'stellar': {
         const xlmKeywords = ['xlm', 'stellar', 'xrp', 'ripple'];
         filteredCoins = filteredCoins.filter(coin => 
           xlmKeywords.some(keyword => 
@@ -1070,6 +1074,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
+      }
       case 'top-100':
       default:
         // Already sorted by market cap from API
@@ -1726,7 +1731,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
         );
         break;
       }
-      case 'cosmos':
+      case 'cosmos': {
         const atomKeywords = ['cosmos', 'atom', 'osmo'];
         filteredCoins = filteredCoins.filter(coin =>
           atomKeywords.some(keyword => 
@@ -1735,7 +1740,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'chainlink':
+      }
+      case 'chainlink': {
         const linkKeywords = ['chainlink', 'link'];
         filteredCoins = filteredCoins.filter(coin =>
           linkKeywords.some(keyword => 
@@ -1744,7 +1750,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'filecoin':
+      }
+      case 'filecoin': {
         const filKeywords = ['filecoin', 'fil'];
         filteredCoins = filteredCoins.filter(coin =>
           filKeywords.some(keyword => 
@@ -1753,7 +1760,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'near':
+      }
+      case 'near': {
         const nearKeywords = ['near', 'aurora'];
         filteredCoins = filteredCoins.filter(coin =>
           nearKeywords.some(keyword => 
@@ -1762,7 +1770,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'algorand':
+      }
+      case 'algorand': {
         const algoKeywords = ['algorand', 'algo'];
         filteredCoins = filteredCoins.filter(coin =>
           algoKeywords.some(keyword => 
@@ -1771,7 +1780,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'stellar':
+      }
+      case 'stellar': {
         const xlmKeywords = ['stellar', 'xlm'];
         filteredCoins = filteredCoins.filter(coin =>
           xlmKeywords.some(keyword => 
@@ -1780,6 +1790,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
+      }
       default:
         break;
     }
