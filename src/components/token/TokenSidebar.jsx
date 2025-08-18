@@ -214,7 +214,9 @@ const TokenSidebar = ({ token, pair, timeFrame, chainId }) => {
               const byContract = await byContractRes.json();
               resolvedId = byContract?.id || null;
             }
-          } catch (ignored) {}
+          } catch (ignored) {
+            // Ignore errors silently
+          }
         }
 
         // Fallback: search by symbol/name

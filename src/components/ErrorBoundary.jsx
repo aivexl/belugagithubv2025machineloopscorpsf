@@ -5,25 +5,19 @@ import React from 'react';
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      hasError: false, 
-      error: null, 
+    this.state = {
+      hasError: false,
+      error: null,
       errorInfo: null,
-      retryCount: 0 
+      retryCount: 0
     };
   }
 
   static getDerivedStateFromError(error) {
-    // Update state so the next render will show the fallback UI
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log error to console for debugging
-    console.error('Error caught by boundary:', error);
-    console.error('Error info:', errorInfo);
-    
-    // Update state with error details
     this.setState({
       error: error,
       errorInfo: errorInfo

@@ -915,7 +915,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           return (changeA || 0) - (changeB || 0);
         });
         break;
-      case 'ethereum':
+      case 'ethereum': {
         const ethKeywords = ['eth', 'ethereum', 'erc', 'defi', 'dao', 'uni', 'aave', 'comp', 'mkr', 'sushi', '1inch', 'curve', 'balancer'];
         filteredCoins = filteredCoins.filter(coin => 
           ethKeywords.some(keyword => 
@@ -924,7 +924,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'solana':
+      }
+      case 'solana': {
         const solKeywords = ['sol', 'solana', 'serum', 'ray', 'orca', 'srm', 'raydium', 'phantom', 'jupiter'];
         filteredCoins = filteredCoins.filter(coin => 
           solKeywords.some(keyword => 
@@ -933,7 +934,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'binance':
+      }
+      case 'binance': {
         const bscKeywords = ['bnb', 'binance', 'cake', 'pancake', 'bsc', 'venus', 'alpaca', 'biswap'];
         filteredCoins = filteredCoins.filter(coin => 
           bscKeywords.some(keyword => 
@@ -942,7 +944,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'polygon':
+      }
+      case 'polygon': {
         const maticKeywords = ['matic', 'polygon', 'quick', 'aave', 'curve', 'sushi'];
         filteredCoins = filteredCoins.filter(coin => 
           maticKeywords.some(keyword => 
@@ -951,7 +954,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'cardano':
+      }
+      case 'cardano': {
         const adaKeywords = ['ada', 'cardano', 'sundae', 'wingriders', 'minswap'];
         filteredCoins = filteredCoins.filter(coin => 
           adaKeywords.some(keyword => 
@@ -960,7 +964,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'avalanche':
+      }
+      case 'avalanche': {
         const avaxKeywords = ['avax', 'avalanche', 'trader', 'pangolin', 'benqi', 'aave'];
         filteredCoins = filteredCoins.filter(coin => 
           avaxKeywords.some(keyword => 
@@ -969,7 +974,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'polkadot':
+      }
+      case 'polkadot': {
         const dotKeywords = ['dot', 'polkadot', 'kusama', 'moonbeam', 'acala', 'astar'];
         filteredCoins = filteredCoins.filter(coin => 
           dotKeywords.some(keyword => 
@@ -978,7 +984,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'base':
+      }
+      case 'base': {
         const baseKeywords = ['base', 'coinbase', 'cbeth', 'aerodrome'];
         filteredCoins = filteredCoins.filter(coin => 
           baseKeywords.some(keyword => 
@@ -987,7 +994,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'arbitrum':
+      }
+      case 'arbitrum': {
         const arbKeywords = ['arb', 'arbitrum', 'gmx', 'camelot', 'pendle'];
         filteredCoins = filteredCoins.filter(coin => 
           arbKeywords.some(keyword => 
@@ -996,7 +1004,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'optimism':
+      }
+      case 'optimism': {
         const opKeywords = ['op', 'optimism', 'velodrome', 'synthetix'];
         filteredCoins = filteredCoins.filter(coin => 
           opKeywords.some(keyword => 
@@ -1005,7 +1014,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
-      case 'cosmos':
+      }
+      case 'cosmos': {
         const atomKeywords = ['atom', 'cosmos', 'osmo', 'juno', 'evmos'];
         filteredCoins = filteredCoins.filter(coin => 
           atomKeywords.some(keyword => 
@@ -1014,6 +1024,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           )
         );
         break;
+      }
       case 'chainlink':
         const linkKeywords = ['link', 'chainlink', 'oracle'];
         filteredCoins = filteredCoins.filter(coin => 
@@ -1615,7 +1626,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           return (change || 0) < 0;
         });
         break;
-      case 'ethereum':
+      case 'ethereum': {
         const ethKeywords = ['ethereum', 'eth', 'erc', 'defi', 'nft'];
         filteredCoins = filteredCoins.filter(coin =>
           ethKeywords.some(keyword => 
@@ -1624,7 +1635,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'solana':
+      }
+      case 'solana': {
         const solKeywords = ['solana', 'sol', 'serum', 'raydium'];
         filteredCoins = filteredCoins.filter(coin =>
           solKeywords.some(keyword => 
@@ -1633,7 +1645,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'binance':
+      }
+      case 'binance': {
         const bnbKeywords = ['binance', 'bnb', 'bsc', 'pancake'];
         filteredCoins = filteredCoins.filter(coin =>
           bnbKeywords.some(keyword => 
@@ -1642,7 +1655,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'polygon':
+      }
+      case 'polygon': {
         const maticKeywords = ['polygon', 'matic', 'quick'];
         filteredCoins = filteredCoins.filter(coin =>
           maticKeywords.some(keyword => 
@@ -1651,7 +1665,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'cardano':
+      }
+      case 'cardano': {
         const adaKeywords = ['cardano', 'ada'];
         filteredCoins = filteredCoins.filter(coin =>
           adaKeywords.some(keyword => 
@@ -1660,7 +1675,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'avalanche':
+      }
+      case 'avalanche': {
         const avaxKeywords = ['avalanche', 'avax'];
         filteredCoins = filteredCoins.filter(coin =>
           avaxKeywords.some(keyword => 
@@ -1669,7 +1685,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'polkadot':
+      }
+      case 'polkadot': {
         const dotKeywords = ['polkadot', 'dot', 'kusama'];
         filteredCoins = filteredCoins.filter(coin =>
           dotKeywords.some(keyword => 
@@ -1678,7 +1695,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'base':
+      }
+      case 'base': {
         const baseKeywords = ['base', 'coinbase'];
         filteredCoins = filteredCoins.filter(coin =>
           baseKeywords.some(keyword => 
@@ -1687,7 +1705,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'arbitrum':
+      }
+      case 'arbitrum': {
         const arbKeywords = ['arbitrum', 'arb'];
         filteredCoins = filteredCoins.filter(coin =>
           arbKeywords.some(keyword => 
@@ -1696,7 +1715,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
-      case 'optimism':
+      }
+      case 'optimism': {
         const optKeywords = ['optimism', 'op'];
         filteredCoins = filteredCoins.filter(coin =>
           optKeywords.some(keyword => 
@@ -1705,6 +1725,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           )
         );
         break;
+      }
       case 'cosmos':
         const atomKeywords = ['cosmos', 'atom', 'osmo'];
         filteredCoins = filteredCoins.filter(coin =>

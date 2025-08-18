@@ -147,7 +147,7 @@ export function getAvailableScrapingSources() {
  * @returns {boolean} - Is valid
  */
 export function validateScrapingTarget(targetKey) {
-  return SCRAPING_TARGETS.hasOwnProperty(targetKey);
+  return Object.prototype.hasOwnProperty.call(SCRAPING_TARGETS, targetKey);
 }
 
 /**
