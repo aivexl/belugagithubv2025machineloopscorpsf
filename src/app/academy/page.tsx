@@ -1,22 +1,14 @@
 import React from 'react';
-import { getArticlesByCategory, addImageUrls } from '../../utils/sanity';
-import type { SanityArticleWithImage } from '../../utils/sanity';
 import AcademyClient from '../../components/AcademyClient';
 import AcademyPageLayout from '../../components/AcademyPageLayout';
+import SanityErrorBoundary from '../../components/SanityErrorBoundary';
 
-export default async function AcademyPage() {
-  let articles: SanityArticleWithImage[] = [];
-  
-  try {
-    const fetchedArticles = await getArticlesByCategory('academy');
-    articles = addImageUrls(fetchedArticles);
-  } catch (error) {
-    console.error('Error fetching academy articles:', error);
-  }
-
+export default function AcademyPage() {
   return (
-    <AcademyPageLayout>
-      <AcademyClient articles={articles} />
-    </AcademyPageLayout>
+    <SanityErrorBoundary>
+      <AcademyPageLayout>
+        <AcademyClient />
+      </AcademyPageLayout>
+    </SanityErrorBoundary>
   );
 } 

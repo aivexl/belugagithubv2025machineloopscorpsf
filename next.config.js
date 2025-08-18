@@ -3,9 +3,28 @@ const nextConfig = {
   // Disable source maps in development to prevent 404 errors
   productionBrowserSourceMaps: false,
   
-  // Optimize images
+  // Optimize images - use remotePatterns instead of deprecated domains
   images: {
-    domains: ['ui-avatars.com', 'assets.coingecko.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.coingecko.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.sanity.io',
+        port: '',
+        pathname: '/**',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
   },
   

@@ -1,3 +1,5 @@
+import { getFallbackArticles } from '../../lib/sanityFallbackData';
+
 // Create a custom client that uses our API route
 interface SanityClient {
   fetch: (query: string, params?: Record<string, unknown>) => Promise<unknown>;
@@ -43,8 +45,21 @@ const customClient: SanityClient = {
       
       return data;
     } catch (error) {
-      console.error('Sanity fetch error:', error);
-      throw error;
+      console.warn('Sanity API failed, using fallback data:', error);
+      
+      // Extract category from query to provide appropriate fallback
+      let category = 'academy'; // default
+      if (params && typeof params === 'object' && 'category' in params) {
+        category = params.category as string;
+      }
+      
+      // Return fallback data
+      const fallbackData = getFallbackArticles(category);
+      
+      // Store fallback data in cache to prevent repeated API calls
+      cache.set(cacheKey, { data: fallbackData, timestamp: Date.now() });
+      
+      return fallbackData;
     }
   }
 };
