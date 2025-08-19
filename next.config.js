@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable source maps in development to prevent 404 errors
-  productionBrowserSourceMaps: false,
-  
-  // Optimize images - use remotePatterns instead of deprecated domains
+  // Optimize images
   images: {
     remotePatterns: [
       {
@@ -26,43 +23,84 @@ const nextConfig = {
       },
     ],
     formats: ['image/webp', 'image/avif'],
-    // Optimize image loading
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   
-  // Experimental features
+  // Enable performance optimizations
   experimental: {
     optimizePackageImports: ['react', 'react-dom', 'next'],
+    optimizeCss: true,
   },
   
-  // Compiler options to reduce bundle size and warnings
+  // Compiler optimizations
   compiler: {
-    // Remove console.log in production
-    removeConsole: process.env.NODE_ENV === 'production',
-    // Optimize CSS
     styledComponents: true,
+    removeConsole: process.env.NODE_ENV === 'production',
   },
   
-  // Webpack configuration to optimize chunk loading
+  // BALANCED Webpack Configuration
   webpack: (config, { dev, isServer }) => {
-    // Only apply optimizations for production builds
-    if (!isServer && !dev) {
-      // Simple and stable chunk splitting
+    // Development Mode: Performance + Stability
+    if (dev) {
+      // Enable chunk splitting for better performance
       config.optimization.splitChunks = {
         chunks: 'all',
         cacheGroups: {
-          // Default vendor chunk
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
             priority: 10,
           },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 5,
+            reuseExistingChunk: true,
+          },
         },
       };
       
-      // Stable module and chunk IDs
+      // Enable runtime chunk for better caching
+      config.optimization.runtimeChunk = {
+        name: 'runtime',
+      };
+      
+      // Better development performance
+      config.devtool = 'eval-cheap-module-source-map';
+      
+      // Optimize module resolution
+      config.resolve.modules = ['node_modules'];
+      config.resolve.extensions = ['.js', '.jsx', '.ts', '.tsx'];
+    }
+    
+    // Production Mode: Maximum Performance
+    if (!isServer && !dev) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 20,
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+          },
+        },
+      };
+      
+      config.optimization.runtimeChunk = {
+        name: 'runtime',
+      };
+      
       config.optimization.moduleIds = 'deterministic';
       config.optimization.chunkIds = 'deterministic';
     }
@@ -70,7 +108,7 @@ const nextConfig = {
     return config;
   },
   
-  // Headers for better performance
+  // Performance headers
   async headers() {
     return [
       {
@@ -88,14 +126,9 @@ const nextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
-          // Optimize caching
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
         ],
       },
-      // Optimize static assets
+      // Cache static assets for performance
       {
         source: '/_next/static/(.*)',
         headers: [
@@ -104,32 +137,6 @@ const nextConfig = {
             value: 'public, max-age=31536000, immutable',
           },
         ],
-      },
-    ];
-  },
-  
-  // Environment variables
-  env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
-  },
-  
-  // Redirects
-  async redirects() {
-    return [
-      {
-        source: '/old-page',
-        destination: '/new-page',
-        permanent: true,
-      },
-    ];
-  },
-  
-  // Rewrites
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'https://api.coingecko.com/api/v3/:path*',
       },
     ];
   },
