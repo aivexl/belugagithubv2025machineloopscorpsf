@@ -262,11 +262,20 @@ export async function GET(request) {
         };
     }
 
-    return NextResponse.json(data);
+    // Return data in the expected format: {success: true, data: [...]}
+    return NextResponse.json({
+      success: true,
+      data: data,
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
     console.error('Error serving dummy data:', error);
     return NextResponse.json(
-      { error: 'Failed to serve dummy data' },
+      { 
+        success: false, 
+        error: 'Failed to serve dummy data',
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     );
   }
