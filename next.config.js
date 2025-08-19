@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Optimize images
+  // Disable source maps in development to prevent 404 errors
+  productionBrowserSourceMaps: false,
+  
+  // Optimize images - use remotePatterns instead of deprecated domains
   images: {
     remotePatterns: [
       {
@@ -23,61 +26,29 @@ const nextConfig = {
       },
     ],
     formats: ['image/webp', 'image/avif'],
+    // Optimize image loading
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   
-  // Enable performance optimizations
+  // Experimental features - minimal for stability
   experimental: {
-    optimizePackageImports: ['react', 'react-dom', 'next'],
-    optimizeCss: true,
+    optimizePackageImports: ['react', 'react-dom'],
   },
   
-  // Compiler optimizations
+  // Compiler options to reduce bundle size and warnings
   compiler: {
-    styledComponents: true,
+    // Remove console.log in production
     removeConsole: process.env.NODE_ENV === 'production',
+    // Optimize CSS
+    styledComponents: true,
   },
   
-  // BALANCED Webpack Configuration
+  // Minimal webpack configuration for stability
   webpack: (config, { dev, isServer }) => {
-    // Development Mode: Performance + Stability
-    if (dev) {
-      // Enable chunk splitting for better performance
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 10,
-          },
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 5,
-            reuseExistingChunk: true,
-          },
-        },
-      };
-      
-      // Enable runtime chunk for better caching
-      config.optimization.runtimeChunk = {
-        name: 'runtime',
-      };
-      
-      // Better development performance
-      config.devtool = 'eval-cheap-module-source-map';
-      
-      // Optimize module resolution
-      config.resolve.modules = ['node_modules'];
-      config.resolve.extensions = ['.js', '.jsx', '.ts', '.tsx'];
-    }
-    
-    // Production Mode: Maximum Performance
+    // Only apply minimal optimizations for production
     if (!isServer && !dev) {
+      // Simple and stable chunk splitting
       config.optimization.splitChunks = {
         chunks: 'all',
         cacheGroups: {
@@ -85,22 +56,12 @@ const nextConfig = {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
-            priority: 20,
-          },
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
             priority: 10,
-            reuseExistingChunk: true,
           },
         },
       };
       
-      config.optimization.runtimeChunk = {
-        name: 'runtime',
-      };
-      
+      // Stable module and chunk IDs
       config.optimization.moduleIds = 'deterministic';
       config.optimization.chunkIds = 'deterministic';
     }
@@ -108,7 +69,7 @@ const nextConfig = {
     return config;
   },
   
-  // Performance headers
+  // Headers for better performance
   async headers() {
     return [
       {
@@ -128,15 +89,31 @@ const nextConfig = {
           },
         ],
       },
-      // Cache static assets for performance
+    ];
+  },
+  
+  // Environment variables
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+  
+  // Redirects
+  async redirects() {
+    return [
       {
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
+        source: '/old-page',
+        destination: '/new-page',
+        permanent: true,
+      },
+    ];
+  },
+  
+  // Rewrites
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://api.coingecko.com/api/v3/:path*',
       },
     ];
   },
