@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { getTrendingCoins } from '../lib/CoinGeckoAPI'; // Adjusted import path
 
 function formatPrice(price) {
   if (price >= 1) return '$' + price.toFixed(2);
@@ -21,8 +20,14 @@ export default function Top100Trending() {
       setLoading(true);
       setError(null);
       
-      const data = await getTrendingCoins();
-      setCoins(data);
+      // Use proxy route to avoid CORS and server crashes
+      const response = await fetch('/api/coingecko-proxy/trending');
+      if (response.ok) {
+        const data = await response.json();
+        setCoins(data.coins || []);
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
     } catch (err) {
       console.warn('[Top100Trending] Error fetching data:', err);
       setError('Failed to fetch data, showing fallback');

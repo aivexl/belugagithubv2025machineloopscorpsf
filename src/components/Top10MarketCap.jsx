@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { getTop10MarketCap } from '../lib/CoinGeckoAPI'; // Adjusted import path
 
 function formatNumber(num) {
   if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
@@ -27,8 +26,14 @@ export default function Top10MarketCap() {
       setLoading(true);
       setError(null);
       
-      const data = await getTop10MarketCap();
-      setCoins(data);
+      // Use proxy route to avoid CORS and server crashes
+      const response = await fetch('/api/coingecko-proxy/coins');
+      if (response.ok) {
+        const data = await response.json();
+        setCoins(data.slice(0, 10)); // Get top 10 for market cap
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
     } catch (err) {
       console.warn('[Top10MarketCap] Error fetching data:', err);
       setError('Failed to fetch data, showing fallback');

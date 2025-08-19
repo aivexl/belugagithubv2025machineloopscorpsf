@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCryptoData } from '../lib/CoinGeckoAPI';
 
 // Define types locally to avoid import issues
 interface CryptoCoin {
@@ -48,10 +47,24 @@ export const CoinGeckoProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setError(null);
     
     try {
-      const data = await getCryptoData();
+      // Fetch data from proxy routes to avoid CORS issues
+      const [coinsResponse, globalResponse] = await Promise.allSettled([
+        fetch('/api/coingecko-proxy/coins'),
+        fetch('/api/coingecko-proxy/global')
+      ]);
       
-      setCoins(data.top10);
-      setGlobal(data.global);
+      // Handle coins data
+      if (coinsResponse.status === 'fulfilled' && coinsResponse.value.ok) {
+        const coinsData = await coinsResponse.value.json();
+        setCoins(coinsData.slice(0, 10)); // Get top 10
+      }
+      
+      // Handle global data
+      if (globalResponse.status === 'fulfilled' && globalResponse.value.ok) {
+        const globalData = await globalResponse.value.json();
+        setGlobal(globalData);
+      }
+      
       setError(null);
     } catch (err) {
       console.warn('[COINGECKO] Error generating data:', err);

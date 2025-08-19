@@ -608,13 +608,16 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
   useEffect(() => {
     const loadCoins = async () => {
       try {
-        // Try to fetch real data from CoinGecko first
-        const { fetchTop100Coins } = await import('../lib/realCoinGeckoAPI');
-        console.log('Attempting to fetch real crypto data from CoinGecko...');
-        const data = await fetchTop100Coins();
+        // Try to fetch real data from CoinGecko proxy first
+        console.log('Attempting to fetch real crypto data from CoinGecko proxy...');
+        const response = await fetch('/api/coingecko-proxy/coins');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
         setCoins(data);
         setLoading(false);
-        console.log('Successfully loaded real crypto data from CoinGecko');
+        console.log('Successfully loaded real crypto data from CoinGecko proxy');
       } catch (error) {
         console.error('Failed to fetch real crypto data, falling back to local generator:', error);
         
@@ -705,9 +708,11 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     // Set up real-time updates every 5 minutes
     const interval = setInterval(async () => {
       try {
-        const { fetchTop100Coins } = await import('../lib/realCoinGeckoAPI');
-        const freshData = await fetchTop100Coins();
-        setCoins(freshData);
+        const response = await fetch('/api/coingecko-proxy/coins');
+        if (response.ok) {
+          const freshData = await response.json();
+          setCoins(freshData);
+        }
       } catch (error) {
         console.warn('Real-time update failed, keeping current data:', error);
       }
@@ -1389,12 +1394,17 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
     const fetchCoins = async () => {
       try {
         console.log('Fetching coins for heatmap...');
-        // Use local data generator for 100% reliability
-        const { getCachedTop100 } = await import('../lib/cryptoDataGenerator');
-        const data = getCachedTop100().slice(0, 25); // Get top 25 for heatmap
-        console.log('Coins loaded successfully for heatmap:', data.length);
-        setCoins(data);
-        setLoading(false);
+        // Try to fetch real data from CoinGecko proxy first
+        const response = await fetch('/api/coingecko-proxy/coins');
+        if (response.ok) {
+          const data = await response.json();
+          const heatmapData = data.slice(0, 25); // Get top 25 for heatmap
+          console.log('Coins loaded successfully for heatmap:', heatmapData.length);
+          setCoins(heatmapData);
+          setLoading(false);
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
       } catch (error) {
         console.error('Error loading coins for heatmap:', error);
         // Provide fallback data if local generator fails
