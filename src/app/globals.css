@@ -115,10 +115,7 @@ html, body {
   background: #4b5563;
 }
 
-/* Smooth scrolling for better UX */
-html {
-  scroll-behavior: smooth;
-}
+/* Smooth scrolling for better UX - Now handled by Next.js 15+ data attribute */
 
 /* Coming Soon Page Animations */
 @keyframes fade-in {

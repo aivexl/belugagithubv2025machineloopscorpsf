@@ -1,46 +1,22 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useHomepageCrypto } from './HomepageCryptoProvider';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
 export default function CryptoTicker() {
-  // ISOLATED DATA SOURCE: Use separate state to prevent overwriting AssetClient data
-  const [tickerCoins, setTickerCoins] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // ENTERPRISE-LEVEL: Use isolated homepage crypto data
+  const { homepageCoins, homepageLoading, homepageError } = useHomepageCrypto();
+  
+  // Get top 10 coins for ticker from isolated data source
+  const tickerCoins = homepageCoins.slice(0, 10);
+  
   const [priceFlash, setPriceFlash] = useState({});
   const tickerRef = useRef();
   const prevPrices = useRef({});
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Use proxy route to avoid CORS and server crashes
-      const response = await fetch('/api/coingecko-proxy/coins');
-      if (response.ok) {
-        const data = await response.json();
-        setTickerCoins(data.slice(0, 10)); // Get top 10 for ticker (isolated data source)
-      } else {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-    } catch (err) {
-      console.warn('[CryptoTicker] Error fetching data:', err);
-      setError('Failed to fetch data, showing fallback');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Update price flash effect when tickerCoins change
   useEffect(() => {
@@ -65,7 +41,7 @@ export default function CryptoTicker() {
     });
   }, [tickerCoins]);
 
-  if (loading && tickerCoins.length === 0) {
+  if (homepageLoading && tickerCoins.length === 0) {
     return (
       <div className="bg-duniacrypto-panel border-b border-gray-800 py-2 overflow-hidden">
         <div className="flex space-x-8 animate-pulse">
@@ -155,7 +131,7 @@ export default function CryptoTicker() {
         ))}
       </div>
       
-      {error && (
+      {homepageError && (
         <div className="absolute top-0 right-2 text-red-400 text-xs bg-red-900/20 px-2 py-1 rounded">
           ⚠️ Data error
         </div>

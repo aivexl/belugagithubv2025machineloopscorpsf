@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import CryptoTicker from "./CryptoTicker";
 import NewsSlider from "./NewsSlider";
 import NewsFeedServer from "./NewsFeedServer";
-import { CoinGeckoProvider } from "./CoinGeckoContext";
+import { HomepageCryptoProvider } from "./HomepageCryptoProvider";
 
 // Dynamic imports for better code splitting - only import what's actually used
 const BtcEthPercentageChart = dynamic(() => import("./BtcEthPercentageChart"), {
@@ -29,12 +29,12 @@ import DailyRecap from "./DailyRecap";
 
 export default function HomeClient({ articles = [] }) {
   return (
-    <CoinGeckoProvider>
+    <HomepageCryptoProvider>
       {/* Ticker */}
       <CryptoTicker />
       {/* Main Layout */}
       <main className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-6 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 flex-1 w-full tablet-container">
-        <section className="col-span-1 lg:col-span-2 space-y-4 md:space-y-6">
+        <section className="col-span-1 lg:col-span-2 space-y-4 md:gap-6">
           {/* Prioritas slider: showInSlider > featured > terbaru, maksimal 8, urutan: showInSlider dulu */}
           {(() => {
             let sliderArticles = [];
@@ -70,6 +70,6 @@ export default function HomeClient({ articles = [] }) {
           </Suspense>
         </aside>
       </main>
-    </CoinGeckoProvider>
+    </HomepageCryptoProvider>
   );
 } 

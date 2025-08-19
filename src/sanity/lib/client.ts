@@ -63,11 +63,11 @@ export async function querySanity(query: string, params: any = {}) {
         // ENTERPRISE-LEVEL: Extended timeout for complex queries
         signal: AbortSignal.timeout(ENTERPRISE_CONFIG.TIMEOUT_MS),
       });
-
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
       }
-
+      
       const data = await response.json();
       
       // ENTERPRISE-LEVEL: Validate response data

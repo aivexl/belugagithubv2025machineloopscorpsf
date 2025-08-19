@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useHomepageCrypto } from './HomepageCryptoProvider';
 
 function formatNumber(num) {
   if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
@@ -17,39 +18,13 @@ function formatPrice(price) {
 }
 
 export default function Top10MarketCap() {
-  // ISOLATED DATA SOURCE: Use separate state to prevent overwriting AssetClient data
-  const [marketCapCoins, setMarketCapCoins] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // ENTERPRISE-LEVEL: Use isolated homepage crypto data
+  const { getTop10ByMarketCap, homepageLoading, homepageError } = useHomepageCrypto();
+  
+  // Get top 10 coins by market cap from isolated data source
+  const marketCapCoins = getTop10ByMarketCap();
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Use proxy route to avoid CORS and server crashes
-      const response = await fetch('/api/coingecko-proxy/coins');
-      if (response.ok) {
-        const data = await response.json();
-        setMarketCapCoins(data.slice(0, 10)); // Get top 10 for market cap (isolated data source)
-      } else {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-    } catch (err) {
-      console.warn('[Top10MarketCap] Error fetching data:', err);
-      setError('Failed to fetch data, showing fallback');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  if (loading && marketCapCoins.length === 0) {
+  if (homepageLoading && marketCapCoins.length === 0) {
     return (
       <div className="bg-duniacrypto-panel rounded-lg shadow p-4 relative mb-8">
         <div className="mb-4 flex justify-center">
@@ -80,9 +55,9 @@ export default function Top10MarketCap() {
         <h3 className="text-lg font-bold text-white">Top 10 Market Cap</h3>
       </div>
       
-      {error && (
+      {homepageError && (
         <div className="mb-4 p-3 bg-red-900/20 border border-red-700 rounded text-red-300 text-sm text-center">
-          {error}
+          {homepageError}
         </div>
       )}
       
@@ -98,28 +73,26 @@ export default function Top10MarketCap() {
                   alt={coin.symbol} 
                   className="w-8 h-8 rounded-full"
                   onError={(e) => {
-                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${coin.symbol}&background=1f2937&color=fff&size=32&bold=true`;
+                    e.target.src = '/Asset/duniacrypto.png';
                   }}
                 />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2">
-                  <span className="text-white font-medium">{coin.name}</span>
-                  <span className="text-gray-400 text-sm">{coin.symbol.toUpperCase()}</span>
+                  <span className="text-white font-medium text-sm truncate">{coin.name}</span>
+                  <span className="text-gray-400 text-xs uppercase">{coin.symbol}</span>
                 </div>
                 <div className="text-gray-400 text-xs">
-                  Rank #{coin.market_cap_rank} • {formatNumber(coin.circulating_supply)} {coin.symbol.toUpperCase()}
+                  Market Cap: {formatNumber(coin.market_cap)}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-white font-medium">{formatPrice(coin.current_price)}</div>
-                <div className={`text-xs ${coin.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h.toFixed(2)}%
+                <div className="text-white font-medium text-sm">
+                  {formatPrice(coin.current_price)}
                 </div>
-              </div>
-              <div className="text-right text-gray-400 text-xs">
-                <div>MC: {formatNumber(coin.market_cap)}</div>
-                <div>Vol: {formatNumber(coin.total_volume)}</div>
+                <div className={`text-xs ${coin.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h?.toFixed(2)}%
+                </div>
               </div>
             </div>
           ))}

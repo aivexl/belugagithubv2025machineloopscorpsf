@@ -1,69 +1,29 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useHomepageCrypto } from './HomepageCryptoProvider';
 
-function formatPrice(price) {
-  if (price >= 1) return '$' + price.toFixed(2);
-  if (price >= 0.01) return '$' + price.toFixed(4);
-  return '$' + price.toFixed(6);
-}
-
+// ENTERPRISE-LEVEL: Use isolated homepage crypto data
 export default function Top100Trending() {
-  // ISOLATED DATA SOURCE: Use separate state to prevent overwriting AssetClient data
-  const [trendingCoins, setTrendingCoins] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const coinsPerPage = 20;
+  const { homepageCoins, homepageLoading, homepageError } = useHomepageCrypto();
+  
+  // Get trending coins (top 10 by volume change)
+  const trendingCoins = homepageCoins
+    .sort((a, b) => (b.total_volume || 0) - (a.total_volume || 0))
+    .slice(0, 10);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Use proxy route to avoid CORS and server crashes
-      const response = await fetch('/api/coingecko-proxy/trending');
-      if (response.ok) {
-        const data = await response.json();
-        setTrendingCoins(data.coins || []); // Isolated data source
-      } else {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-    } catch (err) {
-      console.warn('[Top100Trending] Error fetching data:', err);
-      setError('Failed to fetch data, showing fallback');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 10 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const totalPages = Math.ceil(trendingCoins.length / coinsPerPage);
-  const startIndex = (currentPage - 1) * coinsPerPage;
-  const endIndex = startIndex + coinsPerPage;
-  const currentCoins = trendingCoins.slice(startIndex, endIndex);
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  if (loading && trendingCoins.length === 0) {
+  if (homepageLoading && trendingCoins.length === 0) {
     return (
       <div className="bg-duniacrypto-panel rounded-lg shadow p-4 relative mb-8">
         <div className="mb-4 flex justify-center">
-          <h3 className="text-lg font-bold text-white">Trending Now</h3>
+          <h3 className="text-lg font-bold text-white">Top Trending</h3>
         </div>
         <div className="space-y-3">
-          {Array.from({ length: 20 }, (_, i) => (
+          {Array.from({ length: 10 }, (_, i) => (
             <div key={i} className="flex items-center space-x-3 p-2 rounded animate-pulse">
               <div className="w-8 h-8 bg-gray-600 rounded-full"></div>
               <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-600 rounded w-24"></div>
+                <div className="h-4 bg-gray-600 rounded w-20"></div>
                 <div className="h-3 bg-gray-600 rounded w-16"></div>
               </div>
               <div className="space-y-2">
@@ -80,88 +40,51 @@ export default function Top100Trending() {
   return (
     <div className="bg-duniacrypto-panel rounded-lg shadow p-4 relative mb-8">
       <div className="mb-4 flex justify-center">
-        <h3 className="text-lg font-bold text-white">Trending Now</h3>
+        <h3 className="text-lg font-bold text-white">Top Trending</h3>
       </div>
       
-      {error && (
+      {homepageError && (
         <div className="mb-4 p-3 bg-red-900/20 border border-red-700 rounded text-red-300 text-sm text-center">
-          {error}
+          {homepageError}
         </div>
       )}
       
       {trendingCoins.length === 0 ? (
-        <div className="text-gray-400 text-center">No data available</div>
+        <div className="text-gray-400 text-center">No trending data available</div>
       ) : (
-        <>
-          <div className="space-y-3 mb-6">
-            {currentCoins.map((coin) => (
-              <div key={coin.item.id} className="flex items-center space-x-3 p-2 rounded hover:bg-duniacrypto-card transition-colors">
-                <div className="flex-shrink-0">
-                  <img 
-                    src={coin.item.large} 
-                    alt={coin.item.symbol} 
-                    className="w-8 h-8 rounded-full"
-                    onError={(e) => {
-                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${coin.item.symbol}&background=1f2937&color=fff&size=32&bold=true`;
-                    }}
-                  />
+        <div className="space-y-3">
+          {trendingCoins.map((coin) => (
+            <div key={coin.id} className="flex items-center space-x-3 p-2 rounded hover:bg-duniacrypto-card transition-colors">
+              <div className="flex-shrink-0">
+                <img 
+                  src={coin.image} 
+                  alt={coin.symbol} 
+                  className="w-8 h-8 rounded-full"
+                  onError={(e) => {
+                    e.target.src = '/Asset/duniacrypto.png';
+                  }}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-2">
+                  <span className="text-white font-medium text-sm truncate">{coin.name}</span>
+                  <span className="text-gray-400 text-xs uppercase">{coin.symbol}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-white font-medium">{coin.item.name}</span>
-                    <span className="text-gray-400 text-sm">{coin.item.symbol.toUpperCase()}</span>
-                  </div>
-                  <div className="text-gray-400 text-xs">
-                    Rank #{coin.item.market_cap_rank} • BTC: {coin.item.price_btc.toFixed(8)}
-                  </div>
-                </div>
-                <div className="text-right text-gray-400 text-xs">
-                  <div>Trending #{coin.item.market_cap_rank}</div>
+                <div className="text-gray-400 text-xs">
+                  Volume: ${(coin.total_volume || 0).toLocaleString()}
                 </div>
               </div>
-            ))}
-          </div>
-          
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center space-x-2 mb-4">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="px-3 py-1 text-sm bg-duniacrypto-card text-white rounded hover:bg-duniacrypto-card/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Previous
-              </button>
-              
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                if (page > totalPages) return null;
-                
-                return (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`px-3 py-1 text-sm rounded transition-colors ${
-                      page === currentPage
-                        ? 'bg-duniacrypto-green text-black'
-                        : 'bg-duniacrypto-card text-white hover:bg-duniacrypto-card/80'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-              
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 text-sm bg-duniacrypto-card text-white rounded hover:bg-duniacrypto-card/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Next
-              </button>
+              <div className="text-right">
+                <div className="text-white font-medium text-sm">
+                  ${coin.current_price?.toFixed(4) || '0.0000'}
+                </div>
+                <div className={`text-xs ${coin.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h?.toFixed(2)}%
+                </div>
+              </div>
             </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
     </div>
   );

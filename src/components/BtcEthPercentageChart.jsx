@@ -1,7 +1,7 @@
 "use client";
 
- import React, { useEffect, useMemo, useState, useRef } from "react";
- import { useCoinGecko } from "./CoinGeckoContext";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useHomepageCrypto } from "./HomepageCryptoProvider";
 
 // Small, dependency-free percentage comparison chart for BTC vs ETH
 export default function BtcEthPercentageChart() {
@@ -10,7 +10,7 @@ export default function BtcEthPercentageChart() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [badgePct, setBadgePct] = useState({ btc: 0, eth: 0 });
-    const { coins } = useCoinGecko();
+    const { homepageCoins } = useHomepageCrypto();
     const [today, setToday] = useState(null); // Start with null to avoid hydration mismatch
     
     // Cache for storing fetched data to avoid redundant API calls
