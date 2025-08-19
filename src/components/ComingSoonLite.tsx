@@ -58,7 +58,7 @@ export default function ComingSoonLite({
               alt="Beluga Logo"
               width={120}
               height={120}
-              className="relative z-10 drop-shadow-2xl group-hover:scale-110 transition-transform duration-300"
+              className="relative z-10 drop-shadow-2xl group-hover:scale-110 transition-transform duration-300 w-[120px] h-[120px]"
               priority
             />
           </div>
