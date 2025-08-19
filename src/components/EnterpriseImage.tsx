@@ -57,25 +57,30 @@ export default function EnterpriseImage({
   const retryCountRef = useRef(0);
   const monitoringIdRef = useRef<string>('');
   const maxRetries = 2;
+  const retryDelay = 1000; // 1 second base delay
 
-  // Enterprise-level error handling with automatic recovery
-  const handleImageError = useCallback((error: Error) => {
-    console.warn(`EnterpriseImage: Failed to load image: ${src}`, error);
+  // Handle image loading errors with enterprise-level fallback strategy
+  const handleImageError = useCallback((event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const error = new Error('Image failed to load');
     
-    // Record failure in performance monitor
-    recordImageFailure(monitoringIdRef.current, src, error.message, retryCountRef.current);
-    
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`EnterpriseImage: Image load error for ${imageSrc}:`, error);
+    }
+
+    // Increment retry count
+    retryCountRef.current += 1;
+
+    // Record error in performance monitor
+    recordImageFailure(monitoringIdRef.current, imageSrc, error.message, retryCountRef.current);
+
+    // Try retry logic first
     if (retryCountRef.current < maxRetries && !isFallback) {
-      // Retry with exponential backoff
-      retryCountRef.current++;
-      const delay = Math.pow(2, retryCountRef.current) * 1000;
-      
+      console.log(`EnterpriseImage: Retrying image load (${retryCountRef.current}/${maxRetries}): ${imageSrc}`);
       setTimeout(() => {
-        if (imageRef.current) {
-          console.log(`EnterpriseImage: Retrying image load (attempt ${retryCountRef.current})`);
-          setImageSrc(src);
-        }
-      }, delay);
+        setImageSrc(src);
+        setIsLoading(true);
+        setHasError(false);
+      }, retryDelay * retryCountRef.current);
       return;
     }
 
@@ -105,7 +110,7 @@ export default function EnterpriseImage({
     setHasError(true);
     setIsLoading(false);
     onError?.(error);
-  }, [src, fallbackSrc, isFallback, onError]);
+  }, [src, fallbackSrc, isFallback, onError, imageSrc]);
 
   // Handle successful image load
   const handleImageLoad = useCallback(() => {
@@ -135,14 +140,26 @@ export default function EnterpriseImage({
 
   // Preload critical images for better performance
   useEffect(() => {
-    if (priority && src && src !== fallbackSrc) {
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
+    if (priority && src && src !== fallbackSrc && typeof window !== 'undefined') {
+      try {
+        // ENTERPRISE-LEVEL: Proper browser API handling with TypeScript safety
+        const img = new (window as any).Image() as HTMLImageElement;
+        img.src = src;
+        img.onload = () => {
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`EnterpriseImage: Preloaded critical image: ${src}`);
+          }
+        };
+        img.onerror = () => {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`EnterpriseImage: Failed to preload image: ${src}`);
+          }
+        };
+      } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.log(`EnterpriseImage: Preloaded critical image: ${src}`);
+          console.warn('EnterpriseImage: Image preloading not supported in this environment');
         }
-      };
+      }
     }
   }, [priority, src, fallbackSrc]);
 
@@ -220,7 +237,6 @@ export default function EnterpriseImage({
         priority={priority}
         placeholder={placeholder}
         blurDataURL={blurDataURL}
-        sizes={sizes}
         quality={quality}
         loading={loadingAttr}
         onError={handleImageError}
@@ -232,8 +248,6 @@ export default function EnterpriseImage({
         }}
         // Performance optimizations
         unoptimized={false}
-        // SEO optimizations
-        sizes={sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"}
       />
       
       {/* Loading overlay */}
