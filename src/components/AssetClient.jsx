@@ -605,34 +605,40 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     );
   };
 
-  useEffect(() => {
+    useEffect(() => {
     const loadCoins = async () => {
       try {
         // Try to fetch real data from CoinGecko proxy first
-        console.log('Attempting to fetch real crypto data from CoinGecko proxy...');
+        console.log('AssetClient: Attempting to fetch real crypto data from CoinGecko proxy...');
         const response = await fetch('/api/coingecko-proxy/coins');
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         const data = await response.json();
-        setCoins(data);
-        setLoading(false);
-        console.log('Successfully loaded real crypto data from CoinGecko proxy');
+        
+        // Validate data structure
+        if (data && Array.isArray(data) && data.length > 0) {
+          console.log(`AssetClient: Successfully loaded ${data.length} coins from CoinGecko proxy`);
+          setCoins(data);
+          setLoading(false);
+        } else {
+          throw new Error('Invalid data structure received from API');
+        }
       } catch (error) {
-        console.error('Failed to fetch real crypto data, falling back to local generator:', error);
+        console.error('AssetClient: Failed to fetch real crypto data, falling back to local generator:', error);
         
         try {
           // Fallback to local data generator
           const { getCachedTop100 } = await import('../lib/cryptoDataGenerator');
           const data = getCachedTop100();
+          console.log(`AssetClient: Successfully loaded ${data.length} coins from local generator`);
           setCoins(data);
           setLoading(false);
-          console.log('Successfully loaded fallback crypto data');
         } catch (fallbackError) {
-          console.error('Both real API and fallback failed, using static data:', fallbackError);
+          console.error('AssetClient: Both real API and fallback failed, using static data:', fallbackError);
           
           // Ultimate fallback - static data with proper structure
-          setCoins([
+          const staticData = [
             {
               id: 'bitcoin',
               symbol: 'btc',
@@ -670,34 +676,69 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
               symbol: 'eth',
               name: 'Ethereum',
               image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
-              current_price: 3000,
-              market_cap: 350000000000,
+              current_price: 3200,
+              market_cap: 380000000000,
               market_cap_rank: 2,
-              price_change_percentage_1h_in_currency: 0.3,
-              price_change_percentage_24h: 1.8,
-              price_change_percentage_7d_in_currency: 6.5,
-              price_change_percentage_30d_in_currency: 12.8,
-              price_change_percentage_1y_in_currency: 38.2,
+              price_change_percentage_1h_in_currency: 1.2,
+              price_change_percentage_24h: 3.8,
+              price_change_percentage_7d_in_currency: 12.5,
+              price_change_percentage_30d_in_currency: 28.9,
+              price_change_percentage_1y_in_currency: 67.3,
               circulating_supply: 120000000,
               total_supply: 120000000,
               max_supply: null,
               ath: 4800,
               total_volume: 15000000000,
-              high_24h: 3100,
-              low_24h: 2900,
-              price_change_24h: 54,
-              market_cap_change_24h: 6300000000,
-              market_cap_change_percentage_24h: 1.8,
-              fully_diluted_valuation: 350000000000,
-              ath_change_percentage: -37.5,
+              high_24h: 3300,
+              low_24h: 3100,
+              price_change_24h: 121.6,
+              market_cap_change_24h: 14440000000,
+              market_cap_change_percentage_24h: 3.8,
+              fully_diluted_valuation: 380000000000,
+              ath_change_percentage: -33.33,
               ath_date: '2021-11-10T14:24:11.849Z',
               atl: 0.432979,
-              atl_change_percentage: 692775.25,
+              atl_change_percentage: 739275.25,
               atl_date: '2015-10-20T00:00:00.000Z',
               roi: null,
               last_updated: new Date().toISOString()
+            },
+            {
+              id: 'binancecoin',
+              symbol: 'bnb',
+              name: 'BNB',
+              image: 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png',
+              current_price: 320,
+              market_cap: 48000000000,
+              market_cap_rank: 3,
+              price_change_percentage_1h_in_currency: 0.8,
+              price_change_percentage_24h: 2.1,
+              price_change_percentage_7d_in_currency: 7.8,
+              price_change_percentage_30d_in_currency: 18.5,
+              price_change_percentage_1y_in_currency: 52.3,
+              circulating_supply: 150000000,
+              total_supply: 150000000,
+              max_supply: 150000000,
+              ath: 686,
+              total_volume: 8000000000,
+              high_24h: 325,
+              low_24h: 315,
+              price_change_24h: 6.72,
+              market_cap_change_24h: 1008000000,
+              market_cap_change_percentage_24h: 2.1,
+              fully_diluted_valuation: 48000000000,
+              ath_change_percentage: -53.35,
+              ath_date: '2021-05-10T07:24:17.661Z',
+              atl: 0.0398177,
+              atl_change_percentage: 803722.25,
+              atl_date: '2017-07-25T00:00:00.000Z',
+              roi: null,
+              last_updated: new Date().toISOString()
             }
-          ]);
+          ];
+          
+          console.log(`AssetClient: Using static fallback data with ${staticData.length} coins`);
+          setCoins(staticData);
           setLoading(false);
         }
       }
@@ -1037,13 +1078,25 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
   };
 
   const filteredCoins = getFilteredCoins();
-
-
+  
+  // Debug logging for enterprise troubleshooting
+  console.log('AssetClient: CryptoTableWithSearch Debug Info:', {
+    totalCoins: coins?.length || 0,
+    filteredCoinsCount: filteredCoins?.length || 0,
+    searchQuery,
+    filter,
+    dateRange,
+    loading,
+    hasError: !!error
+  });
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-6 sm:py-8">
-        <div className="animate-spin rounded-full h-6 sm:h-8 w-6 sm:w-8 border-b-2 border-blue-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+          <p className="text-gray-400 text-sm">Loading crypto data...</p>
+        </div>
       </div>
     );
   }
@@ -1055,6 +1108,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           ? `No cryptocurrencies found matching "${searchQuery}"`
           : `No cryptocurrencies found for ${filter} filter`
         }
+        <div className="mt-2 text-xs text-gray-500">
+          Total coins available: {coins?.length || 0}
+        </div>
       </div>
     );
   }
@@ -1397,7 +1453,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
         // Try to fetch real data from CoinGecko proxy first
         const response = await fetch('/api/coingecko-proxy/coins');
         if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
           const heatmapData = data.slice(0, 25); // Get top 25 for heatmap
           console.log('Coins loaded successfully for heatmap:', heatmapData.length);
           setCoins(heatmapData);
