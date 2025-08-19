@@ -608,20 +608,33 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
   useEffect(() => {
     const loadCoins = async () => {
       try {
-        // Import and use local data generator for 100% reliability
-        const { getCachedTop100 } = await import('../lib/cryptoDataGenerator');
-        const data = getCachedTop100();
+        // Try to fetch real data from CoinGecko first
+        const { fetchTop100Coins } = await import('../lib/realCoinGeckoAPI');
+        console.log('Attempting to fetch real crypto data from CoinGecko...');
+        const data = await fetchTop100Coins();
         setCoins(data);
         setLoading(false);
-              } catch (error) {
-          console.error('Error loading coins:', error);
+        console.log('Successfully loaded real crypto data from CoinGecko');
+      } catch (error) {
+        console.error('Failed to fetch real crypto data, falling back to local generator:', error);
+        
+        try {
+          // Fallback to local data generator
+          const { getCachedTop100 } = await import('../lib/cryptoDataGenerator');
+          const data = getCachedTop100();
+          setCoins(data);
+          setLoading(false);
+          console.log('Successfully loaded fallback crypto data');
+        } catch (fallbackError) {
+          console.error('Both real API and fallback failed, using static data:', fallbackError);
+          
           // Ultimate fallback - static data with proper structure
           setCoins([
             {
               id: 'bitcoin',
               symbol: 'btc',
               name: 'Bitcoin',
-              image: 'https://ui-avatars.com/api/?name=BTC&background=random&color=fff&size=128',
+              image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
               current_price: 45000,
               market_cap: 850000000000,
               market_cap_rank: 1,
@@ -649,86 +662,55 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
               roi: null,
               last_updated: new Date().toISOString()
             },
-          {
-            id: 'ethereum',
-            symbol: 'eth',
-            name: 'Ethereum',
-            current_price: 3000,
-            market_cap: 350000000000,
-            market_cap_rank: 2,
-            price_change_percentage_1h_in_currency: 0.3,
-            price_change_percentage_24h: 1.8,
-            price_change_percentage_7d_in_currency: 6.5,
-            price_change_percentage_30d_in_currency: 12.8,
-            price_change_percentage_1y_in_currency: 38.2,
-            circulating_supply: 120000000,
-            total_supply: 120000000,
-            max_supply: null,
-            ath: 4800
-          },
-          {
-            id: 'tether',
-            symbol: 'usdt',
-            name: 'Tether',
-            current_price: 1.001,
-            market_cap: 95000000000,
-            market_cap_rank: 3,
-            price_change_percentage_1h_in_currency: 0.0,
-            price_change_percentage_24h: 0.0,
-            price_change_percentage_7d_in_currency: 0.1,
-            price_change_percentage_30d_in_currency: 0.2,
-            price_change_percentage_1y_in_currency: 0.5,
-            circulating_supply: 95000000000,
-            total_supply: 95000000000,
-            max_supply: null,
-            ath: 1.32
-          },
-          {
-            id: 'solana',
-            symbol: 'sol',
-            name: 'Solana',
-            current_price: 194.95,
-            market_cap: 85000000000,
-            market_cap_rank: 4,
-            price_change_percentage_1h_in_currency: -0.8,
-            price_change_percentage_24h: -3.7,
-            price_change_percentage_7d_in_currency: -5.2,
-            price_change_percentage_30d_in_currency: 12.8,
-            price_change_percentage_1y_in_currency: 45.7,
-            circulating_supply: 435000000,
-            total_supply: 535000000,
-            max_supply: null,
-            ath: 260
-          },
-          {
-            id: 'xrp',
-            symbol: 'xrp',
-            name: 'XRP',
-            current_price: 3.11,
-            market_cap: 75000000000,
-            market_cap_rank: 5,
-            price_change_percentage_1h_in_currency: -0.5,
-            price_change_percentage_24h: -2.1,
-            price_change_percentage_7d_in_currency: -1.8,
-            price_change_percentage_30d_in_currency: 8.5,
-            price_change_percentage_1y_in_currency: 25.3,
-            circulating_supply: 24000000000,
-            total_supply: 100000000000,
-            max_supply: 100000000000,
-            ath: 3.84
-          }
-        ]);
-        setLoading(false);
+            {
+              id: 'ethereum',
+              symbol: 'eth',
+              name: 'Ethereum',
+              image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
+              current_price: 3000,
+              market_cap: 350000000000,
+              market_cap_rank: 2,
+              price_change_percentage_1h_in_currency: 0.3,
+              price_change_percentage_24h: 1.8,
+              price_change_percentage_7d_in_currency: 6.5,
+              price_change_percentage_30d_in_currency: 12.8,
+              price_change_percentage_1y_in_currency: 38.2,
+              circulating_supply: 120000000,
+              total_supply: 120000000,
+              max_supply: null,
+              ath: 4800,
+              total_volume: 15000000000,
+              high_24h: 3100,
+              low_24h: 2900,
+              price_change_24h: 54,
+              market_cap_change_24h: 6300000000,
+              market_cap_change_percentage_24h: 1.8,
+              fully_diluted_valuation: 350000000000,
+              ath_change_percentage: -37.5,
+              ath_date: '2021-11-10T14:24:11.849Z',
+              atl: 0.432979,
+              atl_change_percentage: 692775.25,
+              atl_date: '2015-10-20T00:00:00.000Z',
+              roi: null,
+              last_updated: new Date().toISOString()
+            }
+          ]);
+          setLoading(false);
+        }
       }
     };
 
     loadCoins();
     
-    // Set up real-time updates every 5 minutes (more reasonable for local data)
-    const interval = setInterval(() => {
-      const { getCachedTop100 } = require('../lib/cryptoDataGenerator');
-      const freshData = getCachedTop100();
-      setCoins(freshData);
+    // Set up real-time updates every 5 minutes
+    const interval = setInterval(async () => {
+      try {
+        const { fetchTop100Coins } = await import('../lib/realCoinGeckoAPI');
+        const freshData = await fetchTop100Coins();
+        setCoins(freshData);
+      } catch (error) {
+        console.warn('Real-time update failed, keeping current data:', error);
+      }
     }, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
@@ -1407,20 +1389,21 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
     const fetchCoins = async () => {
       try {
         console.log('Fetching coins for heatmap...');
-        // Single API call with reasonable limit to avoid rate limiting
         // Use local data generator for 100% reliability
         const { getCachedTop100 } = await import('../lib/cryptoDataGenerator');
         const data = getCachedTop100().slice(0, 25); // Get top 25 for heatmap
         console.log('Coins loaded successfully for heatmap:', data.length);
         setCoins(data);
+        setLoading(false);
       } catch (error) {
         console.error('Error loading coins for heatmap:', error);
-        // Provide fallback data if all API calls fail
+        // Provide fallback data if local generator fails
         setCoins([
           {
             id: 'bitcoin',
             symbol: 'btc',
             name: 'Bitcoin',
+            image: 'https://ui-avatars.com/api/?name=BTC&background=random&color=fff&size=128',
             current_price: 45000,
             market_cap: 850000000000,
             market_cap_rank: 1,
@@ -1432,12 +1415,27 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
             circulating_supply: 19500000,
             total_supply: 21000000,
             max_supply: 21000000,
-            ath: 69000
+            ath: 69000,
+            total_volume: 25000000000,
+            high_24h: 46000,
+            low_24h: 44000,
+            price_change_24h: 1125,
+            market_cap_change_24h: 21250000000,
+            market_cap_change_percentage_24h: 2.5,
+            fully_diluted_valuation: 945000000000,
+            ath_change_percentage: -34.78,
+            ath_date: '2021-11-10T14:24:11.849Z',
+            atl: 67.81,
+            atl_change_percentage: 66263.25,
+            atl_date: '2013-07-06T00:00:00.000Z',
+            roi: null,
+            last_updated: new Date().toISOString()
           },
           {
             id: 'ethereum',
             symbol: 'eth',
             name: 'Ethereum',
+            image: 'https://ui-avatars.com/api/?name=ETH&background=random&color=fff&size=128',
             current_price: 3000,
             market_cap: 350000000000,
             market_cap_rank: 2,
@@ -1449,14 +1447,28 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
             circulating_supply: 120000000,
             total_supply: 120000000,
             max_supply: null,
-            ath: 4800
+            ath: 4800,
+            total_volume: 15000000000,
+            high_24h: 3100,
+            low_24h: 2900,
+            price_change_24h: 54,
+            market_cap_change_24h: 6300000000,
+            market_cap_change_percentage_24h: 1.8,
+            fully_diluted_valuation: 350000000000,
+            ath_change_percentage: -37.5,
+            ath_date: '2021-11-10T14:24:11.849Z',
+            atl: 0.432979,
+            atl_change_percentage: 692775.25,
+            atl_date: '2015-10-20T00:00:00.000Z',
+            roi: null,
+            last_updated: new Date().toISOString()
           }
         ]);
         setLoading(false);
       }
     };
 
-    loadCoins();
+    fetchCoins();
   }, [dateRange]);
 
   const getFilteredCoins = () => {
