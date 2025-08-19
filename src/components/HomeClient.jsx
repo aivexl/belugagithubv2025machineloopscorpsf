@@ -10,22 +10,18 @@ import { CoinGeckoProvider } from "./CoinGeckoContext";
 // Dynamic imports for better code splitting - only import what's actually used
 const BtcEthPercentageChart = dynamic(() => import("./BtcEthPercentageChart"), {
   loading: () => <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-64" />,
-  ssr: false,
 });
 
 const SubscribeContainer = dynamic(() => import("./SubscribeContainer"), {
   loading: () => <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-32" />,
-  ssr: false, // Disable SSR to prevent preloading
 });
 
 const Top10MarketCap = dynamic(() => import("./Top10MarketCap"), {
   loading: () => <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-96" />,
-  ssr: false,
 });
 
 const Top100Trending = dynamic(() => import("./Top100Trending"), {
   loading: () => <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-96" />,
-  ssr: false,
 });
 
 // Import DailyRecap directly since it's used immediately

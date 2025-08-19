@@ -46,48 +46,25 @@ const nextConfig = {
   
   // Webpack configuration to optimize chunk loading
   webpack: (config, { dev, isServer }) => {
-    // Optimize chunk splitting
-    if (!isServer) {
+    // Only apply optimizations for production builds
+    if (!isServer && !dev) {
+      // Simple and stable chunk splitting
       config.optimization.splitChunks = {
         chunks: 'all',
         cacheGroups: {
-          default: false,
-          vendors: false,
-          // Create vendor chunk for node_modules
+          // Default vendor chunk
           vendor: {
-            name: 'vendor',
-            chunks: 'all',
-            test: /node_modules/,
-            priority: 20,
-          },
-          // Create common chunk for shared code
-          common: {
-            name: 'common',
-            minChunks: 2,
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
             chunks: 'all',
             priority: 10,
-            reuseExistingChunk: true,
-            enforce: true,
           },
         },
       };
       
-      // Optimize dynamic imports
+      // Stable module and chunk IDs
       config.optimization.moduleIds = 'deterministic';
       config.optimization.chunkIds = 'deterministic';
-      
-      // Optimize preloading
-      config.optimization.runtimeChunk = {
-        name: 'runtime',
-      };
-    }
-    
-    // Optimize for development
-    if (dev) {
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-      };
     }
     
     return config;
