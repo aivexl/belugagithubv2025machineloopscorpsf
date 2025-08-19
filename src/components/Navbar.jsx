@@ -14,8 +14,11 @@ export default function Navbar() {
   // Conditional preloading for logo - only when navbar is rendered
   useEffect(() => {
     // Preload logo image only when navbar is actually visible
-    const logoImg = new Image();
-    logoImg.src = '/Asset/beluganewlogov2.png';
+    // Use native browser Image constructor, not next/image
+    if (typeof window !== 'undefined') {
+      const logoImg = new window.Image();
+      logoImg.src = '/Asset/beluganewlogov2.png';
+    }
   }, []);
 
   useEffect(() => {

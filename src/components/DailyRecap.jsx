@@ -20,8 +20,11 @@ export default function DailyRecap() {
   // Conditional preloading for aistar image - only when component is rendered
   useEffect(() => {
     // Preload aistar image only when component is actually visible
-    const aistarImg = new Image();
-    aistarImg.src = '/Asset/aistar.png';
+    // Use native browser Image constructor, not next/image
+    if (typeof window !== 'undefined') {
+      const aistarImg = new window.Image();
+      aistarImg.src = '/Asset/aistar.png';
+    }
   }, []);
 
   return (
