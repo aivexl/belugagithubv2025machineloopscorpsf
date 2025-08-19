@@ -70,7 +70,9 @@ const GlobalErrorHandler = () => {
         message.includes('message port closed') ||
         message.includes('Failed to load resource') ||
         message.includes('404') ||
-        message.includes('source map')
+        message.includes('source map') ||
+        message.includes('Failed to load image') ||
+        message.includes('EnterpriseImage: Failed to load image')
       ) {
         return; // Don't log these errors
       }

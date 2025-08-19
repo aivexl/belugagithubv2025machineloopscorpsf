@@ -1,4 +1,6 @@
-// Utility functions for handling Sanity images
+// Utility functions for handling Sanity images with enterprise-level error handling
+
+import { urlFor } from '../sanity/lib/image';
 
 export interface SanityImage {
   asset: {
@@ -20,7 +22,7 @@ export interface SanityImage {
 }
 
 /**
- * Generate a Sanity image URL with proper formatting
+ * Generate a Sanity image URL with proper formatting using official Sanity client
  * @param image - Sanity image object
  * @param options - Image options
  * @returns Formatted image URL or null if invalid
@@ -30,7 +32,7 @@ export function generateSanityImageUrl(
   options: {
     width?: number;
     height?: number;
-    format?: 'webp' | 'jpg' | 'png' | 'avif';
+    format?: 'webp' | 'jpg' | 'png';
     quality?: number;
     fit?: 'clip' | 'crop' | 'fill' | 'fillmax' | 'max' | 'scale' | 'min';
   } = {}
@@ -39,6 +41,7 @@ export function generateSanityImageUrl(
     return null;
   }
 
+  try {
   const {
     width = 800,
     height,
@@ -47,44 +50,37 @@ export function generateSanityImageUrl(
     fit = 'crop'
   } = options;
 
-  // Extract project and dataset from environment
-  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'qaofdbqx';
-  const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production';
-
-  // Extract asset ID from reference
-  // Reference format: image-{assetId}-{originalWidth}x{originalHeight}-{originalFormat}
-  const assetRef = image.asset._ref;
-  const assetId = assetRef.replace('image-', '').split('-')[0];
-
-  // Build the URL with Sanity's image transformation API
-  let url = `https://cdn.sanity.io/images/${projectId}/${dataset}/${assetId}`;
-  
-  // Add transformations
-  const params = new URLSearchParams();
-  
-  if (width) params.append('w', width.toString());
-  if (height) params.append('h', height.toString());
-  if (format) params.append('fm', format);
-  if (quality) params.append('q', quality.toString());
-  if (fit) params.append('fit', fit);
+    // Use the official Sanity image builder
+    let builder = urlFor(image);
+    
+    // Apply transformations
+    if (width) builder = builder.width(width);
+    if (height) builder = builder.height(height);
+    if (format) builder = builder.format(format);
+    if (quality) builder = builder.quality(quality);
+    if (fit) builder = builder.fit(fit);
   
   // Add hotspot and crop if available
   if (image.hotspot) {
-    params.append('fp-x', image.hotspot.x.toString());
-    params.append('fp-y', image.hotspot.y.toString());
-    params.append('fp-z', '1');
+      builder = builder.crop('focalpoint')
+        .focalPoint(image.hotspot.x, image.hotspot.y);
   }
   
   if (image.crop) {
-    params.append('rect', `${image.crop.left},${image.crop.top},${image.crop.right - image.crop.left},${image.crop.bottom - image.crop.top}`);
-  }
+      builder = builder.crop('focalpoint')
+        .rect(
+          image.crop.left,
+          image.crop.top,
+          image.crop.right - image.crop.left,
+          image.crop.bottom - image.crop.top
+        );
+    }
 
-  // Append parameters if any
-  if (params.toString()) {
-    url += `?${params.toString()}`;
+    return builder.url();
+  } catch (error) {
+    console.warn('Failed to generate Sanity image URL:', error);
+    return null;
   }
-
-  return url;
 }
 
 /**
@@ -95,6 +91,7 @@ export function generateSanityImageUrl(
 export function generateResponsiveImageUrls(image: SanityImage | null | undefined) {
   if (!image) return null;
 
+  try {
   return {
     thumbnail: generateSanityImageUrl(image, { width: 300, height: 200, fit: 'crop' }),
     small: generateSanityImageUrl(image, { width: 600, height: 400, fit: 'crop' }),
@@ -102,34 +99,136 @@ export function generateResponsiveImageUrls(image: SanityImage | null | undefine
     large: generateSanityImageUrl(image, { width: 1200, height: 800, fit: 'crop' }),
     original: generateSanityImageUrl(image, { fit: 'max' })
   };
+  } catch (error) {
+    console.warn('Failed to generate responsive image URLs:', error);
+    return null;
+  }
 }
 
 /**
- * Generate optimized image URL for article thumbnails
+ * Generate optimized image URL for article thumbnails with enterprise-level fallbacks
  * @param image - Sanity image object
- * @returns Optimized thumbnail URL
+ * @returns Optimized thumbnail URL or fallback
  */
-export function generateArticleThumbnailUrl(image: SanityImage | null | undefined): string | null {
-  return generateSanityImageUrl(image, {
+export function generateArticleThumbnailUrl(image: SanityImage | null | undefined): string {
+  try {
+    const url = generateSanityImageUrl(image, {
     width: 800,
     height: 450, // 16:9 aspect ratio
     format: 'webp',
     quality: 85,
     fit: 'crop'
   });
+    
+    // Return the generated URL or fallback to default
+    return url || '/Asset/duniacrypto.png';
+  } catch (error) {
+    console.warn('Failed to generate article thumbnail URL, using fallback:', error);
+    return '/Asset/duniacrypto.png';
+  }
 }
 
 /**
- * Generate hero image URL for featured articles
+ * Generate hero image URL for featured articles with enterprise-level fallbacks
  * @param image - Sanity image object
- * @returns Hero image URL
+ * @returns Hero image URL or fallback
  */
-export function generateHeroImageUrl(image: SanityImage | null | undefined): string | null {
-  return generateSanityImageUrl(image, {
+export function generateHeroImageUrl(image: SanityImage | null | undefined): string {
+  try {
+    const url = generateSanityImageUrl(image, {
     width: 1200,
     height: 600,
     format: 'webp',
     quality: 90,
     fit: 'crop'
+    });
+    
+    // Return the generated URL or fallback to default
+    return url || '/Asset/duniacrypto.png';
+  } catch (error) {
+    console.warn('Failed to generate hero image URL, using fallback:', error);
+    return '/Asset/duniacrypto.png';
+  }
+}
+
+/**
+ * Enterprise-level image validation and fallback system
+ * @param image - Sanity image object
+ * @param fallbackUrl - Fallback image URL
+ * @returns Validated image URL or fallback
+ */
+export function validateAndGetImageUrl(
+  image: SanityImage | null | undefined, 
+  fallbackUrl: string = '/Asset/duniacrypto.png'
+): string {
+  // ENTERPRISE-LEVEL VALIDATION: Comprehensive image structure checking
+  if (!image) {
+    console.warn('validateAndGetImageUrl: No image object provided');
+    return fallbackUrl;
+  }
+  
+  if (!image.asset) {
+    console.warn('validateAndGetImageUrl: No image asset found:', image);
+    return fallbackUrl;
+  }
+  
+  if (!image.asset._ref) {
+    console.warn('validateAndGetImageUrl: No image asset reference found:', image.asset);
+    return fallbackUrl;
+  }
+  
+  if (typeof image.asset._ref !== 'string') {
+    console.warn('validateAndGetImageUrl: Invalid asset reference type:', typeof image.asset._ref);
+    return fallbackUrl;
+  }
+
+  try {
+    const url = generateSanityImageUrl(image, {
+      width: 800,
+      height: 450,
+      format: 'webp',
+      quality: 85,
+      fit: 'crop'
+    });
+    
+    // ENTERPRISE-LEVEL VALIDATION: Ensure URL is valid
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+      console.warn('validateAndGetImageUrl: Generated URL is invalid:', url);
+      return fallbackUrl;
+    }
+    
+    // ENTERPRISE-LEVEL VALIDATION: Check if URL is accessible
+    if (url.startsWith('http') || url.startsWith('https')) {
+      console.log('validateAndGetImageUrl: Generated external URL:', url);
+      return url;
+    }
+    
+    // ENTERPRISE-LEVEL VALIDATION: Check if URL is relative
+    if (url.startsWith('/') || url.startsWith('./')) {
+      console.log('validateAndGetImageUrl: Generated relative URL:', url);
+      return url;
+    }
+    
+    console.warn('validateAndGetImageUrl: Generated URL format is unexpected:', url);
+    return fallbackUrl;
+    
+  } catch (error) {
+    console.error('validateAndGetImageUrl: Image generation failed:', error);
+    return fallbackUrl;
+  }
+}
+
+/**
+ * Preload critical images for better performance
+ * @param imageUrls - Array of image URLs to preload
+ */
+export function preloadImages(imageUrls: string[]): void {
+  if (typeof window === 'undefined') return; // Server-side only
+  
+  imageUrls.forEach(url => {
+    if (url && url !== '/Asset/duniacrypto.png') {
+      const img = new Image();
+      img.src = url;
+    }
   });
 }

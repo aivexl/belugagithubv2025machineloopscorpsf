@@ -5,9 +5,12 @@ import Link from 'next/link';
 import { useAcademyFilters } from './AcademyFiltersProvider';
 // Import custom Sanity client and image utilities
 import { client } from '../sanity/lib/client';
-import { generateArticleThumbnailUrl } from '../utils/sanityImageUtils';
+import { validateAndGetImageUrl } from '../utils/sanityImageUtils';
+// Import enterprise-level image component
+import { ArticleThumbnail } from './EnterpriseImage';
+import ImageDebugPanel from './ImageDebugPanel';
 
-// Function to fetch academy articles using custom client
+// Function to fetch academy articles using custom client with complete image data
 async function getArticlesByCategory(category) {
   const query = `
     *[_type == "article" && category == $category] | order(publishedAt desc) {
@@ -16,7 +19,15 @@ async function getArticlesByCategory(category) {
       slug,
       excerpt,
       content,
-      image,
+      "image": {
+        "asset": {
+          "_ref": image.asset._ref,
+          "_type": image.asset._type
+        },
+        "hotspot": image.hotspot,
+        "crop": image.crop,
+        "alt": image.alt
+      },
       category,
       source,
       publishedAt,
@@ -35,6 +46,7 @@ export default function AcademyClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [displayCount, setDisplayCount] = useState(9);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
   const { activeLevel, activeTopic, activeNetwork } = useAcademyFilters();
   
   useEffect(() => {
@@ -45,11 +57,30 @@ export default function AcademyClient() {
         
         const data = await getArticlesByCategory('academy');
         
-        // Transform articles to include proper image URLs using utility function
-        const articlesWithImages = data.map(article => ({
-          ...article,
-          mainImage: generateArticleThumbnailUrl(article.image)
-        }));
+        // ENTERPRISE-LEVEL DEBUGGING: Log the raw data structure
+        console.log('AcademyClient: Raw Sanity data received:', {
+          totalArticles: data?.length || 0,
+          sampleArticle: data?.[0] || null,
+          imageStructure: data?.[0]?.image || null
+        });
+        
+        // Transform articles to include proper image URLs using enterprise-level utility function
+        const articlesWithImages = data.map(article => {
+          const imageUrl = validateAndGetImageUrl(article.image, '/Asset/duniacrypto.png');
+          
+          // ENTERPRISE-LEVEL DEBUGGING: Log each article's image transformation
+          console.log('AcademyClient: Article image transformation:', {
+            articleId: article._id,
+            articleTitle: article.title,
+            originalImage: article.image,
+            transformedImageUrl: imageUrl
+          });
+          
+          return {
+            ...article,
+            mainImage: imageUrl
+          };
+        });
         
         setArticles(articlesWithImages);
       } catch (error) {
@@ -122,6 +153,28 @@ export default function AcademyClient() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* ENTERPRISE-LEVEL DEBUG CONTROLS */}
+      <div className="mb-6 flex justify-between items-center">
+        <div className="text-left">
+          <h1 className="text-2xl font-bold text-white mb-2">Academy Articles</h1>
+          <p className="text-gray-400 text-sm">
+            Total: {articles.length} • With Images: {articles.filter(a => a.mainImage && a.mainImage !== '/Asset/duniacrypto.png').length}
+          </p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setShowDebugPanel(!showDebugPanel)}
+            className={`px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+              showDebugPanel 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            {showDebugPanel ? '🔒 Hide Debug' : '🔍 Debug Images'}
+          </button>
+        </div>
+      </div>
+
       {/* Articles Section */}
       <section>
         {filteredArticles.length > 0 ? (
@@ -135,28 +188,30 @@ export default function AcademyClient() {
                   className="block group no-underline hover:no-underline focus:no-underline active:no-underline"
                 >
                   <div className="bg-duniacrypto-panel border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors group h-full flex flex-col">
-                    {/* Article Image */}
+                    {/* Article Image - Enterprise-Level Component */}
                     <div className="aspect-video bg-gray-800 overflow-hidden">
-                      {article.mainImage ? (
-                        <img
-                          src={article.mainImage}
-                          alt={article.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            console.warn(`Failed to load image for article: ${article.title}`);
-                            e.currentTarget.src = '/Asset/duniacrypto.png';
-                          }}
-                          onLoad={() => {
-                            console.log(`Successfully loaded image for article: ${article.title}`);
-                          }}
-                        />
-                      ) : (
-                        <img
-                          src="/Asset/duniacrypto.png"
-                          alt="Default Academy Image"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      )}
+                                             {/* ENTERPRISE-LEVEL IMAGE HANDLING: Bulletproof fallback system */}
+                       {article.mainImage && article.mainImage !== '/Asset/duniacrypto.png' ? (
+                         <ArticleThumbnail
+                           src={article.mainImage}
+                           alt={article.title || 'Academy Article'}
+                           className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                           priority={false}
+                         />
+                       ) : (
+                         /* Fallback: Professional placeholder with article info */
+                         <div className="w-full h-full bg-gradient-to-br from-blue-900/50 to-purple-900/50 flex items-center justify-center p-4">
+                           <div className="text-center">
+                             <div className="w-16 h-16 mx-auto mb-3 bg-blue-600/20 rounded-full flex items-center justify-center">
+                               <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 9.246 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 19 16.5 19c-1.746 0-3.332-.477-4.5-1.253" />
+                               </svg>
+                             </div>
+                             <h4 className="text-white font-semibold text-sm mb-1">Academy Article</h4>
+                             <p className="text-blue-200 text-xs">{article.title || 'Learning Content'}</p>
+                           </div>
+                         </div>
+                       )}
                     </div>
 
                     {/* Article Content */}
@@ -225,6 +280,13 @@ export default function AcademyClient() {
           </div>
         )}
       </section>
+      
+      {/* ENTERPRISE-LEVEL DEBUG PANEL */}
+      <ImageDebugPanel
+        articles={articles}
+        isVisible={showDebugPanel}
+        onClose={() => setShowDebugPanel(false)}
+      />
     </div>
   );
 } 
