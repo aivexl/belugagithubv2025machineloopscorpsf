@@ -1482,6 +1482,7 @@ function CryptoSectors() {
 function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
   const [coins, setCoins] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // Add error state for API-only strategy
 
   useEffect(() => {
     const fetchCoins = async () => {
@@ -1499,74 +1500,9 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
       } catch (error) {
-        console.error('Error loading coins for heatmap:', error);
-        // Provide fallback data if local generator fails
-        setCoins([
-          {
-            id: 'bitcoin',
-            symbol: 'btc',
-            name: 'Bitcoin',
-            image: 'https://ui-avatars.com/api/?name=BTC&background=random&color=fff&size=128',
-            current_price: 45000,
-            market_cap: 850000000000,
-            market_cap_rank: 1,
-            price_change_percentage_1h_in_currency: 0.5,
-            price_change_percentage_24h: 2.5,
-            price_change_percentage_7d_in_currency: 8.2,
-            price_change_percentage_30d_in_currency: 15.3,
-            price_change_percentage_1y_in_currency: 45.7,
-            circulating_supply: 19500000,
-            total_supply: 21000000,
-            max_supply: 21000000,
-            ath: 69000,
-            total_volume: 25000000000,
-            high_24h: 46000,
-            low_24h: 44000,
-            price_change_24h: 1125,
-            market_cap_change_24h: 21250000000,
-            market_cap_change_percentage_24h: 2.5,
-            fully_diluted_valuation: 945000000000,
-            ath_change_percentage: -34.78,
-            ath_date: '2021-11-10T14:24:11.849Z',
-            atl: 67.81,
-            atl_change_percentage: 66263.25,
-            atl_date: '2013-07-06T00:00:00.000Z',
-            roi: null,
-            last_updated: new Date().toISOString()
-          },
-          {
-            id: 'ethereum',
-            symbol: 'eth',
-            name: 'Ethereum',
-            image: 'https://ui-avatars.com/api/?name=ETH&background=random&color=fff&size=128',
-            current_price: 3000,
-            market_cap: 350000000000,
-            market_cap_rank: 2,
-            price_change_percentage_1h_in_currency: 0.3,
-            price_change_percentage_24h: 1.8,
-            price_change_percentage_7d_in_currency: 6.5,
-            price_change_percentage_30d_in_currency: 12.8,
-            price_change_percentage_1y_in_currency: 38.2,
-            circulating_supply: 120000000,
-            total_supply: 120000000,
-            max_supply: null,
-            ath: 4800,
-            total_volume: 15000000000,
-            high_24h: 3100,
-            low_24h: 2900,
-            price_change_24h: 54,
-            market_cap_change_24h: 6300000000,
-            market_cap_change_percentage_24h: 1.8,
-            fully_diluted_valuation: 350000000000,
-            ath_change_percentage: -37.5,
-            ath_date: '2021-11-10T14:24:11.849Z',
-            atl: 0.432979,
-            atl_change_percentage: 692775.25,
-            atl_date: '2015-10-20T00:00:00.000Z',
-            roi: null,
-            last_updated: new Date().toISOString()
-          }
-        ]);
+        // API-ONLY STRATEGY: No fallbacks to prevent data corruption
+        console.error('CryptoHeatmap: API failed - using API-only strategy, no fallbacks');
+        setError('Failed to load crypto data from API for heatmap. Please refresh the page to retry.');
         setLoading(false);
       }
     };
@@ -1833,6 +1769,24 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
     if (absPercentage >= 0) return 'opacity-60';
     return 'opacity-50';
   };
+
+  // Show error if exists (API-only strategy)
+  if (error) {
+    return (
+      <div className="text-center py-6 sm:py-8">
+        <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 mb-4">
+          <p className="text-red-400 text-sm mb-2">Error loading crypto data for heatmap:</p>
+          <p className="text-red-300 text-xs">{error}</p>
+        </div>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
