@@ -54,6 +54,11 @@ export default function AssetClient() {
   const [activeSection, setActiveSection] = useState('top-100');
   const [searchQuery, setSearchQuery] = useState('');
   const [cryptoFilter, setCryptoFilter] = useState('top-100');
+  
+  // Debug logging for state changes
+  useEffect(() => {
+    console.log('AssetClient: State changed:', { activeSection, cryptoFilter, searchQuery });
+  }, [activeSection, cryptoFilter, searchQuery]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showEcosystemSubFilter, setShowEcosystemSubFilter] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -63,6 +68,14 @@ export default function AssetClient() {
   
   useEffect(() => {
     setIsClient(true);
+    
+    // Debug logging for enterprise troubleshooting
+    console.log('AssetClient: Component mounted with initial state:', {
+      activeSection,
+      cryptoFilter,
+      searchQuery,
+      viewMode
+    });
   }, []);
 
   // Back to Top functionality
@@ -329,7 +342,7 @@ export default function AssetClient() {
               {viewMode === 'table' ? (
                 <CryptoTableWithSearch 
                   searchQuery={searchQuery} 
-                  filter={cryptoFilter}
+                  filter={activeSection === 'top-100' ? 'top-100' : cryptoFilter}
                   dateRange={dateRange}
                   onCoinClick={(coin) => {
                     // Navigate to detail page instead of showing overlay
@@ -571,6 +584,7 @@ function MarketOverviewRedesigned() {
 function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) {
   const [coins, setCoins] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // Add error state
   const [sortColumn, setSortColumn] = useState('market_cap'); // Default sorting by market cap
   const [sortDirection, setSortDirection] = useState('desc'); // Default descending when sorting is activated
 
@@ -609,7 +623,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     const loadCoins = async () => {
       try {
         // Try to fetch real data from CoinGecko proxy first
-        console.log('AssetClient: Attempting to fetch real crypto data from CoinGecko proxy...');
+        console.log('CryptoTableWithSearch: Attempting to fetch real crypto data from CoinGecko proxy...');
         const response = await fetch('/api/coingecko-proxy/coins');
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -618,7 +632,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         
         // Validate data structure
         if (data && Array.isArray(data) && data.length > 0) {
-          console.log(`AssetClient: Successfully loaded ${data.length} coins from CoinGecko proxy`);
+          console.log(`CryptoTableWithSearch: Successfully loaded ${data.length} coins from CoinGecko proxy`);
+          console.log('CryptoTableWithSearch: Sample data:', data.slice(0, 2));
           setCoins(data);
           setLoading(false);
         } else {
@@ -626,16 +641,20 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         }
       } catch (error) {
         console.error('AssetClient: Failed to fetch real crypto data, falling back to local generator:', error);
+        setError(error.message);
         
         try {
           // Fallback to local data generator
           const { getCachedTop100 } = await import('../lib/cryptoDataGenerator');
           const data = getCachedTop100();
-          console.log(`AssetClient: Successfully loaded ${data.length} coins from local generator`);
+          console.log(`CryptoTableWithSearch: Successfully loaded ${data.length} coins from local generator`);
+          console.log('CryptoTableWithSearch: Local generator sample data:', data.slice(0, 2));
           setCoins(data);
           setLoading(false);
+          setError(null); // Clear error on successful fallback
         } catch (fallbackError) {
           console.error('AssetClient: Both real API and fallback failed, using static data:', fallbackError);
+          setError('Failed to load crypto data from all sources');
           
           // Ultimate fallback - static data with proper structure
           const staticData = [
@@ -737,9 +756,11 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
             }
           ];
           
-          console.log(`AssetClient: Using static fallback data with ${staticData.length} coins`);
+          console.log(`CryptoTableWithSearch: Using static fallback data with ${staticData.length} coins`);
+          console.log('CryptoTableWithSearch: Static fallback sample data:', staticData.slice(0, 2));
           setCoins(staticData);
           setLoading(false);
+          setError(null); // Clear error on successful static fallback
         }
       }
     };
@@ -1087,7 +1108,10 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     filter,
     dateRange,
     loading,
-    hasError: !!error
+    hasError: !!error,
+    coinsSample: coins?.slice(0, 3) || [],
+    filterType: typeof filter,
+    searchQueryType: typeof searchQuery
   });
 
   if (loading) {
@@ -1097,6 +1121,24 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
           <p className="text-gray-400 text-sm">Loading crypto data...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Show error if exists
+  if (error) {
+    return (
+      <div className="text-center py-6 sm:py-8">
+        <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 mb-4">
+          <p className="text-red-400 text-sm mb-2">Error loading crypto data:</p>
+          <p className="text-red-300 text-xs">{error}</p>
+        </div>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
   }
