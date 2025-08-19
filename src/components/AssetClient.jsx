@@ -637,9 +637,28 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           }
           const data = await response.json();
       
-          // Enterprise-level data validation
+          // Enterprise-level data validation with comprehensive logging
+          console.log('CryptoTableWithSearch: Raw API response:', {
+            dataType: typeof data,
+            isArray: Array.isArray(data),
+            length: data?.length || 0,
+            sampleData: data?.slice(0, 2) || []
+          });
+          
           if (data && Array.isArray(data) && data.length > 0) {
-            // Validate data structure integrity
+            // Validate data structure integrity with detailed logging
+            const validationResults = data.map((coin, index) => ({
+              index,
+              id: !!coin.id,
+              symbol: !!coin.symbol,
+              name: !!coin.name,
+              current_price: typeof coin.current_price === 'number',
+              market_cap: typeof coin.market_cap === 'number',
+              market_cap_rank: typeof coin.market_cap_rank === 'number'
+            }));
+            
+            console.log('CryptoTableWithSearch: Data validation results:', validationResults.slice(0, 5));
+            
             const isValidData = data.every(coin => 
               coin.id && coin.symbol && coin.name && 
               typeof coin.current_price === 'number' &&
@@ -658,12 +677,24 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
               setDataSource('coingecko-api'); // Track data source
               setLoading(false);
               setDataUpdateCount(1);
+              console.log('CryptoTableWithSearch: State updated successfully:', {
+                coinsCount: data.length,
+                dataSource: 'coingecko-api',
+                loading: false,
+                dataUpdateCount: 1
+              });
               return; // Success, exit retry loop
             } else {
               console.error('CryptoTableWithSearch: Data validation failed - some coins missing required fields');
+              console.error('CryptoTableWithSearch: First 3 validation failures:', validationResults.filter(r => !r.id || !r.symbol || !r.name || !r.current_price || !r.market_cap || !r.market_cap_rank).slice(0, 3));
               throw new Error('Data validation failed - incomplete coin data structure');
             }
           } else {
+            console.error('CryptoTableWithSearch: Invalid data structure:', {
+              data: data,
+              isArray: Array.isArray(data),
+              length: data?.length || 0
+            });
             throw new Error('Invalid data structure received from API');
           }
         } catch (error) {
@@ -753,6 +784,13 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
 
   const getFilteredCoins = () => {
     let filteredCoins = coins || [];
+    
+    console.log('CryptoTableWithSearch: getFilteredCoins called with:', {
+      inputCoinsCount: coins?.length || 0,
+      searchQuery,
+      filter,
+      dateRange
+    });
 
     // Apply search filter
     if (searchQuery) {
@@ -760,6 +798,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         coin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         coin.symbol.toLowerCase().includes(searchQuery.toLowerCase())
       );
+      console.log('CryptoTableWithSearch: After search filter:', filteredCoins.length);
     }
 
     // Apply category filter
@@ -1063,6 +1102,17 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       });
     }
 
+    console.log('CryptoTableWithSearch: Final filtered coins:', {
+      finalCount: filteredCoins.length,
+      sampleCoins: filteredCoins.slice(0, 3).map(coin => ({
+        id: coin.id,
+        symbol: coin.symbol,
+        name: coin.name,
+        price: coin.current_price,
+        marketCap: coin.market_cap
+      }))
+    });
+    
     return filteredCoins;
   };
 
@@ -1075,6 +1125,18 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     hasValidMarketCaps: coins.every(coin => typeof coin.market_cap === 'number' && coin.market_cap > 0),
     hasValidRanks: coins.every(coin => typeof coin.market_cap_rank === 'number' && coin.market_cap_rank > 0)
   } : null;
+  
+  // Comprehensive state monitoring
+  useEffect(() => {
+    console.log('CryptoTableWithSearch: State changed:', {
+      coinsCount: coins?.length || 0,
+      loading,
+      error,
+      dataSource,
+      dataUpdateCount,
+      lastValidDataCount: lastValidData?.length || 0
+    });
+  }, [coins, loading, error, dataSource, dataUpdateCount, lastValidData]);
   
   // Data corruption detection and auto-recovery
   useEffect(() => {
