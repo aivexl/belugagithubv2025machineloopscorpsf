@@ -17,7 +17,8 @@ function formatPrice(price) {
 }
 
 export default function Top10MarketCap() {
-  const [coins, setCoins] = useState([]);
+  // ISOLATED DATA SOURCE: Use separate state to prevent overwriting AssetClient data
+  const [marketCapCoins, setMarketCapCoins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -30,7 +31,7 @@ export default function Top10MarketCap() {
       const response = await fetch('/api/coingecko-proxy/coins');
       if (response.ok) {
         const data = await response.json();
-        setCoins(data.slice(0, 10)); // Get top 10 for market cap
+        setMarketCapCoins(data.slice(0, 10)); // Get top 10 for market cap (isolated data source)
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -48,7 +49,7 @@ export default function Top10MarketCap() {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading && coins.length === 0) {
+  if (loading && marketCapCoins.length === 0) {
     return (
       <div className="bg-duniacrypto-panel rounded-lg shadow p-4 relative mb-8">
         <div className="mb-4 flex justify-center">
@@ -85,11 +86,11 @@ export default function Top10MarketCap() {
         </div>
       )}
       
-      {coins.length === 0 ? (
+      {marketCapCoins.length === 0 ? (
         <div className="text-gray-400 text-center">No data available</div>
       ) : (
         <div className="space-y-3">
-          {coins.map((coin) => (
+          {marketCapCoins.map((coin) => (
             <div key={coin.id} className="flex items-center space-x-3 p-2 rounded hover:bg-duniacrypto-card transition-colors">
               <div className="flex-shrink-0">
                 <img 

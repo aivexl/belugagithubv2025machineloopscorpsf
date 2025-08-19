@@ -9,7 +9,8 @@ function formatPrice(price) {
 }
 
 export default function Top100Trending() {
-  const [coins, setCoins] = useState([]);
+  // ISOLATED DATA SOURCE: Use separate state to prevent overwriting AssetClient data
+  const [trendingCoins, setTrendingCoins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,7 +25,7 @@ export default function Top100Trending() {
       const response = await fetch('/api/coingecko-proxy/trending');
       if (response.ok) {
         const data = await response.json();
-        setCoins(data.coins || []);
+        setTrendingCoins(data.coins || []); // Isolated data source
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -42,16 +43,16 @@ export default function Top100Trending() {
     return () => clearInterval(interval);
   }, []);
 
-  const totalPages = Math.ceil(coins.length / coinsPerPage);
+  const totalPages = Math.ceil(trendingCoins.length / coinsPerPage);
   const startIndex = (currentPage - 1) * coinsPerPage;
   const endIndex = startIndex + coinsPerPage;
-  const currentCoins = coins.slice(startIndex, endIndex);
+  const currentCoins = trendingCoins.slice(startIndex, endIndex);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  if (loading && coins.length === 0) {
+  if (loading && trendingCoins.length === 0) {
     return (
       <div className="bg-duniacrypto-panel rounded-lg shadow p-4 relative mb-8">
         <div className="mb-4 flex justify-center">
@@ -88,7 +89,7 @@ export default function Top100Trending() {
         </div>
       )}
       
-      {coins.length === 0 ? (
+      {trendingCoins.length === 0 ? (
         <div className="text-gray-400 text-center">No data available</div>
       ) : (
         <>

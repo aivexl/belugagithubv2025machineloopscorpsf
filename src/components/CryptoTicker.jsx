@@ -7,7 +7,8 @@ function classNames(...classes) {
 }
 
 export default function CryptoTicker() {
-  const [coins, setCoins] = useState([]);
+  // ISOLATED DATA SOURCE: Use separate state to prevent overwriting AssetClient data
+  const [tickerCoins, setTickerCoins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [priceFlash, setPriceFlash] = useState({});
@@ -23,7 +24,7 @@ export default function CryptoTicker() {
       const response = await fetch('/api/coingecko-proxy/coins');
       if (response.ok) {
         const data = await response.json();
-        setCoins(data.slice(0, 10)); // Get top 10 for ticker
+        setTickerCoins(data.slice(0, 10)); // Get top 10 for ticker (isolated data source)
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -41,9 +42,9 @@ export default function CryptoTicker() {
     return () => clearInterval(interval);
   }, []);
 
-  // Update price flash effect when coins change
+  // Update price flash effect when tickerCoins change
   useEffect(() => {
-    coins.forEach(coin => {
+    tickerCoins.forEach(coin => {
       const prevPrice = prevPrices.current[coin.id];
       if (prevPrice && prevPrice !== coin.current_price) {
         setPriceFlash(prev => ({
@@ -62,9 +63,9 @@ export default function CryptoTicker() {
       }
       prevPrices.current[coin.id] = coin.current_price;
     });
-  }, [coins]);
+  }, [tickerCoins]);
 
-  if (loading && coins.length === 0) {
+  if (loading && tickerCoins.length === 0) {
     return (
       <div className="bg-duniacrypto-panel border-b border-gray-800 py-2 overflow-hidden">
         <div className="flex space-x-8 animate-pulse">
@@ -80,7 +81,7 @@ export default function CryptoTicker() {
     );
   }
 
-  if (coins.length === 0) {
+  if (tickerCoins.length === 0) {
     return (
       <div className="bg-duniacrypto-panel border-b border-gray-800 py-2 text-center text-gray-400">
         No crypto data available
@@ -92,7 +93,7 @@ export default function CryptoTicker() {
     <div className="bg-duniacrypto-panel border-b border-gray-800 py-2 overflow-hidden" ref={tickerRef}>
       <div className="animate-scroll">
         {/* First set of coins */}
-        {coins.map((coin) => (
+        {tickerCoins.map((coin) => (
           <div key={coin.id} className="flex items-center space-x-2 flex-shrink-0 mx-4">
             <img 
               src={coin.image} 
@@ -123,7 +124,7 @@ export default function CryptoTicker() {
         ))}
         
         {/* Duplicate set for seamless loop */}
-        {coins.map((coin) => (
+        {tickerCoins.map((coin) => (
           <div key={`${coin.id}-duplicate`} className="flex items-center space-x-2 flex-shrink-0 mx-4">
             <img 
               src={coin.image} 
