@@ -587,6 +587,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
   const [error, setError] = useState(null); // Add error state
   const [sortColumn, setSortColumn] = useState('market_cap'); // Default sorting by market cap
   const [sortDirection, setSortDirection] = useState('desc'); // Default descending when sorting is activated
+  const [lastValidData, setLastValidData] = useState(null); // Backup of last valid data
+  const [dataUpdateCount, setDataUpdateCount] = useState(0); // Track data update frequency
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -630,12 +632,30 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         }
         const data = await response.json();
         
-        // Validate data structure
+        // Enterprise-level data validation
         if (data && Array.isArray(data) && data.length > 0) {
-          console.log(`CryptoTableWithSearch: Successfully loaded ${data.length} coins from CoinGecko proxy`);
-          console.log('CryptoTableWithSearch: Sample data:', data.slice(0, 2));
-          setCoins(data);
-          setLoading(false);
+          // Validate data structure integrity
+          const isValidData = data.every(coin => 
+            coin.id && coin.symbol && coin.name && 
+            typeof coin.current_price === 'number' &&
+            typeof coin.market_cap === 'number' &&
+            typeof coin.market_cap_rank === 'number'
+          );
+          
+          if (isValidData) {
+            console.log(`CryptoTableWithSearch: Successfully loaded ${data.length} coins from CoinGecko proxy`);
+            console.log('CryptoTableWithSearch: Sample data:', data.slice(0, 2));
+            console.log('CryptoTableWithSearch: Data validation passed - all coins have required fields');
+            
+            // Store as backup data for corruption recovery
+            setLastValidData([...data]);
+            setCoins(data);
+            setLoading(false);
+            setDataUpdateCount(1);
+          } else {
+            console.error('CryptoTableWithSearch: Data validation failed - some coins missing required fields');
+            throw new Error('Data validation failed - incomplete coin data structure');
+          }
         } else {
           throw new Error('Invalid data structure received from API');
         }
@@ -767,16 +787,56 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
 
     loadCoins();
     
-    // Set up real-time updates every 5 minutes
+    // Set up real-time updates every 5 minutes with enterprise-level data validation
     const interval = setInterval(async () => {
       try {
+        console.log('CryptoTableWithSearch: Attempting real-time update...');
         const response = await fetch('/api/coingecko-proxy/coins');
         if (response.ok) {
           const freshData = await response.json();
-          setCoins(freshData);
+          
+          // Enterprise-level data validation before updating
+          if (freshData && Array.isArray(freshData) && freshData.length > 0) {
+            // Validate data structure integrity
+            const isValidData = freshData.every(coin => 
+              coin.id && coin.symbol && coin.name && 
+              typeof coin.current_price === 'number' &&
+              typeof coin.market_cap === 'number'
+            );
+            
+            if (isValidData) {
+              // Compare with current data to prevent unnecessary updates
+              const currentCoins = coins || [];
+              const hasSignificantChanges = freshData.length !== currentCoins.length || 
+                freshData.some((freshCoin, index) => {
+                  const currentCoin = currentCoins[index];
+                  return !currentCoin || 
+                    Math.abs(freshCoin.current_price - currentCoin.current_price) > 0.01 ||
+                    Math.abs(freshCoin.market_cap - currentCoin.market_cap) > 1000000;
+                });
+              
+              if (hasSignificantChanges) {
+                console.log(`CryptoTableWithSearch: Real-time update successful with significant changes, updating ${freshData.length} coins`);
+                // Backup current valid data before updating
+                if (currentCoins.length > 0) {
+                  setLastValidData([...currentCoins]);
+                }
+                setCoins(freshData);
+                setDataUpdateCount(prev => prev + 1);
+              } else {
+                console.log('CryptoTableWithSearch: Real-time update successful but no significant changes, keeping current data');
+              }
+            } else {
+              console.warn('CryptoTableWithSearch: Real-time update data validation failed, keeping current data');
+            }
+          } else {
+            console.warn('CryptoTableWithSearch: Real-time update returned invalid data structure, keeping current data');
+          }
+        } else {
+          console.warn(`CryptoTableWithSearch: Real-time update HTTP error ${response.status}, keeping current data`);
         }
       } catch (error) {
-        console.warn('Real-time update failed, keeping current data:', error);
+        console.warn('CryptoTableWithSearch: Real-time update failed, keeping current data:', error);
       }
     }, 5 * 60 * 1000);
     
@@ -1100,7 +1160,29 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
 
   const filteredCoins = getFilteredCoins();
   
-  // Debug logging for enterprise troubleshooting
+  // Enterprise-level debugging and data integrity monitoring
+  const dataIntegrity = coins ? {
+    hasValidIds: coins.every(coin => coin.id && typeof coin.id === 'string'),
+    hasValidPrices: coins.every(coin => typeof coin.current_price === 'number' && coin.current_price > 0),
+    hasValidMarketCaps: coins.every(coin => typeof coin.market_cap === 'number' && coin.market_cap > 0),
+    hasValidRanks: coins.every(coin => typeof coin.market_cap_rank === 'number' && coin.market_cap_rank > 0)
+  } : null;
+  
+  // Data corruption detection and auto-recovery
+  useEffect(() => {
+    if (coins && coins.length > 0 && dataIntegrity && !dataIntegrity.hasValidIds) {
+      console.error('CryptoTableWithSearch: Data corruption detected! Attempting auto-recovery...');
+      if (lastValidData && lastValidData.length > 0) {
+        console.log('CryptoTableWithSearch: Restoring from backup data...');
+        setCoins(lastValidData);
+        setError('Data corruption detected and recovered from backup');
+      } else {
+        console.error('CryptoTableWithSearch: No backup data available for recovery');
+        setError('Critical data corruption - no backup available');
+      }
+    }
+  }, [coins, dataIntegrity, lastValidData]);
+  
   console.log('AssetClient: CryptoTableWithSearch Debug Info:', {
     totalCoins: coins?.length || 0,
     filteredCoinsCount: filteredCoins?.length || 0,
@@ -1111,7 +1193,10 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     hasError: !!error,
     coinsSample: coins?.slice(0, 3) || [],
     filterType: typeof filter,
-    searchQueryType: typeof searchQuery
+    searchQueryType: typeof searchQuery,
+    dataIntegrity,
+    lastValidDataCount: lastValidData?.length || 0,
+    dataUpdateCount
   });
 
   if (loading) {
