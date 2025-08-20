@@ -105,7 +105,7 @@ export async function GET() {
         twoFactorAuth: AUTH_CONFIG.FEATURES.ENABLE_2FA,
         socialLogin: AUTH_CONFIG.FEATURES.ENABLE_SOCIAL_LOGIN,
         debugMode: AUTH_CONFIG.FEATURES.ENABLE_DEBUG_MODE,
-        performanceMonitoring: AUTH_CONFIG.FEATURES.ENABLE_PERFORMANCE_MONITORING,
+        performanceMonitoring: AUTH_CONFIG.MONITORING.ENABLE_PERFORMANCE_MONITORING,
       },
       
       // Monitoring
