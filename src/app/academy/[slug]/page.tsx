@@ -2,19 +2,6 @@ import { getArticleBySlug, addImageUrls, getAllArticles } from '../../../utils/s
 import { notFound } from 'next/navigation';
 import ArticleDetailClient from '../../../components/ArticleDetailClient';
 
-// Generate static paths for dynamic routes
-export async function generateStaticParams() {
-  try {
-    const articles = await getAllArticles();
-    return articles.map((article: any) => ({
-      slug: article.slug?.current || ''
-    })).filter((param: any) => param.slug);
-  } catch (error) {
-    console.error('Error generating static params:', error);
-    return [];
-  }
-}
-
 export default async function AcademyDetailPage({ 
   params 
 }: { 

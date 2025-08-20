@@ -36,12 +36,6 @@ const nextConfig = {
     optimizePackageImports: ['react', 'react-dom'],
   },
   
-  // Ensure App Router is used exclusively
-  appDir: true,
-  
-  // Disable Pages Router to prevent conflicts
-  useFileSystemPublicRoutes: false,
-  
   // Compiler options to reduce bundle size and warnings
   compiler: {
     // Remove console.log in production
@@ -137,12 +131,6 @@ const nextConfig = {
     // number of pages that should be kept simultaneously without being disposed
     pagesBufferLength: 2,
   },
-  
-  // Enhanced error handling for production builds
-  generateBuildId: async () => {
-    return process.env.BUILD_ID || `build-${Date.now()}`;
-  },
-  
 };
 
 module.exports = nextConfig;
