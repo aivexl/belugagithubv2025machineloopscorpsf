@@ -5,10 +5,15 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  isAuthenticated: boolean;
+  authError: string | null;
+  signIn: (email: string, password: string) => Promise<{ data?: any; error: AuthError | null }>;
+  signUp: (email: string, password: string) => Promise<{ data?: any; error: AuthError | null }>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<{ error: AuthError | null }>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  updateProfile: (updates: { [key: string]: any }) => Promise<{ error: AuthError | null }>;
+  refreshSession: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

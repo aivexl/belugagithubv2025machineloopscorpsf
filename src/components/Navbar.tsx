@@ -5,8 +5,7 @@ import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import GradientText from "./GradientText";
 import { useAuth } from "../hooks/useAuth";
-import LoginModal from "./auth/LoginModal";
-import SignUpModal from "./auth/SignUpModal";
+import AuthModalManager, { AuthModalType } from "./auth/AuthModalManager";
 import { 
   AiOutlineHome,
   AiOutlineExperiment,
@@ -597,22 +596,16 @@ export default function Navbar() {
       )}
 
       {/* Auth Modals */}
-      <LoginModal
+      <AuthModalManager
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
-        onSwitchToSignUp={() => {
-          setShowLoginModal(false);
-          setShowSignUpModal(true);
-        }}
+        initialModal="login"
       />
       
-      <SignUpModal
+      <AuthModalManager
         isOpen={showSignUpModal}
         onClose={() => setShowSignUpModal(false)}
-        onSwitchToLogin={() => {
-          setShowSignUpModal(false);
-          setShowLoginModal(true);
-        }}
+        initialModal="signup"
       />
 
 

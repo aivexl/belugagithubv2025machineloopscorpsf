@@ -71,11 +71,12 @@ export const metadata: Metadata = {
   },
 };
 
+// CRITICAL FIX: Font configuration with literal values for Next.js compatibility
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
   display: "swap",
-  preload: true,
+  preload: false, // Disable preloading to prevent font manifest errors
 });
 
 const geistMono = Geist_Mono({
