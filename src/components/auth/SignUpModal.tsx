@@ -9,6 +9,7 @@ interface SignUpModalProps {
 }
 
 export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUpModalProps) {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -27,6 +28,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
   // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen) {
+      setFullName('');
       setEmail('');
       setPassword('');
       setConfirmPassword('');
@@ -124,7 +126,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
     setSuccess('');
 
     // Validation
-    if (!email.trim() || !password || !confirmPassword) {
+    if (!fullName.trim() || !email.trim() || !password || !confirmPassword) {
       setError('Please fill in all fields');
       setLoading(false);
       return;
@@ -149,7 +151,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
     }
 
     try {
-      const { error } = await signUp(email.trim(), password);
+      const { error } = await signUp(email.trim(), password, fullName.trim());
       
       if (error) {
         setError(error.message);
@@ -164,7 +166,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
     } finally {
       setLoading(false);
     }
-  }, [email, password, confirmPassword, acceptTerms, passwordStrength, signUp, onClose]);
+  }, [fullName, email, password, confirmPassword, acceptTerms, passwordStrength, signUp, onClose]);
 
   const handleGoogleSignIn = useCallback(async () => {
     setLoading(true);
@@ -232,6 +234,24 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
 
         {/* Sign Up Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Full Name Field */}
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium text-gray-300 mb-1">
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              disabled={loading}
+              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              placeholder="Enter your full name"
+              required
+              autoComplete="name"
+            />
+          </div>
+
           {/* Email Field */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">

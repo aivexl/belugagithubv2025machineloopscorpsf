@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import GradientText from "./GradientText";
 import { useAuth } from "../hooks/useAuth";
 import AuthModalManager, { AuthModalType } from "./auth/AuthModalManager";
+import Profile from "./Profile";
 import { 
   AiOutlineHome,
   AiOutlineExperiment,
@@ -98,6 +99,25 @@ export default function Navbar() {
   const handleSignOut = async () => {
     await signOut();
   };
+
+  // CRITICAL FIX: Listen for custom auth modal events from other components
+  useEffect(() => {
+    const handleCustomAuthModal = (event: CustomEvent) => {
+      if (event.detail?.type) {
+        if (event.detail.type === 'login') {
+          setShowLoginModal(true);
+        } else if (event.detail.type === 'signup') {
+          setShowSignUpModal(true);
+        }
+      }
+    };
+
+    window.addEventListener('openAuthModal', handleCustomAuthModal as EventListener);
+    
+    return () => {
+      window.removeEventListener('openAuthModal', handleCustomAuthModal as EventListener);
+    };
+  }, []);
 
   // Check if current path is active
   const isActive = (path: string) => {
@@ -367,17 +387,7 @@ export default function Navbar() {
           {/* Desktop Auth Buttons - Right side */}
           <div className="hidden xl:flex items-center space-x-3 flex-shrink-0">
               {user ? (
-                <div className="flex items-center space-x-3">
-                  <span className="text-gray-300 text-sm">
-                    {user.email}
-                  </span>
-                  <button
-                    onClick={handleSignOut}
-                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
-                  >
-                    Sign Out
-                  </button>
-                </div>
+                <Profile showDropdown={true} />
               ) : (
                 <>
                   <button
@@ -555,18 +565,7 @@ export default function Navbar() {
             <div className="pt-4 md:pt-6 border-t border-gray-700">
               {user ? (
                 <div className="space-y-3 md:space-y-4">
-                  <span className="text-gray-300 text-sm md:text-base block">
-                    {user.email}
-                  </span>
-                  <button
-                    onClick={() => {
-                      handleSignOut();
-                      setNavOpen(false);
-                    }}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 md:py-4 px-4 md:px-6 rounded-lg transition-colors duration-200 text-base md:text-lg"
-                  >
-                    Sign Out
-                  </button>
+                  <Profile showDropdown={false} />
                 </div>
               ) : (
                 <div className="flex flex-col space-y-3 md:space-y-4">

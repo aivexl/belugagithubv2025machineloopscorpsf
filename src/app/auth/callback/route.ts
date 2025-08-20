@@ -50,10 +50,18 @@ export async function GET(request: Request) {
     console.warn('Missing required parameters for authentication');
   }
 
-  // CRITICAL FIX: Enhanced redirect logic for production
-  const redirectUrl = process.env.NODE_ENV === 'production'
-    ? 'https://belugagithubv2025machineloopscorpsf-gold.vercel.app'
-    : requestUrl.origin;
+  // CRITICAL FIX: Enhanced redirect logic for production with environment variable support
+  let redirectUrl;
+  
+  if (process.env.NODE_ENV === 'production') {
+    // Use environment variable if available, fallback to hardcoded production domain
+    redirectUrl = process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 
+                 'https://belugagithubv2025machineloopscorpsf-gold.vercel.app';
+  } else {
+    // Development environment
+    redirectUrl = process.env.NEXT_PUBLIC_DEVELOPMENT_DOMAIN || 
+                 requestUrl.origin;
+  }
 
   // Add success parameter for better UX
   const finalRedirectUrl = `${redirectUrl}?auth=success&verified=true`;

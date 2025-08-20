@@ -8,7 +8,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   authError: string | null;
   signIn: (email: string, password: string) => Promise<{ data?: any; error: AuthError | null }>;
-  signUp: (email: string, password: string) => Promise<{ data?: any; error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<{ data?: any; error: AuthError | null }>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;

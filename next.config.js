@@ -97,7 +97,7 @@ const nextConfig = {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
   
-  // Redirects
+  // Redirects for better routing
   async redirects() {
     return [
       {
@@ -105,10 +105,16 @@ const nextConfig = {
         destination: '/new-page',
         permanent: true,
       },
+      // Fallback for profile routes
+      {
+        source: '/profile/:path*',
+        destination: '/profile',
+        permanent: false,
+      },
     ];
   },
   
-  // Rewrites
+  // Rewrites for API routing
   async rewrites() {
     return [
       {
@@ -117,6 +123,12 @@ const nextConfig = {
       },
     ];
   },
+  
+  // Trailing slash configuration for better routing
+  trailingSlash: false,
+  
+  // Enable strict mode for better error detection
+  reactStrictMode: true,
 };
 
 module.exports = nextConfig;

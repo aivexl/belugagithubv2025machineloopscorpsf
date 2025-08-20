@@ -8,3 +8,6 @@ export function useAuth() {
   }
   return context;
 }
+
+// Export types for convenience
+export type { AuthContextType } from '../contexts/AuthContext';

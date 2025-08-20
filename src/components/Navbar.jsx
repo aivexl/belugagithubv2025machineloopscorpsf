@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../contexts/AuthProvider';
 import { useRouter } from 'next/navigation';
 import AuthModalManager, { AuthModalType } from './auth/AuthModalManager';
+import Profile from './Profile';
 
 export default function Navbar() {
   const { user, signOut, isAuthenticated, loading } = useAuth();
@@ -111,32 +112,7 @@ export default function Navbar() {
               {!loading && (
                 <>
                   {isAuthenticated && user ? (
-                    <div className="flex items-center space-x-3">
-                      {/* User Profile Section */}
-                      <div className="hidden sm:flex items-center space-x-3">
-                        <div className="flex flex-col items-end">
-                          <span className="text-white text-sm font-medium">
-                            Welcome back!
-                          </span>
-                          <span className="text-gray-300 text-xs">
-                            {user.email}
-                          </span>
-                        </div>
-                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                          <span className="text-white text-sm font-bold">
-                            {user.email?.charAt(0).toUpperCase() || 'U'}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Sign Out Button */}
-                      <button
-                        onClick={handleSignOut}
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium transform hover:scale-105 active:scale-95"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
+                    <Profile showDropdown={true} />
                   ) : (
                     <div className="flex items-center space-x-3">
                       {/* Sign In Button */}
@@ -230,7 +206,7 @@ export default function Navbar() {
                             setIsMobileMenuOpen(false);
                             openAuthModal('login');
                           }}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors duration-300 text-sm"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-300 text-sm"
                         >
                           Sign In
                         </button>
@@ -239,7 +215,7 @@ export default function Navbar() {
                             setIsMobileMenuOpen(false);
                             openAuthModal('signup');
                           }}
-                          className="w-full bg-transparent hover:bg-white/10 text-white border border-white/20 hover:border-white/40 px-3 py-2 rounded-lg transition-colors duration-300 text-sm"
+                          className="w-full bg-transparent hover:bg-white/10 text-white border border-white/20 hover:border-white/40 px-4 py-2 rounded-lg transition-colors duration-300 text-sm"
                         >
                           Sign Up
                         </button>

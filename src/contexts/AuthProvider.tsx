@@ -251,8 +251,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase, loginAttempts, rateLimiter]);
 
-  // Enhanced sign up with validation
-  const signUp = useCallback(async (email: string, password: string) => {
+  // Enhanced sign up with validation and name support
+  const signUp = useCallback(async (email: string, password: string, fullName?: string) => {
     if (!supabase) {
       return { error: { message: 'Authentication service not available' } as AuthError };
     }
@@ -297,6 +297,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         options: {
           emailRedirectTo: finalRedirectUrl,
           data: {
+            full_name: fullName || '',
             signup_date: new Date().toISOString(),
             user_agent: navigator.userAgent,
             ip_address: 'client-side', // Will be captured server-side
@@ -335,17 +336,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase]);
 
-  // Enhanced Google sign in
+  // Enhanced Google sign in with production domain support
   const signInWithGoogle = useCallback(async () => {
     if (!supabase) {
       return { error: { message: 'Authentication service not available' } as AuthError };
     }
 
     try {
+      // ENHANCED FIX: Dynamic domain detection for Google OAuth
+      let redirectUrl;
+      
+      if (process.env.NODE_ENV === 'production') {
+        // Use environment variable if available, fallback to hardcoded production domain
+        redirectUrl = process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 
+                     'https://belugagithubv2025machineloopscorpsf-gold.vercel.app';
+      } else {
+        // Development environment
+        redirectUrl = process.env.NEXT_PUBLIC_DEVELOPMENT_DOMAIN || 
+                     window.location.origin;
+      }
+      
+      const finalRedirectUrl = `${redirectUrl}/auth/callback`;
+
+      console.log('Google OAuth redirect URL:', finalRedirectUrl);
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: finalRedirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent'
@@ -360,7 +378,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase]);
 
-  // Password reset functionality
+  // Password reset functionality with production domain support
   const resetPassword = useCallback(async (email: string) => {
     if (!supabase) {
       return { error: { message: 'Authentication service not available' } as AuthError };
@@ -372,8 +390,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
+      // ENHANCED FIX: Dynamic domain detection for password reset
+      let redirectUrl;
+      
+      if (process.env.NODE_ENV === 'production') {
+        // Use environment variable if available, fallback to hardcoded production domain
+        redirectUrl = process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 
+                     'https://belugagithubv2025machineloopscorpsf-gold.vercel.app';
+      } else {
+        // Development environment
+        redirectUrl = process.env.NEXT_PUBLIC_DEVELOPMENT_DOMAIN || 
+                     window.location.origin;
+      }
+      
+      const finalRedirectUrl = `${redirectUrl}/auth/reset-password`;
+
+      console.log('Password reset redirect URL:', finalRedirectUrl);
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`
+        redirectTo: finalRedirectUrl
       });
 
       return { error };

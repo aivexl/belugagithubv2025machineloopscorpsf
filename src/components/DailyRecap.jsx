@@ -2,7 +2,6 @@
 
 import React, { useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useAuth } from '../hooks/useAuth';
 
 const recapItems = [
@@ -26,6 +25,16 @@ export default function DailyRecap() {
       aistarImg.src = '/Asset/aistar.png';
     }
   }, []);
+
+  // CRITICAL FIX: Handle sign in click to trigger modal
+  const handleSignInClick = () => {
+    // Dispatch custom event to trigger auth modal
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('openAuthModal', { 
+        detail: { type: 'login' } 
+      }));
+    }
+  };
 
   return (
     <div className="bg-duniacrypto-panel rounded-lg shadow p-4">
@@ -74,14 +83,14 @@ export default function DailyRecap() {
               </ul>
             </div>
             
-            {/* Sign In overlay */}
+            {/* Sign In overlay - CRITICAL FIX: Using button instead of broken route */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <Link
-                href="/auth/signin"
+              <button
+                onClick={handleSignInClick}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-300 font-medium"
               >
                 Sign In to See More
-              </Link>
+              </button>
             </div>
           </div>
         </div>
