@@ -105,12 +105,6 @@ const nextConfig = {
         destination: '/new-page',
         permanent: true,
       },
-      // Fallback for profile routes
-      {
-        source: '/profile/:path*',
-        destination: '/profile',
-        permanent: false,
-      },
     ];
   },
   
@@ -129,6 +123,14 @@ const nextConfig = {
   
   // Enable strict mode for better error detection
   reactStrictMode: true,
+  
+  // Better error handling
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 25 * 1000,
+    // number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
+  },
 };
 
 module.exports = nextConfig;
