@@ -25,12 +25,12 @@ export default function NotFound() {
             Go to Profile
           </Link>
           
-          <button
-            onClick={() => window.history.back()}
+          <Link
+            href="/"
             className="block w-full bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
           >
             Go Back
-          </button>
+          </Link>
         </div>
         
         <div className="mt-8 text-sm text-gray-500">
@@ -39,4 +39,4 @@ export default function NotFound() {
       </div>
     </div>
   );
-} 
+}

@@ -1,15 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Disable ESLint and TypeScript errors during build
+  // Enterprise-level build configuration
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false, // Enable ESLint for quality
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false, // Enable TypeScript checking
   },
   
-  // Enhanced image optimization
+  // Enhanced image optimization for enterprise performance
   images: {
     remotePatterns: [
       {
@@ -24,34 +24,57 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 31536000, // 1 year
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   
-  // Enhanced compression and performance
+  // Enterprise performance optimizations
   compress: true,
   poweredByHeader: false,
   
-  // Performance optimizations
+  // Stable experimental features
   experimental: {
-    // Disable optimizeCss for now as it requires additional dependencies
-    // optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@vercel/analytics'],
   },
   
-  // Fix Supabase Edge Runtime warnings
+  // Fix Supabase Edge Runtime compatibility
   serverExternalPackages: ['@supabase/supabase-js', '@supabase/ssr'],
   
-  // FORCE RESET: Disable ALL webpack customizations
-  webpack: (config) => {
-    // Return default Next.js webpack config without modifications
+  // Enterprise webpack configuration
+  webpack: (config, { dev, isServer }) => {
+    // Production optimizations
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 10,
+          },
+        },
+      };
+      
+      config.optimization.moduleIds = 'deterministic';
+      config.optimization.chunkIds = 'deterministic';
+    }
+    
     return config;
   },
   
-  // Headers for better caching and security
+  // Enterprise security and caching headers
   async headers() {
     return [
       {
@@ -64,21 +87,6 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Development cache busting - less aggressive for chunks
-        source: '/',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, must-revalidate',
-          },
-          {
-            key: 'Pragma',
-            value: 'no-cache',
-          },
-        ],
-      },
-      {
-        // Exclude Next.js internal assets from strict headers
         source: '/((?!_next/).*)',
         headers: [
           {
@@ -98,12 +106,22 @@ const nextConfig: NextConfig = {
     ];
   },
   
-  // Ensure consistent output
+  // Enterprise output configuration
   output: 'standalone',
   
-  // Environment-specific configurations
+  // Environment configuration
   env: {
     CUSTOM_KEY: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+  },
+  
+  // Enterprise routing configuration
+  trailingSlash: false,
+  reactStrictMode: true,
+  
+  // Performance monitoring
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
   },
 };
 
