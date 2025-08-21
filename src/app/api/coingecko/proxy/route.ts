@@ -4,7 +4,7 @@ import { withCache } from '../../../../lib/memoryCache';
 export const dynamic = 'force-dynamic';
 
 function withApiKey(url: URL): URL {
-  const apiKey = process.env.COINGECKO_API_KEY || process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
+  const apiKey = process.env['COINGECKO_API_KEY'] || process.env['NEXT_PUBLIC_COINGECKO_API_KEY'];
   if (!apiKey) return url;
   if (!url.searchParams.has('x_cg_demo_api_key')) {
     url.searchParams.set('x_cg_demo_api_key', apiKey);
@@ -15,7 +15,7 @@ function withApiKey(url: URL): URL {
 type CachedResponse = { status: number; body: string; contentType: string };
 
 async function fetchJson(url: URL): Promise<CachedResponse> {
-  const apiKey = process.env.COINGECKO_API_KEY || process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
+  const apiKey = process.env['COINGECKO_API_KEY'] || process.env['NEXT_PUBLIC_COINGECKO_API_KEY'];
   const headers: Record<string, string> = {
     accept: 'application/json',
     'User-Agent': 'beluga-app/1.0 (+https://vercel.app)'

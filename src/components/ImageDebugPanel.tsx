@@ -3,16 +3,7 @@
 import React, { useState } from 'react';
 
 interface ImageDebugPanelProps {
-  articles: Array<{
-    _id?: string;
-    title?: string;
-    mainImage?: string;
-    image?: {
-      asset?: {
-        _ref?: string;
-      };
-    };
-  }>;
+  articles: any[];
   isVisible: boolean;
   onClose: () => void;
 }

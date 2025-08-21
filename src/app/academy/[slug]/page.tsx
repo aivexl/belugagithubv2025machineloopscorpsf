@@ -18,11 +18,6 @@ export default async function AcademyDetailPage({
     
     const [articleWithImage] = addImageUrls([article]);
     
-    if (!articleWithImage) {
-      console.log('Article with image not found for slug:', slug);
-      return notFound();
-    }
-    
     // Get related articles (same category, excluding current article)
     const allArticles = await getAllArticles();
     const relatedArticles = allArticles

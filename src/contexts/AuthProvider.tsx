@@ -53,15 +53,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Create Supabase client with error handling
   const supabase = useMemo(() => {
-    if (!process.env['NEXT_PUBLIC_SUPABASE_URL'] || !process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       console.warn('Supabase environment variables not configured');
       return null;
     }
 
     try {
       return createBrowserClient(
-        process.env['NEXT_PUBLIC_SUPABASE_URL'],
-        process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'],
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         {
           auth: {
             autoRefreshToken: true,
@@ -419,7 +419,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase, rateLimiter]);
 
   // Update user profile
-  const updateProfile = useCallback(async (updates: Record<string, unknown>) => {
+  const updateProfile = useCallback(async (updates: { [key: string]: any }) => {
     if (!supabase || !user) {
       return { error: { message: 'User not authenticated' } as AuthError };
     }

@@ -22,7 +22,7 @@ export default function GlobalError({
             <div className="text-6xl mb-6">🚨</div>
             <h1 className="text-4xl font-bold text-white mb-4">Something went wrong!</h1>
             <p className="text-gray-400 text-lg mb-8">
-              We&apos;re experiencing technical difficulties. Please try again.
+              We're experiencing technical difficulties. Please try again.
             </p>
             
             <div className="space-y-4">

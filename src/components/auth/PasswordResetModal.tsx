@@ -21,7 +21,7 @@ export default function PasswordResetModal({
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState(0);
   
-  const { resetPassword } = useAuth();
+  const { resetPassword, authError } = useAuth();
 
   // Check lockout status - FIXED: Moved to useEffect to follow React hooks rules
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function PasswordResetModal({
           onClose();
         }, 3000);
       }
-    } catch {
+    } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -197,7 +197,7 @@ export default function PasswordResetModal({
             <li>• Check your email for a password reset link</li>
             <li>• Click the link to set a new password</li>
             <li>• The link expires in 1 hour for security</li>
-            <li>• Check your spam folder if you don&apos;t see it</li>
+            <li>• Check your spam folder if you don't see it</li>
           </ul>
         </div>
 

@@ -61,7 +61,7 @@ export const getCryptoMapping = (symbol) => {
 
 export const getSupportedChains = () => {
   const chains = new Set();
-  Object.values(CRYPTO_CONTRACT_MAPPING).forEach((mapping) => {
+  Object.values(CRYPTO_CONTRACT_MAPPING).forEach(mapping => {
     chains.add(mapping.chainName);
   });
   return Array.from(chains);
@@ -69,7 +69,7 @@ export const getSupportedChains = () => {
 
 export const getCryptosByChain = (chain) => {
   return Object.entries(CRYPTO_CONTRACT_MAPPING)
-    .filter(([, mapping]) => mapping.chainName === chain)
+    .filter(([_, mapping]) => mapping.chainName === chain)
     .map(([symbol, mapping]) => ({ symbol, ...mapping }));
 };
 

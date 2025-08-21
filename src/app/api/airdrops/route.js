@@ -405,9 +405,9 @@ function processApiData(data, apiType) {
 
        case 'dropstab_airdrops':
         if (data.airdrops && Array.isArray(data.airdrops)) {
-          data.airdrops.slice(0, 15).forEach((airdrop) => {
+          data.airdrops.slice(0, 15).forEach((airdrop, index) => {
             airdrops.push({
-              id: `dropstab-${Math.random().toString(36).substr(2, 9)}`,
+              id: `dropstab-${index + 1}`,
               project: airdrop.project_name || airdrop.name,
               token: airdrop.token_symbol || airdrop.symbol,
               network: airdrop.network || 'Multi-chain',
@@ -435,9 +435,9 @@ function processApiData(data, apiType) {
 
       case 'airdrops_io':
         if (data.airdrops && Array.isArray(data.airdrops)) {
-          data.airdrops.slice(0, 15).forEach((airdrop) => {
+          data.airdrops.slice(0, 15).forEach((airdrop, index) => {
             airdrops.push({
-              id: `airdropsio-${Math.random().toString(36).substr(2, 9)}`,
+              id: `airdropsio-${index + 1}`,
               project: airdrop.project_name,
               token: airdrop.token_symbol,
               network: airdrop.network,
@@ -465,9 +465,9 @@ function processApiData(data, apiType) {
 
       case 'airdropalert':
         if (data.airdrops && Array.isArray(data.airdrops)) {
-          data.airdrops.slice(0, 15).forEach((airdrop) => {
+          data.airdrops.slice(0, 15).forEach((airdrop, index) => {
             airdrops.push({
-              id: `airdropalert-${Math.random().toString(36).substr(2, 9)}`,
+              id: `airdropalert-${index + 1}`,
               project: airdrop.project_name,
               token: airdrop.token_symbol,
               network: airdrop.network,
@@ -739,23 +739,23 @@ function getDataSourceInfo(primary, fallback, scraping) {
   return 'Synthetic Data (All Sources Failed)';
 }
 
-// Network mapping functions - Currently unused but kept for future implementation
-// function getNetworkFromPlatform(platformId) {
-//   if (!platformId) return 'Multi-chain';
-//   const networkMap = {
-//     'ethereum': 'Ethereum',
-//     'binance-smart-chain': 'BSC',
-//     'polygon-pos': 'Polygon',
-//     'arbitrum-one': 'Arbitrum',
-//     'optimistic-ethereum': 'Optimism',
-//     'avalanche': 'Avalanche',
-//     'solana': 'Solana',
-//     'cardano': 'Cardano',
-//     'polkadot': 'Polkadot',
-//     'cosmos': 'Cosmos'
-//   };
-//   return networkMap[platformId] || 'Multi-chain';
-// }
+// Network mapping functions
+function getNetworkFromPlatform(platformId) {
+  if (!platformId) return 'Multi-chain';
+  const networkMap = {
+    'ethereum': 'Ethereum',
+    'binance-smart-chain': 'BSC',
+    'polygon-pos': 'Polygon',
+    'arbitrum-one': 'Arbitrum',
+    'optimistic-ethereum': 'Optimism',
+    'avalanche': 'Avalanche',
+    'solana': 'Solana',
+    'cardano': 'Cardano',
+    'polkadot': 'Polkadot',
+    'cosmos': 'Cosmos'
+  };
+  return networkMap[platformId] || 'Multi-chain';
+}
 
 function getNetworkForProject(project) {
   const projectMap = {
@@ -779,12 +779,12 @@ function getNetworkForProject(project) {
 }
 
 // Project classification functions
-function getProjectType() {
+function getProjectType(name) {
   const types = ['DeFi', 'Infrastructure', 'Layer 1', 'Layer 2', 'NFT', 'Gaming', 'Privacy', 'Oracle', 'Bridge', 'Wallet'];
   return types[Math.floor(Math.random() * types.length)];
 }
 
-function getProjectCategory() {
+function getProjectCategory(name) {
   const categories = ['DEX', 'Lending', 'Yield Farming', 'Bridge', 'Blockchain', 'Wallet', 'Analytics', 'Staking', 'Governance', 'Cross-chain'];
   return categories[Math.floor(Math.random() * categories.length)];
 }

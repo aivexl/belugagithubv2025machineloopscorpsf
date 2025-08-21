@@ -95,7 +95,7 @@ export default function LoginModal({
         // Success - close modal
         onClose();
       }
-    } catch {
+    } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -114,7 +114,7 @@ export default function LoginModal({
       if (error) {
         setError(error.message);
       }
-    } catch {
+    } catch (err) {
       setError('Google sign-in failed. Please try again.');
     } finally {
       setLoading(false);
@@ -299,7 +299,7 @@ export default function LoginModal({
         {/* Sign Up Link */}
         <div className="mt-6 text-center">
           <p className="text-gray-400">
-            Don&apos;t have an account?{' '}
+            Don't have an account?{' '}
             <button
               onClick={onSwitchToSignUp}
               disabled={loading || isLocked}

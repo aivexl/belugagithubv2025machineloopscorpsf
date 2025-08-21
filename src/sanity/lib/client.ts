@@ -45,7 +45,7 @@ async function retryWithBackoff<T>(
   throw lastError!;
 }
 
-export async function querySanity(query: string, params: Record<string, unknown> = {}) {
+export async function querySanity(query: string, params: any = {}) {
   return retryWithBackoff(async () => {
     try {
       const queryParams = new URLSearchParams({

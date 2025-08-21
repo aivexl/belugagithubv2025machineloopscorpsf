@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import { tradingViewService } from '../utils/tradingview';
 import type { TradingViewSearchResult } from '../utils/tradingview';
 
@@ -92,11 +91,9 @@ export default function TradingViewSearch({
                 >
                   <div className="flex items-center space-x-3">
                     {result.logo_urls?.dark && (
-                      <Image 
+                      <img 
                         src={result.logo_urls.dark} 
                         alt={result.full_name}
-                        width={32}
-                        height={32}
                         className="w-8 h-8 rounded"
                       />
                     )}
@@ -118,7 +115,7 @@ export default function TradingViewSearch({
             </div>
           ) : query.trim() && (
             <div className="p-4 text-center text-gray-400">
-              No results found for &quot;{query}&quot;
+              No results found for "{query}"
             </div>
           )}
         </div>
