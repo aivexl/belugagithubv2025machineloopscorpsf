@@ -66,10 +66,29 @@ const nextConfig = {
       config.optimization.chunkIds = 'deterministic';
     }
     
+    // Fix for Supabase Edge Runtime compatibility
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        stream: false,
+        url: false,
+        zlib: false,
+        http: false,
+        https: false,
+        assert: false,
+        os: false,
+        path: false,
+      };
+    }
+    
     return config;
   },
   
-  // Headers for better performance
+  // Headers for better performance and security
   async headers() {
     return [
       {
@@ -86,6 +105,14 @@ const nextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
           },
         ],
       },
@@ -129,6 +156,12 @@ const nextConfig = {
   
   // Enable strict mode for better error detection
   reactStrictMode: true,
+  
+  // Performance optimizations
+  compress: true,
+  
+  // Security headers
+  poweredByHeader: false,
 };
 
-module.exports = nextConfig;
+export default nextConfig;

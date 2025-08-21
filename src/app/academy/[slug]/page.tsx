@@ -25,7 +25,12 @@ export default async function AcademyDetailPage({
       .slice(0, 6);
     
     const relatedArticlesWithImages = addImageUrls(relatedArticles);
-    
+
+    // Ensure article exists before rendering
+    if (!articleWithImage) {
+      return notFound();
+    }
+
     return <ArticleDetailClient article={articleWithImage} relatedArticles={relatedArticlesWithImages} />;
   } catch (error) {
     console.error('Error in AcademyDetailPage:', error);
