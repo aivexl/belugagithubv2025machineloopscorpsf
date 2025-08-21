@@ -33,7 +33,11 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
     intervalRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % sliderArticles.length);
     }, 4000);
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [sliderArticles.length]);
 
   const handlePrev = () => {

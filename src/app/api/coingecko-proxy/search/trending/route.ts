@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Enterprise-level fallback data for trending coins
 const FALLBACK_TRENDING_COINS = {
@@ -42,7 +42,7 @@ const FALLBACK_TRENDING_COINS = {
   ]
 };
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('Server-side trending: Fetching trending coins from CoinGecko...');
     

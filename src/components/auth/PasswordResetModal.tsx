@@ -21,7 +21,7 @@ export default function PasswordResetModal({
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState(0);
   
-  const { resetPassword, authError } = useAuth();
+  const { resetPassword } = useAuth();
 
   // Check lockout status - FIXED: Moved to useEffect to follow React hooks rules
   useEffect(() => {
@@ -37,6 +37,7 @@ export default function PasswordResetModal({
       
       return () => clearInterval(timer);
     }
+    return undefined;
   }, [isLocked, lockoutTime]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {

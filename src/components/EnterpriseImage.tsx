@@ -44,7 +44,6 @@ export default function EnterpriseImage({
   onLoad,
   placeholder = 'empty',
   blurDataURL,
-  sizes,
   quality = 85,
   fill = false,
   style
@@ -60,7 +59,7 @@ export default function EnterpriseImage({
   const retryDelay = 1000; // 1 second base delay
 
   // Handle image loading errors with enterprise-level fallback strategy
-  const handleImageError = useCallback((event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const handleImageError = useCallback(() => {
     const error = new Error('Image failed to load');
     
     if (process.env.NODE_ENV === 'development') {
@@ -136,6 +135,8 @@ export default function EnterpriseImage({
     
     // Start performance monitoring
     monitoringIdRef.current = startImageMonitoring(src);
+    
+    return undefined;
   }, [src]);
 
   // Preload critical images for better performance
@@ -224,31 +225,54 @@ export default function EnterpriseImage({
   // Main image render with Next.js Image optimization
   return (
     <div className={`relative ${className}`} style={style}>
-      <Image
-        ref={imageRef}
-        src={imageSrc}
-        alt={safeAlt}
-        width={fill ? undefined : width}
-        height={fill ? undefined : height}
-        fill={fill}
-        className={`transition-opacity duration-300 ${
-          isLoading ? 'opacity-0' : 'opacity-100'
-        }`}
-        priority={priority}
-        placeholder={placeholder}
-        blurDataURL={blurDataURL}
-        quality={quality}
-        loading={loadingAttr}
-        onError={handleImageError}
-        onLoad={handleImageLoad}
-        onLoadingComplete={() => setIsLoading(false)}
-        style={{
-          objectFit: 'cover',
-          ...style
-        }}
-        // Performance optimizations
-        unoptimized={false}
-      />
+      {fill ? (
+        <Image
+          ref={imageRef}
+          src={imageSrc}
+          alt={safeAlt}
+          fill={true}
+          className={`transition-opacity duration-300 ${
+            isLoading ? 'opacity-0' : 'opacity-100'
+          }`}
+          priority={priority}
+          placeholder={placeholder}
+          blurDataURL={blurDataURL}
+          quality={quality}
+          loading={loadingAttr}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
+          onLoadingComplete={() => setIsLoading(false)}
+          style={{
+            objectFit: 'cover',
+            ...style
+          }}
+          unoptimized={false}
+        />
+      ) : (
+        <Image
+          ref={imageRef}
+          src={imageSrc}
+          alt={safeAlt}
+          width={width || 800}
+          height={height || 600}
+          className={`transition-opacity duration-300 ${
+            isLoading ? 'opacity-0' : 'opacity-100'
+          }`}
+          priority={priority}
+          placeholder={placeholder}
+          blurDataURL={blurDataURL}
+          quality={quality}
+          loading={loadingAttr}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
+          onLoadingComplete={() => setIsLoading(false)}
+          style={{
+            objectFit: 'cover',
+            ...style
+          }}
+          unoptimized={false}
+        />
+      )}
       
       {/* Loading overlay */}
       {isLoading && (

@@ -2,7 +2,7 @@
 // ENTERPRISE AUTHENTICATION UTILITIES
 // =============================================================================
 
-import { AUTH_CONFIG, getAuthRedirectUrl, isProduction } from './authConfig';
+import { AUTH_CONFIG, isProduction } from './authConfig';
 
 // Password strength validation
 export const validatePasswordStrength = (password: string): {

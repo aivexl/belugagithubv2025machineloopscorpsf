@@ -65,6 +65,7 @@ export default function Profile({ className = '', showDropdown = false, onProfil
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
+    return undefined;
   }, [isDropdownOpen, handleClickOutside]);
 
   // Generate avatar initials

@@ -31,7 +31,7 @@ class ImagePerformanceMonitor {
   /**
    * Start monitoring an image load
    */
-  startMonitoring(url: string): string {
+  startMonitoring(): string {
     if (!this.isEnabled) return '';
     
     const id = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -210,7 +210,7 @@ class ImagePerformanceMonitor {
 export const imagePerformanceMonitor = new ImagePerformanceMonitor();
 
 // Export utility functions
-export const startImageMonitoring = (url: string) => imagePerformanceMonitor.startMonitoring(url);
+export const startImageMonitoring = (url: string) => imagePerformanceMonitor.startMonitoring();
 export const recordImageSuccess = (id: string, url: string, size: number, format: string) => 
   imagePerformanceMonitor.recordSuccess(id, url, size, format);
 export const recordImageFailure = (id: string, url: string, error: string, retryCount?: number) => 

@@ -1,11 +1,11 @@
 "use client";
-    import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import GradientText from "./GradientText";
 import { useAuth } from "../hooks/useAuth";
-import AuthModalManager, { AuthModalType } from "./auth/AuthModalManager";
+import AuthModalManager from "./auth/AuthModalManager";
 import Profile from "./Profile";
 import { 
   AiOutlineHome,
@@ -96,10 +96,6 @@ export default function Navbar() {
     }
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
-
   // CRITICAL FIX: Listen for custom auth modal events from other components
   useEffect(() => {
     const handleCustomAuthModal = (event: CustomEvent) => {
@@ -121,6 +117,8 @@ export default function Navbar() {
 
   // Check if current path is active
   const isActive = (path: string) => {
+    if (!pathname) return false;
+    
     if (path === '/') {
       return pathname === '/';
     }

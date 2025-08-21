@@ -59,6 +59,7 @@ export default function LoginModal({
       }, 1000);
       return () => clearInterval(timer);
     }
+    return undefined;
   }, [isLocked, lockoutTime]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {

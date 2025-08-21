@@ -248,7 +248,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
       clearInterval(refreshInterval);
     };
   }, [supabase, handleAuthStateChange, refreshSessionIfNeeded]);
