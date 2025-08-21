@@ -41,46 +41,6 @@ class RateLimiter {
   }
 }
 
-// Enterprise-level mock Supabase client for graceful degradation
-const createMockSupabaseClient = () => {
-  console.log('🔄 Initializing mock Supabase client for graceful degradation');
-  
-  // Create a proper AuthError object that matches the expected interface
-  const createAuthError = (message: string): AuthError => {
-    const error = new Error(message) as AuthError;
-    error.name = 'AuthError';
-    error.status = 503;
-    error.message = message;
-    return error;
-  };
-  
-  return {
-    auth: {
-      getSession: async () => ({ data: { session: null }, error: null }),
-      get user() { return null; },
-      get session() { return null; },
-      signIn: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
-      signInWithPassword: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
-      signInWithOAuth: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
-      signUp: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
-      signOut: async () => ({ error: null }),
-      onAuthStateChange: () => ({ data: { subscription: null } }),
-      refreshSession: async () => ({ data: { session: null }, error: null }),
-      resetPasswordForEmail: async () => ({ error: null }),
-      updateUser: async () => ({ data: { user: null }, error: createAuthError('Authentication service not available') }),
-      updatePassword: async () => ({ error: createAuthError('Authentication service not available') }),
-    },
-    from: () => ({
-      select: () => ({
-        eq: () => ({ single: async () => ({ data: null, error: { message: 'Database service not available' } }) }),
-        insert: async () => ({ data: null, error: { message: 'Database service not available' } }),
-        update: async () => ({ data: null, error: { message: 'Database service not available' } }),
-        delete: async () => ({ data: null, error: { message: 'Database service not available' } }),
-      }),
-    }),
-  };
-};
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -137,6 +97,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return createMockSupabaseClient();
     }
   }, []);
+
+  // Enterprise-level mock Supabase client for graceful degradation
+  const createMockSupabaseClient = () => {
+    console.log('🔄 Initializing mock Supabase client for graceful degradation');
+    
+    // Create a proper AuthError object that matches the expected interface
+    const createAuthError = (message: string): AuthError => {
+      const error = new Error(message) as AuthError;
+      error.name = 'AuthError';
+      error.status = 503;
+      error.message = message;
+      return error;
+    };
+    
+    return {
+      auth: {
+        getSession: async () => ({ data: { session: null }, error: null }),
+        get user() { return null; },
+        get session() { return null; },
+        signIn: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
+        signInWithPassword: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
+        signInWithOAuth: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
+        signUp: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
+        signOut: async () => ({ error: null }),
+        onAuthStateChange: () => ({ data: { subscription: null } }),
+        refreshSession: async () => ({ data: { session: null }, error: null }),
+        resetPasswordForEmail: async () => ({ error: null }),
+        updateUser: async () => ({ data: { user: null }, error: createAuthError('Authentication service not available') }),
+        updatePassword: async () => ({ error: createAuthError('Authentication service not available') }),
+      },
+      from: () => ({
+        select: () => ({
+          eq: () => ({ single: async () => ({ data: null, error: { message: 'Database service not available' } }) }),
+          insert: async () => ({ data: null, error: { message: 'Database service not available' } }),
+          update: async () => ({ data: null, error: { message: 'Database service not available' } }),
+          delete: async () => ({ data: null, error: { message: 'Database service not available' } }),
+        }),
+      }),
+    };
+  };
 
   // Enhanced session management with automatic refresh
   const refreshSessionIfNeeded = useCallback(async () => {
