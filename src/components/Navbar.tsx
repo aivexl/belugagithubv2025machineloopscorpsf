@@ -50,7 +50,7 @@ export default function Navbar() {
   const headerRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
 
   // Keep spacer height exactly equal to actual navbar height across breakpoints
   useEffect(() => {

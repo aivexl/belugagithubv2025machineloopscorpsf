@@ -7,7 +7,7 @@ const client = createClient({
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
   apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2025-07-22',
   useCdn: false,
-  token: process.env.SANITY_API_TOKEN, // Optional: for private datasets
+  ...(process.env.SANITY_API_TOKEN && { token: process.env.SANITY_API_TOKEN }),
 });
 
 export async function GET(request: NextRequest) {
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         error: 'Failed to fetch data from Sanity',
-        details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : 'Internal server error'
       }, 
       { status: 500 }
     );

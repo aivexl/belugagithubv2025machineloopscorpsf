@@ -36,9 +36,10 @@ const nextConfig = {
   // ENTERPRISE-LEVEL: Experimental features for stability
   experimental: {
     optimizePackageImports: ['react', 'react-dom'],
-    serverComponentsExternalPackages: ['@supabase/realtime-js'],
-    esmExternals: 'loose',
   },
+  
+  // ENTERPRISE-LEVEL: Server external packages for Edge Runtime compatibility
+  serverExternalPackages: ['@supabase/realtime-js'],
   
   // ENTERPRISE-LEVEL: Compiler optimizations
   compiler: {

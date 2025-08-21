@@ -134,7 +134,7 @@ export default function EnterpriseImage({
     retryCountRef.current = 0;
     
     // Start performance monitoring
-    monitoringIdRef.current = startImageMonitoring(src);
+    monitoringIdRef.current = startImageMonitoring();
     
     return undefined;
   }, [src]);
@@ -236,7 +236,7 @@ export default function EnterpriseImage({
           }`}
           priority={priority}
           placeholder={placeholder}
-          blurDataURL={blurDataURL}
+          {...(blurDataURL && { blurDataURL })}
           quality={quality}
           loading={loadingAttr}
           onError={handleImageError}
@@ -260,7 +260,7 @@ export default function EnterpriseImage({
           }`}
           priority={priority}
           placeholder={placeholder}
-          blurDataURL={blurDataURL}
+          {...(blurDataURL && { blurDataURL })}
           quality={quality}
           loading={loadingAttr}
           onError={handleImageError}

@@ -53,7 +53,7 @@ export async function POST() {
         api: 'ok',
         middleware: 'ok'
       },
-      recommendations: []
+      recommendations: [] as string[]
     };
 
     // Add recommendations based on environment

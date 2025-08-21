@@ -210,7 +210,7 @@ class ImagePerformanceMonitor {
 export const imagePerformanceMonitor = new ImagePerformanceMonitor();
 
 // Export utility functions
-export const startImageMonitoring = (url: string) => imagePerformanceMonitor.startMonitoring();
+export const startImageMonitoring = () => imagePerformanceMonitor.startMonitoring();
 export const recordImageSuccess = (id: string, url: string, size: number, format: string) => 
   imagePerformanceMonitor.recordSuccess(id, url, size, format);
 export const recordImageFailure = (id: string, url: string, error: string, retryCount?: number) => 

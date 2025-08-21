@@ -17,6 +17,8 @@ const eslintConfig = [
       "@next/next/no-html-link-for-pages": "off",
       "@next/next/no-head-element": "off",
       "react/no-unescaped-entities": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   {
