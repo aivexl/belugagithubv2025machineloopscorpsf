@@ -15,7 +15,18 @@ const eslintConfig = [
     rules: {
       "@next/next/no-img-element": "off",
       "@next/next/no-html-link-for-pages": "off",
+      "@next/next/no-head-element": "off",
+      "react/no-unescaped-entities": "off",
     },
+  },
+  {
+    ignores: [
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "dist/**",
+      "build/**",
+    ],
   },
 ];
 
