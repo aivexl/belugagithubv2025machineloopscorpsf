@@ -7,12 +7,12 @@ export interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   authError: string | null;
-  signIn: (email: string, password: string) => Promise<{ data?: any; error: AuthError | null }>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ data?: any; error: AuthError | null }>;
+  signIn: (email: string, password: string) => Promise<{ data?: unknown; error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<{ data?: unknown; error: AuthError | null }>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
-  updateProfile: (updates: { [key: string]: any }) => Promise<{ error: AuthError | null }>;
+  updateProfile: (updates: Record<string, unknown>) => Promise<{ error: AuthError | null }>;
   refreshSession: () => Promise<void>;
 }
 

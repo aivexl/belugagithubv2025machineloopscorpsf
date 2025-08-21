@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import GradientText from "./GradientText";
 import { useAuth } from "../hooks/useAuth";
-import AuthModalManager, { AuthModalType } from "./auth/AuthModalManager";
+import AuthModalManager from "./auth/AuthModalManager";
 import Profile from "./Profile";
 import { 
   AiOutlineHome,
@@ -96,9 +96,7 @@ export default function Navbar() {
     }
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
+
 
   // CRITICAL FIX: Listen for custom auth modal events from other components
   useEffect(() => {

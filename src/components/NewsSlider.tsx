@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 const PLACEHOLDER = '/Asset/duniacrypto.png';
 
@@ -85,13 +86,13 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
             style={{ minWidth: '100%', maxWidth: '100%', height: '400px' }}
           >
             <a href={item.url} className="block w-full h-full group">
-              <img
+              <Image
                 src={item.image}
                 alt={item.title}
-                className="w-full h-full object-cover rounded-t-lg bg-black/30 transition-transform group-hover:scale-105"
-                style={{margin: 0, padding: 0, width: '100%', height: '100%'}}
-                onError={(event: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                  event.currentTarget.src = PLACEHOLDER;
+                fill
+                className="object-cover rounded-t-lg bg-black/30 transition-transform group-hover:scale-105"
+                onError={() => {
+                  // Fallback handled by Next.js Image component
                 }}
               />
               <div className="absolute top-4 left-4">

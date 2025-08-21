@@ -121,10 +121,10 @@ export default function ComingSoonLite({
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold text-green-400 mb-2">
-                  You're on the list!
+                  You&apos;re on the list!
                 </h3>
                 <p className="text-gray-300">
-                  We'll let you know when we launch. Get ready for something awesome! 
+                  We&apos;ll let you know when we launch. Get ready for something awesome! 
                 </p>
               </div>
             )}

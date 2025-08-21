@@ -17,15 +17,10 @@ export default function ConsoleSilencer() {
       if (typeof window === "undefined" || typeof window.console === "undefined") return;
 
       const noop = () => {};
-      // eslint-disable-next-line no-console
       console.log = noop;
-      // eslint-disable-next-line no-console
       console.info = noop;
-      // eslint-disable-next-line no-console
       console.debug = noop;
-      // eslint-disable-next-line no-console
       console.warn = noop;
-      // eslint-disable-next-line no-console
       console.error = noop;
     } catch {
       // fail-safe

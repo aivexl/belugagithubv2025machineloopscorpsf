@@ -31,7 +31,7 @@ export default function useFetch(url, { refreshInterval = null, timeout = 10000 
 
   useEffect(() => {
     fetchData();
-  }, [url]);
+  }, [url, fetchData]);
 
   useInterval(() => {
     fetchData();

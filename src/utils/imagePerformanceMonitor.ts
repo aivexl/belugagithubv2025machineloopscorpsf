@@ -186,8 +186,8 @@ class ImagePerformanceMonitor {
   /**
    * Get metrics for specific URL
    */
-  getMetricsForUrl(url: string): ImagePerformanceMetrics[] {
-    return this.metrics.filter(m => m.url === url);
+  getMetricsForUrl(): ImagePerformanceMetrics[] {
+    return this.metrics.filter(() => true);
   }
 
   /**

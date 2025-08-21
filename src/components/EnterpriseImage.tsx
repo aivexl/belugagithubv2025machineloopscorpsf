@@ -44,7 +44,6 @@ export default function EnterpriseImage({
   onLoad,
   placeholder = 'empty',
   blurDataURL,
-  sizes,
   quality = 85,
   fill = false,
   style
@@ -60,7 +59,7 @@ export default function EnterpriseImage({
   const retryDelay = 1000; // 1 second base delay
 
   // Handle image loading errors with enterprise-level fallback strategy
-  const handleImageError = useCallback((event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const handleImageError = useCallback(() => {
     const error = new Error('Image failed to load');
     
     if (process.env.NODE_ENV === 'development') {
@@ -155,7 +154,7 @@ export default function EnterpriseImage({
             console.warn(`EnterpriseImage: Failed to preload image: ${src}`);
           }
         };
-      } catch (error) {
+      } catch {
         if (process.env.NODE_ENV === 'development') {
           console.warn('EnterpriseImage: Image preloading not supported in this environment');
         }
@@ -228,15 +227,14 @@ export default function EnterpriseImage({
         ref={imageRef}
         src={imageSrc}
         alt={safeAlt}
-        width={fill ? undefined : width}
-        height={fill ? undefined : height}
+        {...(fill ? {} : { width: width || 800, height: height || 600 })}
         fill={fill}
         className={`transition-opacity duration-300 ${
           isLoading ? 'opacity-0' : 'opacity-100'
         }`}
         priority={priority}
         placeholder={placeholder}
-        blurDataURL={blurDataURL}
+        {...(blurDataURL ? { blurDataURL } : {})}
         quality={quality}
         loading={loadingAttr}
         onError={handleImageError}

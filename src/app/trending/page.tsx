@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 const API_KEY = process.env.NEXT_PUBLIC_MORALIS_API_KEY;
 
@@ -164,9 +165,11 @@ const TrendingPage = () => {
               className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors border border-gray-700"
             >
               <div className="flex items-center space-x-3 mb-3">
-                <img
+                <Image
                   src={token.logo || "/images/token-default.svg"}
                   alt={token.name}
+                  width={40}
+                  height={40}
                   className="w-10 h-10 rounded-full"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;

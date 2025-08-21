@@ -161,7 +161,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
           onClose();
         }, 3000);
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -178,7 +178,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
       if (error) {
         setError(error.message);
       }
-    } catch (err) {
+    } catch {
       setError('Google sign-up failed. Please try again.');
     } finally {
       setLoading(false);

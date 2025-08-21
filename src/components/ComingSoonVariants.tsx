@@ -92,7 +92,7 @@ export const SimpleComingSoon = ({ title, subtitle }: { title: string; subtitle:
   />
 );
 
-export default {
+const ComingSoonVariants = {
   Research: ResearchComingSoon,
   Newsroom: NewsroomComingSoon,
   Asset: AssetComingSoon,
@@ -103,3 +103,5 @@ export default {
   Kamus: KamusComingSoon,
   Simple: SimpleComingSoon,
 };
+
+export default ComingSoonVariants;
