@@ -52,8 +52,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize rate limiter
   const rateLimiter = useMemo(() => new RateLimiter(), []);
 
+  // Safety check for static generation
+  const isStaticGeneration = typeof window === 'undefined';
+
   // Create Supabase client with enterprise-level error handling and graceful degradation
   const supabase = useMemo(() => {
+    // During static generation, always return mock client
+    if (isStaticGeneration) {
+      console.log('🔄 Static generation detected, using mock Supabase client');
+      return createMockSupabaseClient();
+    }
+
     // Enhanced environment variable validation with detailed logging
     if (!validateSupabaseConfig()) {
       console.warn('🔴 ENTERPRISE ALERT: Supabase environment variables not configured');
@@ -91,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn('🔄 Falling back to mock client for graceful degradation');
       return createMockSupabaseClient();
     }
-  }, []);
+  }, [isStaticGeneration]);
 
   // Enterprise-level mock Supabase client for graceful degradation
   const createMockSupabaseClient = () => {
@@ -202,6 +211,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize authentication
   useEffect(() => {
+    // Skip initialization during static generation
+    if (isStaticGeneration) {
+      setLoading(false);
+      return;
+    }
+
     if (!supabase) {
       setLoading(false);
       return;
@@ -217,8 +232,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (error) throw error;
         
         if (mounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
+          setSession(session);
+          setUser(session?.user ?? null);
           setIsAuthenticated(!!session?.user);
         }
       } catch (error) {
@@ -228,7 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } finally {
         if (mounted) {
-        setLoading(false);
+          setLoading(false);
         }
       }
     };
@@ -246,7 +261,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
       clearInterval(refreshInterval);
     };
-  }, [supabase, handleAuthStateChange, refreshSessionIfNeeded]);
+  }, [supabase, handleAuthStateChange, refreshSessionIfNeeded, isStaticGeneration]);
 
   // Enhanced sign in with security measures
   const signIn = useCallback(async (email: string, password: string) => {

@@ -108,10 +108,30 @@ export function getDevelopmentDomain(): string {
 
 // Get current domain based on environment
 export function getCurrentDomain(): string {
-  if (typeof window !== 'undefined') {
-    return window.location.origin;
+  // During static generation and SSR, always use environment-based fallbacks
+  if (typeof window === 'undefined') {
+    if (process.env.NODE_ENV === 'production') {
+      return getProductionDomain();
+    } else {
+      return getDevelopmentDomain();
+    }
   }
-  return isProduction() ? getProductionDomain() : getDevelopmentDomain();
+  
+  // Only access window.location in browser environment
+  try {
+    if (window.location && window.location.origin) {
+      return window.location.origin;
+    }
+  } catch (error) {
+    console.warn('Failed to access window.location, using fallback domain');
+  }
+  
+  // Fallback for any browser environment issues
+  if (process.env.NODE_ENV === 'production') {
+    return getProductionDomain();
+  } else {
+    return getDevelopmentDomain();
+  }
 }
 
 // Validate Supabase configuration specifically
