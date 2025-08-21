@@ -1,14 +1,6 @@
-'use client';
-
 import Link from 'next/link';
 
 export default function NotFound() {
-  const handleGoBack = () => {
-    if (typeof window !== 'undefined') {
-      window.history.back();
-    }
-  };
-
   return (
     <div className="min-h-screen bg-duniacrypto-background flex items-center justify-center px-4">
       <div className="text-center max-w-md">
@@ -34,7 +26,7 @@ export default function NotFound() {
           </Link>
           
           <button
-            onClick={handleGoBack}
+            onClick={() => window.history.back()}
             className="block w-full bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
           >
             Go Back

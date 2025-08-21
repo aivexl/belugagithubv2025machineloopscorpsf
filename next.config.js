@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ENTERPRISE-LEVEL: Production optimizations
+  // Disable source maps in development to prevent 404 errors
   productionBrowserSourceMaps: false,
   
-  // ENTERPRISE-LEVEL: Image optimization
+  // Optimize images - use remotePatterns instead of deprecated domains
   images: {
     remotePatterns: [
       {
@@ -26,50 +26,29 @@ const nextConfig = {
       },
     ],
     formats: ['image/webp', 'image/avif'],
+    // Optimize image loading
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
-  // ENTERPRISE-LEVEL: Experimental features for stability
+  // Experimental features - minimal for stability
   experimental: {
     optimizePackageImports: ['react', 'react-dom'],
   },
   
-  // ENTERPRISE-LEVEL: Server external packages for Edge Runtime compatibility
-  serverExternalPackages: ['@supabase/realtime-js'],
-  
-  // ENTERPRISE-LEVEL: Compiler optimizations
+  // Compiler options to reduce bundle size and warnings
   compiler: {
+    // Remove console.log in production
     removeConsole: process.env.NODE_ENV === 'production',
+    // Optimize CSS
     styledComponents: true,
   },
   
-  // ENTERPRISE-LEVEL: Webpack configuration for stability
+  // Minimal webpack configuration for stability
   webpack: (config, { dev, isServer }) => {
-    // ENTERPRISE-LEVEL: Handle Supabase Edge Runtime issues
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        crypto: false,
-        stream: false,
-        url: false,
-        zlib: false,
-        http: false,
-        https: false,
-        assert: false,
-        os: false,
-        path: false,
-      };
-    }
-    
-    // ENTERPRISE-LEVEL: Production optimizations
+    // Only apply minimal optimizations for production
     if (!isServer && !dev) {
+      // Simple and stable chunk splitting
       config.optimization.splitChunks = {
         chunks: 'all',
         cacheGroups: {
@@ -79,15 +58,10 @@ const nextConfig = {
             chunks: 'all',
             priority: 10,
           },
-          supabase: {
-            test: /[\\/]node_modules[\\/]@supabase[\\/]/,
-            name: 'supabase',
-            chunks: 'all',
-            priority: 20,
-          },
         },
       };
       
+      // Stable module and chunk IDs
       config.optimization.moduleIds = 'deterministic';
       config.optimization.chunkIds = 'deterministic';
     }
@@ -95,7 +69,7 @@ const nextConfig = {
     return config;
   },
   
-  // ENTERPRISE-LEVEL: Security headers
+  // Headers for better performance
   async headers() {
     return [
       {
@@ -113,25 +87,17 @@ const nextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
         ],
       },
     ];
   },
   
-  // ENTERPRISE-LEVEL: Environment variables
+  // Environment variables
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
   
-  // ENTERPRISE-LEVEL: Redirects for better routing
+  // Redirects for better routing
   async redirects() {
     return [
       {
@@ -139,10 +105,16 @@ const nextConfig = {
         destination: '/new-page',
         permanent: true,
       },
+      // Fallback for profile routes
+      {
+        source: '/profile/:path*',
+        destination: '/profile',
+        permanent: false,
+      },
     ];
   },
   
-  // ENTERPRISE-LEVEL: API rewrites
+  // Rewrites for API routing
   async rewrites() {
     return [
       {
@@ -152,25 +124,11 @@ const nextConfig = {
     ];
   },
   
-  // ENTERPRISE-LEVEL: Configuration
+  // Trailing slash configuration for better routing
   trailingSlash: false,
+  
+  // Enable strict mode for better error detection
   reactStrictMode: true,
-  
-  // ENTERPRISE-LEVEL: Performance optimizations
-  onDemandEntries: {
-    maxInactiveAge: 25 * 1000,
-    pagesBufferLength: 2,
-  },
-  
-  // ENTERPRISE-LEVEL: TypeScript configuration
-  typescript: {
-    ignoreBuildErrors: false,
-  },
-  
-  // ENTERPRISE-LEVEL: ESLint configuration
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
 };
 
 module.exports = nextConfig;

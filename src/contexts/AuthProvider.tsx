@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import type { User, Session, AuthError, AuthChangeEvent } from '@supabase/supabase-js';
 import { createBrowserClient } from '@supabase/ssr';
 import { AuthContext } from './AuthContext';
-import { validateSupabaseConfig, getCurrentDomain, initializeEnvironment } from '../utils/env';
 
 // Enterprise-level security constants
 const SECURITY_CONFIG = {
@@ -52,28 +51,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize rate limiter
   const rateLimiter = useMemo(() => new RateLimiter(), []);
 
-  // Initialize environment configuration on component mount
-  useEffect(() => {
-    initializeEnvironment();
-  }, []);
-
-  // Create Supabase client with enterprise-level error handling and graceful degradation
+  // Create Supabase client with error handling
   const supabase = useMemo(() => {
-    // Enhanced environment variable validation with detailed logging
-    if (!validateSupabaseConfig()) {
-      console.warn('🔴 ENTERPRISE ALERT: Supabase environment variables not configured');
-      console.warn('📋 Required variables:');
-      console.warn('   - NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Configured' : '❌ Missing');
-      console.warn('   - NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Configured' : '❌ Missing');
-      
-      // Return a mock client for graceful degradation
-      return createMockSupabaseClient();
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.warn('Supabase environment variables not configured');
+      return null;
     }
 
     try {
-      const client = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      return createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         {
           auth: {
             autoRefreshToken: true,
@@ -88,55 +76,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       );
-      
-      console.log('✅ Supabase client initialized successfully');
-      return client;
     } catch (error) {
-      console.error('❌ Failed to create Supabase client:', error);
-      console.warn('🔄 Falling back to mock client for graceful degradation');
-      return createMockSupabaseClient();
+      console.error('Failed to create Supabase client:', error);
+      return null;
     }
   }, []);
-
-  // Enterprise-level mock Supabase client for graceful degradation
-  const createMockSupabaseClient = () => {
-    console.log('🔄 Initializing mock Supabase client for graceful degradation');
-    
-    // Create a proper AuthError object that matches the expected interface
-    const createAuthError = (message: string): AuthError => {
-      const error = new Error(message) as AuthError;
-      error.name = 'AuthError';
-      error.status = 503;
-      error.message = message;
-      return error;
-    };
-    
-    return {
-      auth: {
-        getSession: async () => ({ data: { session: null }, error: null }),
-        get user() { return null; },
-        get session() { return null; },
-        signIn: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
-        signInWithPassword: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
-        signInWithOAuth: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
-        signUp: async () => ({ data: { user: null, session: null }, error: createAuthError('Authentication service not available') }),
-        signOut: async () => ({ error: null }),
-        onAuthStateChange: () => ({ data: { subscription: null } }),
-        refreshSession: async () => ({ data: { session: null }, error: null }),
-        resetPasswordForEmail: async () => ({ error: null }),
-        updateUser: async () => ({ data: { user: null }, error: createAuthError('Authentication service not available') }),
-        updatePassword: async () => ({ error: createAuthError('Authentication service not available') }),
-      },
-      from: () => ({
-        select: () => ({
-          eq: () => ({ single: async () => ({ data: null, error: { message: 'Database service not available' } }) }),
-          insert: async () => ({ data: null, error: { message: 'Database service not available' } }),
-          update: async () => ({ data: null, error: { message: 'Database service not available' } }),
-          delete: async () => ({ data: null, error: { message: 'Database service not available' } }),
-        }),
-      }),
-    };
-  };
 
   // Enhanced session management with automatic refresh
   const refreshSessionIfNeeded = useCallback(async () => {
@@ -248,9 +192,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       mounted = false;
-      if (subscription) {
-        subscription.unsubscribe();
-      }
+      subscription.unsubscribe();
       clearInterval(refreshInterval);
     };
   }, [supabase, handleAuthStateChange, refreshSessionIfNeeded]);
@@ -258,28 +200,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Enhanced sign in with security measures
   const signIn = useCallback(async (email: string, password: string) => {
     if (!supabase) {
-      const error = new Error('Authentication service not available') as AuthError;
-      error.name = 'AuthError';
-      error.status = 503;
-      return { error };
+      return { error: { message: 'Authentication service not available' } as AuthError };
     }
 
     // Check rate limiting
     if (!rateLimiter.isAllowed(`login:${email}`)) {
-      const error = new Error('Too many login attempts. Please try again later.') as AuthError;
-      error.name = 'AuthError';
-      error.status = 429;
-      return { error };
+      return { error: { message: 'Too many login attempts. Please try again later.' } as AuthError };
     }
 
     // Check account lockout
     const lockoutInfo = loginAttempts.get(email);
     if (lockoutInfo && Date.now() < lockoutInfo.lockoutUntil) {
       const remainingTime = Math.ceil((lockoutInfo.lockoutUntil - Date.now()) / 1000 / 60);
-      const error = new Error(`Account temporarily locked. Try again in ${remainingTime} minutes.`) as AuthError;
-      error.name = 'AuthError';
-      error.status = 423;
-      return { error };
+      return { error: { message: `Account temporarily locked. Try again in ${remainingTime} minutes.` } as AuthError };
     }
 
     try {
@@ -296,15 +229,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (newAttempts >= SECURITY_CONFIG.MAX_LOGIN_ATTEMPTS) {
           const lockoutUntil = Date.now() + SECURITY_CONFIG.LOCKOUT_DURATION;
           setLoginAttempts(prev => new Map(prev).set(email, { count: newAttempts, lockoutUntil }));
-          const error = new Error('Account locked due to too many failed attempts. Try again in 15 minutes.') as AuthError;
-          error.name = 'AuthError';
-          error.status = 423;
-          return { error };
+          return { error: { message: 'Account locked due to too many failed attempts. Try again in 15 minutes.' } as AuthError };
         } else {
           setLoginAttempts(prev => new Map(prev).set(email, { count: newAttempts, lockoutUntil: 0 }));
         }
         
-        return { error };
+      return { error };
       }
 
       // Reset login attempts on success
@@ -317,50 +247,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { data, error: null };
     } catch (error) {
       console.error('Sign in error:', error);
-      const authError = new Error('Sign in failed') as AuthError;
-      authError.name = 'AuthError';
-      authError.status = 500;
-      return { error: authError };
+      return { error: error as AuthError };
     }
   }, [supabase, loginAttempts, rateLimiter]);
 
   // Enhanced sign up with validation and name support
   const signUp = useCallback(async (email: string, password: string, fullName?: string) => {
     if (!supabase) {
-      const error = new Error('Authentication service not available') as AuthError;
-      error.name = 'AuthError';
-      error.status = 503;
-      return { error };
+      return { error: { message: 'Authentication service not available' } as AuthError };
     }
 
     // Check rate limiting
     if (!rateLimiter.isAllowed(`signup:${email}`)) {
-      const error = new Error('Too many signup attempts. Please try again later.') as AuthError;
-      error.name = 'AuthError';
-      error.status = 429;
-      return { error };
+      return { error: { message: 'Too many signup attempts. Please try again later.' } as AuthError };
     }
 
     // Enhanced password validation
     if (password.length < SECURITY_CONFIG.PASSWORD_MIN_LENGTH) {
-      const error = new Error(`Password must be at least ${SECURITY_CONFIG.PASSWORD_MIN_LENGTH} characters long`) as AuthError;
-      error.name = 'AuthError';
-      error.status = 400;
-      return { error };
+      return { error: { message: `Password must be at least ${SECURITY_CONFIG.PASSWORD_MIN_LENGTH} characters long` } as AuthError };
     }
 
     // Check for common weak passwords
     const weakPasswords = ['password', '123456', 'qwerty', 'admin', 'user'];
     if (weakPasswords.includes(password.toLowerCase())) {
-      const error = new Error('Password is too weak. Please choose a stronger password.') as AuthError;
-      error.name = 'AuthError';
-      error.status = 400;
-      return { error };
+      return { error: { message: 'Password is too weak. Please choose a stronger password.' } as AuthError };
     }
 
     try {
-      // ENHANCED FIX: Use environment utility for domain detection
-      const redirectUrl = getCurrentDomain();
+      // ENHANCED FIX: Dynamic domain detection for production
+      let redirectUrl;
+      
+      if (process.env.NODE_ENV === 'production') {
+        // Use environment variable if available, fallback to hardcoded production domain
+        redirectUrl = process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 
+                     'https://belugagithubv2025machineloopscorpsf-gold.vercel.app';
+      } else {
+        // Development environment
+        redirectUrl = process.env.NEXT_PUBLIC_DEVELOPMENT_DOMAIN || 
+                     window.location.origin;
+      }
+      
       const finalRedirectUrl = `${redirectUrl}/auth/callback`;
 
       console.log('Signup redirect URL:', finalRedirectUrl);
@@ -386,10 +312,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { data, error: null };
     } catch (error) {
       console.error('Sign up error:', error);
-      const authError = new Error('Sign up failed') as AuthError;
-      authError.name = 'AuthError';
-      authError.status = 500;
-      return { error: authError };
+      return { error: error as AuthError };
     }
   }, [supabase, rateLimiter]);
 
@@ -416,15 +339,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Enhanced Google sign in with production domain support
   const signInWithGoogle = useCallback(async () => {
     if (!supabase) {
-      const error = new Error('Authentication service not available') as AuthError;
-      error.name = 'AuthError';
-      error.status = 503;
-      return { error };
+      return { error: { message: 'Authentication service not available' } as AuthError };
     }
 
     try {
-      // ENHANCED FIX: Use environment utility for domain detection
-      const redirectUrl = getCurrentDomain();
+      // ENHANCED FIX: Dynamic domain detection for Google OAuth
+      let redirectUrl;
+      
+      if (process.env.NODE_ENV === 'production') {
+        // Use environment variable if available, fallback to hardcoded production domain
+        redirectUrl = process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 
+                     'https://belugagithubv2025machineloopscorpsf-gold.vercel.app';
+      } else {
+        // Development environment
+        redirectUrl = process.env.NEXT_PUBLIC_DEVELOPMENT_DOMAIN || 
+                     window.location.origin;
+      }
+      
       const finalRedirectUrl = `${redirectUrl}/auth/callback`;
 
       console.log('Google OAuth redirect URL:', finalRedirectUrl);
@@ -443,33 +374,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error };
     } catch (error) {
       console.error('Google sign in error:', error);
-      const authError = new Error('Google sign in failed') as AuthError;
-      authError.name = 'AuthError';
-      authError.status = 500;
-      return { error: authError };
+      return { error: error as AuthError };
     }
   }, [supabase]);
 
   // Password reset functionality with production domain support
   const resetPassword = useCallback(async (email: string) => {
     if (!supabase) {
-      const error = new Error('Authentication service not available') as AuthError;
-      error.name = 'AuthError';
-      error.status = 503;
-      return { error };
+      return { error: { message: 'Authentication service not available' } as AuthError };
     }
 
     // Check rate limiting
     if (!rateLimiter.isAllowed(`reset:${email}`)) {
-      const error = new Error('Too many password reset attempts. Please try again later.') as AuthError;
-      error.name = 'AuthError';
-      error.status = 429;
-      return { error };
+      return { error: { message: 'Too many password reset attempts. Please try again later.' } as AuthError };
     }
 
     try {
-      // ENHANCED FIX: Use environment utility for domain detection
-      const redirectUrl = getCurrentDomain();
+      // ENHANCED FIX: Dynamic domain detection for password reset
+      let redirectUrl;
+      
+      if (process.env.NODE_ENV === 'production') {
+        // Use environment variable if available, fallback to hardcoded production domain
+        redirectUrl = process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 
+                     'https://belugagithubv2025machineloopscorpsf-gold.vercel.app';
+      } else {
+        // Development environment
+        redirectUrl = process.env.NEXT_PUBLIC_DEVELOPMENT_DOMAIN || 
+                     window.location.origin;
+      }
+      
       const finalRedirectUrl = `${redirectUrl}/auth/reset-password`;
 
       console.log('Password reset redirect URL:', finalRedirectUrl);
@@ -481,20 +414,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error };
     } catch (error) {
       console.error('Password reset error:', error);
-      const authError = new Error('Password reset failed') as AuthError;
-      authError.name = 'AuthError';
-      authError.status = 500;
-      return { error: authError };
+      return { error: error as AuthError };
     }
   }, [supabase, rateLimiter]);
 
   // Update user profile
   const updateProfile = useCallback(async (updates: { [key: string]: any }) => {
     if (!supabase || !user) {
-      const error = new Error('User not authenticated') as AuthError;
-      error.name = 'AuthError';
-      error.status = 401;
-      return { error };
+      return { error: { message: 'User not authenticated' } as AuthError };
     }
 
     try {
@@ -502,10 +429,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error };
     } catch (error) {
       console.error('Profile update error:', error);
-      const authError = new Error('Profile update failed') as AuthError;
-      authError.name = 'AuthError';
-      authError.status = 500;
-      return { error: authError };
+      return { error: error as AuthError };
     }
   }, [supabase, user]);
 
