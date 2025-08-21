@@ -1,151 +1,177 @@
-/**
- * ENTERPRISE-LEVEL ENVIRONMENT VARIABLE MANAGEMENT
- * 
- * This utility provides robust environment variable loading and validation
- * with graceful degradation and detailed error reporting.
- */
+// ENTERPRISE-LEVEL ENVIRONMENT CONFIGURATION UTILITY
+// Provides robust environment variable validation and domain detection
 
-// Environment variable validation interface
-interface EnvConfig {
-  SUPABASE_URL: string;
-  SUPABASE_ANON_KEY: string;
-  COINGECKO_API_KEY?: string;
-  MORALIS_API_KEY?: string;
-  SANITY_PROJECT_ID?: string;
-  NODE_ENV: string;
-}
-
-// Environment variable validation with detailed error reporting
-export function validateEnvironmentVariables(): EnvConfig {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-
-  // Required environment variables
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl) {
-    errors.push('NEXT_PUBLIC_SUPABASE_URL is not configured');
-  }
-
-  if (!supabaseKey) {
-    errors.push('NEXT_PUBLIC_SUPABASE_ANON_KEY is not configured');
-  }
-
-  // Optional environment variables with warnings
-  const coingeckoKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY;
-  const moralisKey = process.env.NEXT_PUBLIC_MORALIS_API_KEY;
-  const sanityProjectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-
-  if (!coingeckoKey) {
-    warnings.push('NEXT_PUBLIC_COINGECKO_API_KEY is not configured - CoinGecko features will be limited');
-  }
-
-  if (!moralisKey) {
-    warnings.push('NEXT_PUBLIC_MORALIS_API_KEY is not configured - Moralis features will be limited');
-  }
-
-  if (!sanityProjectId) {
-    warnings.push('NEXT_PUBLIC_SANITY_PROJECT_ID is not configured - Sanity CMS features will be limited');
-  }
-
-  // Log validation results
-  if (errors.length > 0) {
-    console.error('🔴 CRITICAL ENVIRONMENT VARIABLE ERRORS:');
-    errors.forEach(error => console.error(`   ❌ ${error}`));
-  }
-
-  if (warnings.length > 0) {
-    console.warn('🟡 ENVIRONMENT VARIABLE WARNINGS:');
-    warnings.forEach(warning => console.warn(`   ⚠️ ${warning}`));
-  }
-
-  if (errors.length === 0 && warnings.length === 0) {
-    console.log('✅ All environment variables are properly configured');
-  }
-
-  // Return configuration object
-  return {
-    SUPABASE_URL: supabaseUrl || '',
-    SUPABASE_ANON_KEY: supabaseKey || '',
-    COINGECKO_API_KEY: coingeckoKey,
-    MORALIS_API_KEY: moralisKey,
-    SANITY_PROJECT_ID: sanityProjectId,
-    NODE_ENV: process.env.NODE_ENV || 'development'
-  };
-}
-
-// Get environment variable with fallback
-export function getEnvVar(key: string, fallback?: string): string {
-  const value = process.env[key];
-  if (!value && fallback === undefined) {
-    console.warn(`⚠️ Environment variable ${key} is not configured`);
-  }
-  return value || fallback || '';
-}
-
-// Check if running in production
-export function isProduction(): boolean {
-  return process.env.NODE_ENV === 'production';
-}
-
-// Check if running in development
-export function isDevelopment(): boolean {
-  return process.env.NODE_ENV === 'development';
-}
-
-// Get production domain with fallback
-export function getProductionDomain(): string {
-  return process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 
-         'https://belugagithubv2025machineloopscorpsf-gold.vercel.app';
-}
-
-// Get development domain with fallback
-export function getDevelopmentDomain(): string {
-  return process.env.NEXT_PUBLIC_DEVELOPMENT_DOMAIN || 
-         'http://localhost:3000';
-}
-
-// Get current domain based on environment
-export function getCurrentDomain(): string {
-  // During static generation and SSR, always use environment-based fallbacks
-  if (typeof window === 'undefined') {
-    if (process.env.NODE_ENV === 'production') {
-      return getProductionDomain();
-    } else {
-      return getDevelopmentDomain();
-    }
-  }
-  
-  // Only access window.location in browser environment
-  try {
-    if (window.location && window.location.origin) {
-      return window.location.origin;
-    }
-  } catch (error) {
-    console.warn('Failed to access window.location, using fallback domain');
-  }
-  
-  // Fallback for any browser environment issues
-  if (process.env.NODE_ENV === 'production') {
-    return getProductionDomain();
-  } else {
-    return getDevelopmentDomain();
-  }
-}
-
-// Validate Supabase configuration specifically
+// Enterprise-level environment variable validation
 export function validateSupabaseConfig(): boolean {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const requiredVars = [
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY'
+  ];
 
-  if (!supabaseUrl || !supabaseKey) {
-    console.error('🔴 Supabase configuration is incomplete:');
-    console.error(`   URL: ${supabaseUrl ? '✅ Configured' : '❌ Missing'}`);
-    console.error(`   Key: ${supabaseKey ? '✅ Configured' : '❌ Missing'}`);
+  const missingVars = requiredVars.filter(varName => {
+    const value = process.env[varName];
+    return !value || value.trim() === '';
+  });
+
+  if (missingVars.length > 0) {
+    console.error('🔴 ENTERPRISE ALERT: Missing required environment variables:', missingVars);
     return false;
   }
 
-  console.log('✅ Supabase configuration is valid');
+  // Validate URL format
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (supabaseUrl && !isValidUrl(supabaseUrl)) {
+    console.error('🔴 ENTERPRISE ALERT: Invalid Supabase URL format:', supabaseUrl);
+    return false;
+  }
+
+  // Validate key format (basic check)
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (anonKey && !anonKey.startsWith('eyJ')) {
+    console.error('🔴 ENTERPRISE ALERT: Invalid Supabase anon key format');
+    return false;
+  }
+
   return true;
+}
+
+// Enterprise-level domain detection for production deployment
+export function getCurrentDomain(): string {
+  // Development environment
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3000';
+  }
+
+  // Vercel deployment
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // Custom domain
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+
+  // Fallback to window.location (client-side only)
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    return `${protocol}//${host}`;
+  }
+
+  // Default fallback
+  return 'https://your-domain.com';
+}
+
+// Enterprise-level URL validation
+function isValidUrl(url: string): boolean {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Enterprise-level environment variable getter with fallbacks
+export function getEnvVar(key: string, fallback?: string): string {
+  const value = process.env[key];
+  
+  if (!value || value.trim() === '') {
+    if (fallback) {
+      console.warn(`⚠️ Environment variable ${key} not set, using fallback: ${fallback}`);
+      return fallback;
+    }
+    console.error(`🔴 ENTERPRISE ALERT: Required environment variable ${key} not set`);
+    return '';
+  }
+  
+  return value;
+}
+
+// Enterprise-level environment configuration object
+export const ENV_CONFIG = {
+  SUPABASE: {
+    URL: getEnvVar('NEXT_PUBLIC_SUPABASE_URL'),
+    ANON_KEY: getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+    SERVICE_ROLE_KEY: getEnvVar('SUPABASE_SERVICE_ROLE_KEY'),
+  },
+  APP: {
+    ENV: process.env.NODE_ENV || 'development',
+    URL: getCurrentDomain(),
+    DEBUG: process.env.NODE_ENV === 'development',
+  },
+  AUTH: {
+    ENABLED: process.env.NEXT_PUBLIC_AUTH_ENABLED !== 'false',
+    MAX_LOGIN_ATTEMPTS: parseInt(process.env.NEXT_PUBLIC_MAX_LOGIN_ATTEMPTS || '5'),
+    LOCKOUT_DURATION: parseInt(process.env.NEXT_PUBLIC_LOCKOUT_DURATION || '900000'),
+    SESSION_TIMEOUT: parseInt(process.env.NEXT_PUBLIC_SESSION_TIMEOUT || '3600000'),
+  },
+  GOOGLE: {
+    CLIENT_ID: getEnvVar('NEXT_PUBLIC_GOOGLE_CLIENT_ID'),
+  }
+};
+
+// Enterprise-level environment health check
+export function checkEnvironmentHealth(): {
+  healthy: boolean;
+  issues: string[];
+  recommendations: string[];
+} {
+  const issues: string[] = [];
+  const recommendations: string[] = [];
+
+  // Check Supabase configuration
+  if (!validateSupabaseConfig()) {
+    issues.push('Supabase environment variables not configured');
+    recommendations.push('Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment');
+  }
+
+  // Check for development environment
+  if (process.env.NODE_ENV === 'development') {
+    recommendations.push('Ensure .env.local file exists with required variables');
+  }
+
+  // Check for production environment
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.VERCEL_URL && !process.env.NEXT_PUBLIC_APP_URL) {
+      issues.push('Production domain not configured');
+      recommendations.push('Set VERCEL_URL or NEXT_PUBLIC_APP_URL for production deployment');
+    }
+  }
+
+  // Check for security best practices
+  if (process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_DEBUG === 'true') {
+    issues.push('Debug mode enabled in production');
+    recommendations.push('Disable debug mode in production for security');
+  }
+
+  return {
+    healthy: issues.length === 0,
+    issues,
+    recommendations
+  };
+}
+
+// Enterprise-level environment initialization
+export function initializeEnvironment(): void {
+  console.log('🚀 Initializing enterprise environment configuration...');
+  
+  const health = checkEnvironmentHealth();
+  
+  if (health.healthy) {
+    console.log('✅ Environment configuration is healthy');
+  } else {
+    console.error('🔴 Environment configuration issues detected:');
+    health.issues.forEach(issue => console.error(`   - ${issue}`));
+    console.log('📋 Recommendations:');
+    health.recommendations.forEach(rec => console.log(`   - ${rec}`));
+  }
+  
+  // Log configuration summary (without sensitive data)
+  console.log('📊 Environment Summary:');
+  console.log(`   - Environment: ${ENV_CONFIG.APP.ENV}`);
+  console.log(`   - Domain: ${ENV_CONFIG.APP.URL}`);
+  console.log(`   - Auth Enabled: ${ENV_CONFIG.AUTH.ENABLED}`);
+  console.log(`   - Supabase Configured: ${validateSupabaseConfig()}`);
 }

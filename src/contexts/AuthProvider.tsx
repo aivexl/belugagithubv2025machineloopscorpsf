@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import type { User, Session, AuthError, AuthChangeEvent } from '@supabase/supabase-js';
 import { createBrowserClient } from '@supabase/ssr';
 import { AuthContext } from './AuthContext';
-import { validateSupabaseConfig, getCurrentDomain } from '../utils/env';
+import { validateSupabaseConfig, getCurrentDomain, initializeEnvironment } from '../utils/env';
 
 // Enterprise-level security constants
 const SECURITY_CONFIG = {
@@ -52,17 +52,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize rate limiter
   const rateLimiter = useMemo(() => new RateLimiter(), []);
 
-  // Safety check for static generation
-  const isStaticGeneration = typeof window === 'undefined';
+  // Initialize environment configuration on component mount
+  useEffect(() => {
+    initializeEnvironment();
+  }, []);
 
   // Create Supabase client with enterprise-level error handling and graceful degradation
   const supabase = useMemo(() => {
-    // During static generation, always return mock client
-    if (isStaticGeneration) {
-      console.log('🔄 Static generation detected, using mock Supabase client');
-      return createMockSupabaseClient();
-    }
-
     // Enhanced environment variable validation with detailed logging
     if (!validateSupabaseConfig()) {
       console.warn('🔴 ENTERPRISE ALERT: Supabase environment variables not configured');
@@ -100,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn('🔄 Falling back to mock client for graceful degradation');
       return createMockSupabaseClient();
     }
-  }, [isStaticGeneration]);
+  }, []);
 
   // Enterprise-level mock Supabase client for graceful degradation
   const createMockSupabaseClient = () => {
@@ -211,12 +207,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize authentication
   useEffect(() => {
-    // Skip initialization during static generation
-    if (isStaticGeneration) {
-      setLoading(false);
-      return;
-    }
-
     if (!supabase) {
       setLoading(false);
       return;
@@ -232,8 +222,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (error) throw error;
         
         if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
+        setSession(session);
+        setUser(session?.user ?? null);
           setIsAuthenticated(!!session?.user);
         }
       } catch (error) {
@@ -243,7 +233,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } finally {
         if (mounted) {
-          setLoading(false);
+        setLoading(false);
         }
       }
     };
@@ -261,7 +251,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
       clearInterval(refreshInterval);
     };
-  }, [supabase, handleAuthStateChange, refreshSessionIfNeeded, isStaticGeneration]);
+  }, [supabase, handleAuthStateChange, refreshSessionIfNeeded]);
 
   // Enhanced sign in with security measures
   const signIn = useCallback(async (email: string, password: string) => {
