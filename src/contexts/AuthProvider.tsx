@@ -308,15 +308,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const expiresAt = session.expires_at;
-      if (expiresAt && Date.now() > (expiresAt * 1000) - SECURITY_CONFIG.SESSION_REFRESH_THRESHOLD) {
+      const now = Math.floor(Date.now() / 1000); // Convert to seconds
+      
+      // Check if session needs refresh (5 minutes buffer)
+      if (expiresAt && now > expiresAt - 300) {
         console.log('🔄 Enterprise: Proactively refreshing session before expiry');
         
         const { data, error } = await supabase.auth.refreshSession();
-        if (error) throw error;
+        if (error) {
+          console.warn('Session refresh failed:', error);
+          // Don't clear session immediately, let it expire naturally
+          return;
+        }
+        
         if (data.session) {
           setSession(data.session);
           setUser(data.session.user);
+          setIsAuthenticated(true);
           console.log('✅ Enterprise: Session refreshed successfully');
+          
+          // Update storage to ensure persistence
+          try {
+            const storageKey = 'beluga-enterprise-auth';
+            const sessionData = JSON.stringify(data.session);
+            localStorage.setItem(`${storageKey}.session`, sessionData);
+            sessionStorage.setItem(`${storageKey}.session`, sessionData);
+          } catch (storageError) {
+            console.warn('Failed to update session storage:', storageError);
+          }
         }
       }
     } catch (error) {
@@ -440,6 +459,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize authentication with enterprise fallback
   useEffect(() => {
     let mounted = true;
+    let sessionCheckTimeout: NodeJS.Timeout;
 
     const initializeAuth = async () => {
       try {
@@ -450,27 +470,91 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        // Get initial session
+        // ENTERPRISE FIX: Progressive session recovery with rate limiting protection
+        console.log('🔍 Enterprise: Starting session recovery...');
+
+        // First, try to get existing session without making new requests
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (mounted) {
           if (error) {
-            console.error('Initial session fetch error:', error);
-            setAuthError('Failed to initialize authentication');
-          } else if (session) {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setIsAuthenticated(!!session?.user);
-
-            // Set up auth state change listener
-            const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
-            return () => subscription.unsubscribe();
+            console.warn('Initial session fetch error:', error);
+            // Don't set error immediately, try session recovery first
           }
+
+          if (session) {
+            console.log('✅ Enterprise: Active session found, validating...');
+            
+            // Validate session expiry
+            const expiresAt = session.expires_at;
+            const now = Math.floor(Date.now() / 1000); // Convert to seconds
+            
+            if (expiresAt && now < expiresAt - 300) { // 5 minutes buffer
+              // Session is valid
+              setSession(session);
+              setUser(session.user);
+              setIsAuthenticated(true);
+              setAuthError(null);
+              console.log('✅ Enterprise: Valid session restored successfully');
+            } else {
+              // Session expired or about to expire, try refresh
+              console.log('🔄 Enterprise: Session expired, attempting refresh...');
+              
+              try {
+                const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+                
+                if (!refreshError && refreshData.session) {
+                  setSession(refreshData.session);
+                  setUser(refreshData.session.user);
+                  setIsAuthenticated(true);
+                  setAuthError(null);
+                  console.log('✅ Enterprise: Session refreshed successfully');
+                } else {
+                  console.warn('Session refresh failed:', refreshError);
+                  // Clear expired session
+                  setSession(null);
+                  setUser(null);
+                  setIsAuthenticated(false);
+                  setAuthError(null); // Don't show error for expired sessions
+                }
+              } catch (refreshErr) {
+                console.warn('Session refresh error:', refreshErr);
+                setSession(null);
+                setUser(null);
+                setIsAuthenticated(false);
+                setAuthError(null);
+              }
+            }
+          } else {
+            console.log('ℹ️ Enterprise: No active session found');
+            setSession(null);
+            setUser(null);
+            setIsAuthenticated(false);
+            setAuthError(null);
+          }
+
+          // Set up auth state change listener ONCE
+          const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+          
+          // Return cleanup function
+          return () => {
+            if (subscription) {
+              subscription.unsubscribe();
+            }
+            if (sessionCheckTimeout) {
+              clearTimeout(sessionCheckTimeout);
+            }
+          };
         }
       } catch (error) {
         console.error('Initial auth setup error:', error);
         if (mounted) {
-          setAuthError('Authentication service initialization failed');
+          // Only set error for actual system failures, not auth failures
+          if (error.message?.includes('network') || error.message?.includes('fetch')) {
+            setAuthError('Network connection issue');
+          } else {
+            setAuthError(null); // Don't show auth errors to users
+          }
         }
       } finally {
         if (mounted) {
@@ -479,16 +563,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    initializeAuth();
+    // ENTERPRISE FIX: Debounced initialization to prevent multiple rapid calls
+    sessionCheckTimeout = setTimeout(() => {
+      initializeAuth();
+    }, 100); // Small delay to prevent race conditions
 
-    // Set up session refresh interval
-    const refreshInterval = setInterval(refreshSessionIfNeeded, 60000); // Check every minute
+    // Set up periodic session validation (every 5 minutes)
+    const sessionValidationInterval = setInterval(() => {
+      if (session && supabase) {
+        refreshSessionIfNeeded();
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    // ENTERPRISE FIX: Handle browser events for session persistence
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && supabase) {
+        // Page became visible, validate session
+        console.log('🔍 Enterprise: Page visible, validating session...');
+        validateAndRecoverSession();
+      }
+    };
+
+    const handlePageShow = () => {
+      if (supabase) {
+        // Page shown (back/forward navigation), validate session
+        console.log('🔍 Enterprise: Page shown, validating session...');
+        validateAndRecoverSession();
+      }
+    };
+
+    const handleFocus = () => {
+      if (supabase) {
+        // Window focused, validate session
+        console.log('🔍 Enterprise: Window focused, validating session...');
+        validateAndRecoverSession();
+      }
+    };
+
+    // Add event listeners for session persistence
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pageshow', handlePageShow);
+    window.addEventListener('focus', handleFocus);
 
     return () => {
       mounted = false;
-      clearInterval(refreshInterval);
+      if (sessionCheckTimeout) {
+        clearTimeout(sessionCheckTimeout);
+      }
+      if (sessionValidationInterval) {
+        clearInterval(sessionValidationInterval);
+      }
+      
+      // Remove event listeners
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pageshow', handlePageShow);
+      window.removeEventListener('focus', handleFocus);
     };
-  }, [handleAuthStateChange, refreshSessionIfNeeded]);
+  }, [handleAuthStateChange, refreshSessionIfNeeded, supabase, session, validateAndRecoverSession]);
 
   // Enhanced sign in with enterprise fallback
   const signIn = useCallback(async (email: string, password: string) => {
