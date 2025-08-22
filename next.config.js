@@ -142,12 +142,12 @@ const nextConfig = {
         destination: '/new-page',
         permanent: true,
       },
-      // Fallback for profile routes
-      {
-        source: '/profile/:path*',
-        destination: '/profile',
-        permanent: false,
-      },
+      // REMOVED: Problematic profile redirect causing infinite loops
+      // {
+      //   source: '/profile/:path*',
+      //   destination: '/profile',
+      //   permanent: false,
+      // },
     ];
   },
   

@@ -16,13 +16,16 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Skip for static files, API routes, and internal not-found during build
+  // ENHANCED FIX: Skip for static files, API routes, and critical pages
   const pathname = request.nextUrl.pathname
   if (
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/api/') ||
     pathname === '/_not-found' ||
-    pathname.includes('.')
+    pathname.includes('.') ||
+    pathname === '/profile' || // ENTERPRISE FIX: Allow profile page access
+    pathname.startsWith('/auth/') || // ENTERPRISE FIX: Allow auth routes
+    pathname === '/' // ENTERPRISE FIX: Allow homepage
   ) {
     return supabaseResponse
   }
@@ -49,8 +52,8 @@ export async function middleware(request: NextRequest) {
       }
     )
 
-    // Only handle session management, no redirects or access control
-    // This prevents infinite redirect loops
+    // ENTERPRISE FIX: Only handle session management, no redirects or access control
+    // This prevents infinite redirect loops and ensures page accessibility
     await supabase.auth.getUser()
   } catch (error) {
     // Silently handle Supabase errors during build or when env vars are missing
