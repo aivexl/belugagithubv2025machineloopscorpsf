@@ -600,10 +600,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
+    // ENTERPRISE FIX: Add storage event listener for cross-tab session sync
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key && e.key.includes('beluga-enterprise-auth') && supabase) {
+        console.log('🔄 Enterprise: Storage changed, validating session...');
+        validateAndRecoverSession();
+      }
+    };
+
     // Add event listeners for session persistence
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pageshow', handlePageShow);
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
       mounted = false;
@@ -618,6 +627,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pageshow', handlePageShow);
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, [handleAuthStateChange, refreshSessionIfNeeded, supabase, session, validateAndRecoverSession]);
 

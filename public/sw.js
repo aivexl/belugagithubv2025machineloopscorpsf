@@ -25,10 +25,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip caching for API calls (let them go through normally for real-time data)
+  // ENTERPRISE FIX: Skip caching for API calls, authentication, and external services
   if (event.request.url.includes('/api/') || 
       event.request.url.includes('coingecko.com') ||
-      event.request.url.includes('sanity.io')) {
+      event.request.url.includes('sanity.io') ||
+      event.request.url.includes('supabase.co') ||
+      event.request.url.includes('/auth/') ||
+      event.request.url.includes('chrome-extension://') ||
+      event.request.url.includes('moz-extension://') ||
+      event.request.url.includes('_next/') ||
+      event.request.url.includes('hot-reload') ||
+      event.request.url.includes('webpack') ||
+      event.request.method === 'POST' ||
+      event.request.method === 'PUT' ||
+      event.request.method === 'DELETE' ||
+      event.request.method === 'PATCH') {
     return;
   }
 
@@ -52,7 +63,20 @@ self.addEventListener('fetch', (event) => {
 
             caches.open(CACHE_NAME)
               .then((cache) => {
-                cache.put(event.request, responseToCache);
+                // ENTERPRISE FIX: Add error handling for cache put operations
+                try {
+                  // Only cache if request is cacheable
+                  if (event.request.url.startsWith('http') && 
+                      !event.request.url.includes('chrome-extension') &&
+                      !event.request.url.includes('moz-extension')) {
+                    cache.put(event.request, responseToCache);
+                  }
+                } catch (error) {
+                  console.warn('Cache put failed:', error);
+                }
+              })
+              .catch((error) => {
+                console.warn('Cache open failed:', error);
               });
 
             return response;

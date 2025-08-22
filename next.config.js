@@ -54,26 +54,48 @@ const nextConfig = {
     styledComponents: true,
   },
   
-  // Minimal webpack configuration for stability
+  // ENTERPRISE FIX: Webpack configuration for stable module resolution
   webpack: (config, { dev, isServer }) => {
-    // Only apply minimal optimizations for production
+    // ENTERPRISE FIX: Prevent webpack chunk ID collisions and module resolution issues
+    config.optimization = config.optimization || {};
+    
+    // Only apply optimizations for production to prevent development conflicts
     if (!isServer && !dev) {
-      // Simple and stable chunk splitting
+      // ENTERPRISE FIX: Named chunks to prevent numeric ID conflicts
       config.optimization.splitChunks = {
         chunks: 'all',
+        minSize: 20000,
+        maxSize: 244000,
         cacheGroups: {
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
-            priority: 10,
+            priority: -10,
+            reuseExistingChunk: true,
+          },
+          commons: {
+            name: 'commons',
+            chunks: 'initial',
+            minChunks: 2,
+            priority: -5,
+            reuseExistingChunk: true,
           },
         },
       };
       
-      // Stable module and chunk IDs
-      config.optimization.moduleIds = 'deterministic';
-      config.optimization.chunkIds = 'deterministic';
+      // ENTERPRISE FIX: Use named IDs to prevent module resolution conflicts
+      config.optimization.moduleIds = 'named';
+      config.optimization.chunkIds = 'named';
+    } else {
+      // ENTERPRISE FIX: Development mode - simpler configuration
+      config.optimization.moduleIds = 'named';
+      config.optimization.chunkIds = 'named';
     }
     
     // Fix for Supabase Edge Runtime compatibility
@@ -94,6 +116,10 @@ const nextConfig = {
         path: false,
       };
     }
+    
+    // ENTERPRISE FIX: Ensure stable module resolution
+    config.resolve.symlinks = false;
+    config.resolve.cacheWithContext = false;
     
     return config;
   },
