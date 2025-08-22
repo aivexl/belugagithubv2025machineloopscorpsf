@@ -1,24 +1,21 @@
 {
-  "rewrites": [
-    { "source": "/coingecko/:path*", "destination": "https://api.coingecko.com/:path*" },
-    { "source": "/gnews/:path*", "destination": "https://gnews.io/:path*" }
-  ],
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
   "functions": {
-    "src/app/api/**/*.js": {
+    "src/app/api/**/*.ts": {
       "maxDuration": 30
     }
   },
-  "build": {
-    "env": {
-      "NODE_ENV": "production",
-      "NEXT_PUBLIC_APP_ENV": "production"
-    }
-  },
   "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://pedasqlddhrqvbwdlzge.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlZGFzcWxkZGhycXZid2RsemdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNjE3ODIsImV4cCI6MjA2ODYzNzc4Mn0.G2zTfu-4vVO7R86rU8KJ2xKrjGOCLus2Clm0ZobZYBM",
+    "NEXT_PUBLIC_PRODUCTION_DOMAIN": "https://belugagithubv2025machineloopscorpsf-gold.vercel.app",
+    "NEXT_PUBLIC_DEVELOPMENT_DOMAIN": "http://localhost:3000",
     "NODE_ENV": "production",
-    "NEXT_PUBLIC_APP_ENV": "production"
-  },
-  "buildCommand": "npm run build",
-  "installCommand": "npm ci --production=false",
-  "framework": "nextjs"
-} 
+    "NEXT_PUBLIC_APP_ENV": "production",
+    "NEXT_PUBLIC_ENABLE_DEBUG_MODE": "false",
+    "NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING": "true"
+  }
+}

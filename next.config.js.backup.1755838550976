@@ -172,14 +172,6 @@ const nextConfig = {
   
   // Security headers
   poweredByHeader: false,
-
-  // Handle legacy pages structure compatibility
-  pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
-
-  // Disable static optimization for error pages to prevent build issues
-  generateBuildId: async () => {
-    return 'build-' + Date.now();
-  },
 };
 
 export default nextConfig;

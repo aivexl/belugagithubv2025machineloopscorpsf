@@ -1,0 +1,42 @@
+{
+  "timestamp": "2025-08-22T04:57:08.184Z",
+  "diagnosticDuration": 10757,
+  "errorType": "500 Internal Server Error",
+  "targetUrl": "http://localhost:3000/",
+  "criticalErrors": [
+    "Missing required environment variable: NEXT_PUBLIC_SUPABASE_URL",
+    "Missing required environment variable: NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "Missing required environment variable: NEXT_PUBLIC_PRODUCTION_DOMAIN",
+    "Missing required environment variable: NEXT_PUBLIC_DEVELOPMENT_DOMAIN",
+    "Build process failed with exit code: 1",
+    "Development server is not running on localhost:3000"
+  ],
+  "issues": [
+    "Missing optional environment variable: SUPABASE_SERVICE_ROLE_KEY",
+    "Missing optional environment variable: NODE_ENV",
+    "Missing optional environment variable: NEXT_PUBLIC_APP_ENV",
+    "Missing config file: next.config.mjs"
+  ],
+  "findings": [
+    "Package.json analysis completed - 5 critical dependencies checked",
+    "next.config.js configuration file found and readable",
+    ".eslintrc.json configuration file found and readable",
+    "tsconfig.json configuration file found and readable"
+  ],
+  "recommendations": [
+    "Start the development server with: npm run dev",
+    "Set up environment variables in .env.local file",
+    "Ensure all Supabase credentials are correctly configured",
+    "Fix all TypeScript compilation errors",
+    "Resolve all ESLint errors and warnings",
+    "Ensure all dependencies are properly installed",
+    "Start development server with: npm run dev",
+    "Check if port 3000 is available and not blocked"
+  ],
+  "systemInfo": {
+    "nodeVersion": "v22.17.0",
+    "platform": "win32",
+    "architecture": "x64",
+    "cwd": "E:\\beluga"
+  }
+}

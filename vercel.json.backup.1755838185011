@@ -1,0 +1,24 @@
+{
+  "rewrites": [
+    { "source": "/coingecko/:path*", "destination": "https://api.coingecko.com/:path*" },
+    { "source": "/gnews/:path*", "destination": "https://gnews.io/:path*" }
+  ],
+  "functions": {
+    "src/app/api/**/*.js": {
+      "maxDuration": 30
+    }
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production",
+      "NEXT_PUBLIC_APP_ENV": "production"
+    }
+  },
+  "env": {
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_APP_ENV": "production"
+  },
+  "buildCommand": "npm run build",
+  "installCommand": "npm ci --production=false",
+  "framework": "nextjs"
+} 
