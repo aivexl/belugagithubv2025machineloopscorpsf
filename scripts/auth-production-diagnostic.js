@@ -23,8 +23,6 @@ const CONFIG = {
   SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   TIMEOUT: 30000, // 30 seconds
   MAX_RETRIES: 3,
   VERBOSE: process.argv.includes('--verbose')
@@ -76,8 +74,7 @@ class EnterpriseLogger {
         productionDomain: CONFIG.PRODUCTION_DOMAIN,
         hasSupabaseUrl: !!CONFIG.SUPABASE_URL,
         hasSupabaseKey: !!CONFIG.SUPABASE_ANON_KEY,
-        hasServiceRoleKey: !!CONFIG.SUPABASE_SERVICE_ROLE_KEY,
-        hasGoogleAuth: !!CONFIG.GOOGLE_CLIENT_ID
+        hasServiceRoleKey: !!CONFIG.SUPABASE_SERVICE_ROLE_KEY
       },
       logs: this.logs
     };
@@ -305,7 +302,7 @@ async function testEnvironmentConfiguration() {
     issues.push('NEXT_PUBLIC_SUPABASE_ANON_KEY is missing');
   }
 
-  if (!CONFIG.SUPABASE_SERVICE_ROLE_KEY && process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' && !CONFIG.SUPABASE_SERVICE_ROLE_KEY) {
     issues.push('SUPABASE_SERVICE_ROLE_KEY is missing (required in production)');
   }
 
