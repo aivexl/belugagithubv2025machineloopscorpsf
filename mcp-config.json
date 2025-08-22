@@ -1,0 +1,13 @@
+{
+  "capabilities": {
+    "launch_chrome": {
+      "enabled": true,
+      "chrome_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "default_flags": [
+        "--new-window",
+        "--disable-web-security",
+        "--disable-features=VizDisplayCompositor"
+      ]
+    }
+  }
+}
