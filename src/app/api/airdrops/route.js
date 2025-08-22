@@ -101,9 +101,9 @@ export async function GET() {
             break; // Use scraper data as primary source
           }
         } else {
-          let headers = {
-            'Accept': 'application/json',
-            'User-Agent': 'DuniaCrypto/1.0'
+          const headers = {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
           };
 
           // Add API key if required

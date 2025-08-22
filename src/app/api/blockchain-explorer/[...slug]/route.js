@@ -80,7 +80,7 @@ export async function GET(request, { params }) {
           }
           
           // Transform the data to a consistent format
-          let transformedData = {
+          const transformedData = {
             source: explorer.name,
             chain: chain,
             address: address,

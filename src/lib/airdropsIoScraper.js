@@ -41,15 +41,15 @@ export class AirdropsIoScraper {
             
             // Get the next element for action/description
             let action = '';
-            let nextElement = $el.next();
+            const nextElement = $el.next();
             
             if (nextElement.length > 0) {
               action = nextElement.text().trim().substring(0, 100);
             }
             
             // Look for parent container with more info
-            let parent = $el.parent();
-            if (parent.length > 0) {
+            const parent = element.closest('div, section, article');
+            if (parent) {
               const parentText = parent.text().trim();
               if (parentText.length > action.length) {
                 action = parentText.substring(0, 150);

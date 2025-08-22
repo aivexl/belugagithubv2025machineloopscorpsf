@@ -7,6 +7,11 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
   if (!article) return notFound();
   
   const [articleWithImage] = addImageUrls([article]);
-  
+
+  // Ensure article exists before rendering
+  if (!articleWithImage) {
+    return notFound();
+  }
+
   return <ArticleDetailClient article={articleWithImage} />;
 } 

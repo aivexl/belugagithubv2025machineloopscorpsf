@@ -83,9 +83,8 @@ export default function PasswordResetModal({
           onClose();
         }, 3000);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('An unexpected error occurred. Please try again.');
-    } finally {
       setLoading(false);
     }
   }, [email, resetPassword, resetAttempts, isLocked, lockoutTime, onClose]);

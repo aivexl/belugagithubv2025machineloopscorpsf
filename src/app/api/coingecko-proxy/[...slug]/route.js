@@ -37,9 +37,9 @@ export async function GET(request, { params }) {
     console.log(`[PROXY] Using API key: ${apiKey.substring(0, 8)}...`);
     
     // Determine the correct header format based on endpoint
-    let headers = {
+    const headers = {
       'Accept': 'application/json',
-      'User-Agent': 'Beluga-Crypto-App/1.0'
+      'User-Agent': 'DuniaCrypto/1.0'
     };
     
     // For market chart endpoints, try multiple authentication methods

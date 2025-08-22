@@ -81,7 +81,7 @@ export async function setDevCache(key, data) {
   }
 
   try {
-    let cache = await readCache() || {};
+    const cache = await readCache() || {};
     
     cache[key] = {
       data,
@@ -102,7 +102,7 @@ export async function clearDevCache(key) {
   }
 
   try {
-    let cache = await readCache() || {};
+    const cache = await readCache() || {};
     delete cache[key];
     await writeCache(cache);
     console.log(`[DEV CACHE] Cleared cache for ${key}`);

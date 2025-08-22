@@ -161,9 +161,8 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
           onClose();
         }, 3000);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('An unexpected error occurred. Please try again.');
-    } finally {
       setLoading(false);
     }
   }, [fullName, email, password, confirmPassword, acceptTerms, passwordStrength, signUp, onClose]);

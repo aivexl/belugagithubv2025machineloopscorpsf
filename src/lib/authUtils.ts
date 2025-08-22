@@ -176,45 +176,45 @@ export const generateSecureId = (): string => {
 };
 
 // Production environment checks
-export const validateProductionEnvironment = (): {
-  isValid: boolean;
-  warnings: string[];
-  errors: string[];
-} => {
-  const warnings: string[] = [];
+export const validateProductionEnvironment = (): { isValid: boolean; errors: string[]; warnings: string[] } => {
   const errors: string[] = [];
+  const warnings: string[] = [];
 
-  if (!isProduction()) {
-    return { isValid: true, warnings: [], errors: [] };
+  // Check required environment variables
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    errors.push('NEXT_PUBLIC_SUPABASE_URL is required');
   }
 
-  // Check required production variables
-  if (!AUTH_CONFIG.SUPABASE.SERVICE_ROLE_KEY) {
-    errors.push('SUPABASE_SERVICE_ROLE_KEY is required in production');
+  if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    errors.push('NEXT_PUBLIC_SUPABASE_ANON_KEY is required');
   }
 
-  if (!AUTH_CONFIG.DOMAINS.PRODUCTION.includes('https://')) {
-    errors.push('Production domain must use HTTPS');
+  // Check production-specific variables
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      errors.push('SUPABASE_SERVICE_ROLE_KEY is required in production');
+    }
+
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      warnings.push('GOOGLE_CLIENT_ID is recommended for production OAuth');
+    }
+
+    if (!process.env.GOOGLE_CLIENT_SECRET) {
+      warnings.push('GOOGLE_CLIENT_SECRET is recommended for production OAuth');
+    }
   }
 
-  // Check security settings
-  if (AUTH_CONFIG.FEATURES.ENABLE_DEBUG_MODE) {
-    warnings.push('Debug mode should be disabled in production');
-  }
-
-  if (!AUTH_CONFIG.MONITORING.SENTRY_DSN) {
-    warnings.push('Sentry DSN recommended for production error tracking');
-  }
-
-  // Check OAuth configuration
-  if (AUTH_CONFIG.OAUTH.GOOGLE.ENABLED && !AUTH_CONFIG.OAUTH.GOOGLE.CLIENT_ID) {
-    errors.push('Google OAuth enabled but CLIENT_ID not configured');
+  // Check security configurations
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN) {
+      warnings.push('NEXT_PUBLIC_PRODUCTION_DOMAIN is recommended for production');
+    }
   }
 
   return {
     isValid: errors.length === 0,
-    warnings,
     errors,
+    warnings
   };
 };
 

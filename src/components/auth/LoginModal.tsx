@@ -96,9 +96,8 @@ export default function LoginModal({
         // Success - close modal
         onClose();
       }
-    } catch (err) {
+    } catch (_err) {
       setError('An unexpected error occurred. Please try again.');
-    } finally {
       setLoading(false);
     }
   }, [email, password, signIn, loginAttempts, isLocked, lockoutTime, onClose]);

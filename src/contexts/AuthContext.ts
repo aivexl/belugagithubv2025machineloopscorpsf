@@ -1,19 +1,15 @@
 import { createContext } from 'react';
 import type { User, Session, AuthError } from '@supabase/supabase-js';
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
-  session: Session | null;
   loading: boolean;
-  isAuthenticated: boolean;
-  authError: string | null;
-  signIn: (email: string, password: string) => Promise<{ data?: any; error: AuthError | null }>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ data?: any; error: AuthError | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: string | null }>;
+  signInWithGoogle: () => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
-  signInWithGoogle: () => Promise<{ error: AuthError | null }>;
-  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
-  updateProfile: (updates: { [key: string]: any }) => Promise<{ error: AuthError | null }>;
-  refreshSession: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: string | null }>;
+  updateProfile: (updates: Record<string, unknown>) => Promise<{ error: string | null }>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
