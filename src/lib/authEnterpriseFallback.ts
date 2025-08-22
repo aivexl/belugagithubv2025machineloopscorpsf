@@ -207,9 +207,9 @@ class EnterpriseAuthFallback {
     const health = this.serviceHealth.get(serviceName)!;
 
     try {
-      // Perform a simple health check
+      // ENTERPRISE FIX: Use a simple auth health check instead of non-existent table
       const { data, error } = await Promise.race([
-        client.from('_health_check').select('*').limit(1),
+        client.auth.getSession(),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('Health check timeout')), this.config.healthCheck.timeout)
         )
@@ -217,11 +217,11 @@ class EnterpriseAuthFallback {
 
       const responseTime = Date.now() - startTime;
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = table doesn't exist (expected)
+      if (error) {
         throw error;
       }
 
-      // Service is healthy
+      // Service is healthy - auth endpoint responded
       health.status = 'healthy';
       health.responseTime = responseTime;
       health.consecutiveFailures = 0;
