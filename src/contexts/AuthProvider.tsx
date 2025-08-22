@@ -88,7 +88,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
-          flowType: 'pkce'
+          flowType: 'pkce',
+          storage: {
+            // ENTERPRISE FIX: Enhanced session storage configuration
+            getItem: (key: string) => {
+              try {
+                // Try localStorage first, then sessionStorage, then cookies
+                const localStorageValue = localStorage.getItem(key);
+                if (localStorageValue) return localStorageValue;
+                
+                const sessionStorageValue = sessionStorage.getItem(key);
+                if (sessionStorageValue) return sessionStorageValue;
+                
+                // Fallback to cookie parsing
+                const cookies = document.cookie.split(';');
+                for (const cookie of cookies) {
+                  const [cookieKey, cookieValue] = cookie.trim().split('=');
+                  if (cookieKey === key) return decodeURIComponent(cookieValue);
+                }
+                
+                return null;
+              } catch (error) {
+                console.warn('Storage getItem error:', error);
+                return null;
+              }
+            },
+            setItem: (key: string, value: string) => {
+              try {
+                // Store in multiple locations for redundancy
+                localStorage.setItem(key, value);
+                sessionStorage.setItem(key, value);
+                
+                // Also store in cookies as backup
+                const cookieValue = `${key}=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+                document.cookie = cookieValue;
+              } catch (error) {
+                console.warn('Storage setItem error:', error);
+              }
+            },
+            removeItem: (key: string) => {
+              try {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+                
+                // Remove from cookies
+                document.cookie = `${key}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+              } catch (error) {
+                console.warn('Storage removeItem error:', error);
+              }
+            }
+          },
+          // ENTERPRISE FIX: Enhanced session configuration
+          storageKey: 'beluga-enterprise-auth',
+          debug: process.env.NODE_ENV === 'development'
         },
         global: {
           headers: {
@@ -106,7 +158,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
-          flowType: 'pkce'
+          flowType: 'pkce',
+          storage: {
+            // ENTERPRISE FIX: Enhanced session storage configuration
+            getItem: (key: string) => {
+              try {
+                // Try localStorage first, then sessionStorage, then cookies
+                const localStorageValue = localStorage.getItem(key);
+                if (localStorageValue) return localStorageValue;
+                
+                const sessionStorageValue = sessionStorage.getItem(key);
+                if (sessionStorageValue) return sessionStorageValue;
+                
+                // Fallback to cookie parsing
+                const cookies = document.cookie.split(';');
+                for (const cookie of cookies) {
+                  const [cookieKey, cookieValue] = cookie.trim().split('=');
+                  if (cookieKey === key) return decodeURIComponent(cookieValue);
+                }
+                
+                return null;
+              } catch (error) {
+                console.warn('Storage getItem error:', error);
+                return null;
+              }
+            },
+            setItem: (key: string, value: string) => {
+              try {
+                // Store in multiple locations for redundancy
+                localStorage.setItem(key, value);
+                sessionStorage.setItem(key, value);
+                
+                // Also store in cookies as backup
+                const cookieValue = `${key}=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+                document.cookie = cookieValue;
+              } catch (error) {
+                console.warn('Storage setItem error:', error);
+              }
+            },
+            removeItem: (key: string) => {
+              try {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+                
+                // Remove from cookies
+                document.cookie = `${key}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+              } catch (error) {
+                console.warn('Storage removeItem error:', error);
+              }
+            }
+          },
+          // ENTERPRISE FIX: Enhanced session configuration
+          storageKey: 'beluga-enterprise-auth',
+          debug: process.env.NODE_ENV === 'development'
         },
         global: {
           headers: {
@@ -133,7 +237,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
-          flowType: 'pkce'
+          flowType: 'pkce',
+          storage: {
+            // ENTERPRISE FIX: Enhanced session storage configuration
+            getItem: (key: string) => {
+              try {
+                // Try localStorage first, then sessionStorage, then cookies
+                const localStorageValue = localStorage.getItem(key);
+                if (localStorageValue) return localStorageValue;
+                
+                const sessionStorageValue = sessionStorage.getItem(key);
+                if (sessionStorageValue) return sessionStorageValue;
+                
+                // Fallback to cookie parsing
+                const cookies = document.cookie.split(';');
+                for (const cookie of cookies) {
+                  const [cookieKey, cookieValue] = cookie.trim().split('=');
+                  if (cookieKey === key) return decodeURIComponent(cookieValue);
+                }
+                
+                return null;
+              } catch (error) {
+                console.warn('Storage getItem error:', error);
+                return null;
+              }
+            },
+            setItem: (key: string, value: string) => {
+              try {
+                // Store in multiple locations for redundancy
+                localStorage.setItem(key, value);
+                sessionStorage.setItem(key, value);
+                
+                // Also store in cookies as backup
+                const cookieValue = `${key}=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+                document.cookie = cookieValue;
+              } catch (error) {
+                console.warn('Storage setItem error:', error);
+              }
+            },
+            removeItem: (key: string) => {
+              try {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+                
+                // Remove from cookies
+                document.cookie = `${key}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+              } catch (error) {
+                console.warn('Storage removeItem error:', error);
+              }
+            }
+          },
+          // ENTERPRISE FIX: Enhanced session configuration
+          storageKey: 'beluga-enterprise-auth',
+          debug: process.env.NODE_ENV === 'development'
         },
         global: {
           headers: {
@@ -153,11 +309,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const expiresAt = session.expires_at;
       if (expiresAt && Date.now() > (expiresAt * 1000) - SECURITY_CONFIG.SESSION_REFRESH_THRESHOLD) {
+        console.log('🔄 Enterprise: Proactively refreshing session before expiry');
+        
         const { data, error } = await supabase.auth.refreshSession();
         if (error) throw error;
         if (data.session) {
           setSession(data.session);
           setUser(data.session.user);
+          console.log('✅ Enterprise: Session refreshed successfully');
         }
       }
     } catch (error) {
@@ -165,6 +324,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Don't throw error, just log it
     }
   }, [supabase, session]);
+
+  // ENTERPRISE FIX: Enhanced session validation and recovery
+  const validateAndRecoverSession = useCallback(async () => {
+    if (!supabase) return;
+
+    try {
+      console.log('🔍 Enterprise: Validating and recovering session...');
+      
+      // Get current session
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.warn('Session validation error:', error);
+        return;
+      }
+
+      if (session) {
+        // Check if session is still valid
+        const expiresAt = session.expires_at;
+        const now = Date.now();
+        
+        if (expiresAt && now < (expiresAt * 1000)) {
+          // Session is valid, update state
+          setSession(session);
+          setUser(session.user);
+          setIsAuthenticated(true);
+          console.log('✅ Enterprise: Valid session recovered');
+        } else {
+          // Session expired, try to refresh
+          console.log('🔄 Enterprise: Session expired, attempting refresh...');
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          
+          if (refreshError) {
+            console.warn('Session refresh failed:', refreshError);
+            // Clear invalid session
+            setSession(null);
+            setUser(null);
+            setIsAuthenticated(false);
+          } else if (refreshData.session) {
+            setSession(refreshData.session);
+            setUser(refreshData.session.user);
+            setIsAuthenticated(true);
+            console.log('✅ Enterprise: Session refreshed and recovered');
+          }
+        }
+      } else {
+        console.log('ℹ️ Enterprise: No active session found');
+        setSession(null);
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error('Session validation and recovery error:', error);
+    }
+  }, [supabase]);
 
   // Enhanced authentication state management
   const handleAuthStateChange = useCallback(async (event: AuthChangeEvent, session: Session | null) => {
@@ -190,24 +404,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               return newMap;
             });
           }
+          console.log('✅ Enterprise: User signed in successfully');
           break;
         case 'SIGNED_OUT':
           // Clear all auth state
           setUser(null);
           setSession(null);
           setIsAuthenticated(false);
+          console.log('ℹ️ Enterprise: User signed out');
           break;
         case 'TOKEN_REFRESHED':
           // Update session with refreshed token
           if (session) {
             setSession(session);
             setUser(session.user);
+            console.log('✅ Enterprise: Token refreshed successfully');
           }
           break;
         case 'USER_UPDATED':
           // Handle user profile updates
           if (session?.user) {
             setUser(session.user);
+            console.log('✅ Enterprise: User profile updated');
           }
           break;
       }
@@ -312,7 +530,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Reset login attempts on success
       setLoginAttempts(prev => {
         const newMap = new Map(prev);
-        newMap.delete(email);
+        if (email) {
+          newMap.delete(email);
+        }
         return newMap;
       });
 
