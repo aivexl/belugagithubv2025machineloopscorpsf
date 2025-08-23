@@ -10,10 +10,15 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔍 AUTH: /api/auth/me called');
+    console.log('🍪 AUTH: All cookies:', request.cookies.getAll());
+    
     // Get token from httpOnly cookie
     const token = request.cookies.get('auth-token')?.value;
+    console.log('🔍 AUTH: Token found:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
 
     if (!token) {
+      console.log('❌ AUTH: No token in cookies');
       return NextResponse.json(
         { success: false, error: 'No authentication token' },
         { status: 401 }

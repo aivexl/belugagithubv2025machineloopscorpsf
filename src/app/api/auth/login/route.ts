@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       userId: data.user.id,
       email: data.user.email,
       supabaseToken: data.session.access_token,
-      exp: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour
+      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7), // 7 days (match cookie)
     };
 
     const token = jwt.sign(jwtPayload, jwtSecret);
@@ -65,9 +65,17 @@ export async function POST(request: NextRequest) {
     response.cookies.set('auth-token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60, // 1 hour
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days (longer for better UX)
       path: '/',
+      domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost', // Auto-domain in production
+    });
+
+    console.log('🍪 AUTH: Cookie set successfully', {
+      token: token.substring(0, 20) + '...',
+      maxAge: 60 * 60 * 24 * 7,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
     });
 
     return response;

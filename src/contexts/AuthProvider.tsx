@@ -65,12 +65,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       
+      console.log('🔍 AUTH: Checking authentication...');
+      console.log('🍪 AUTH: Document cookie:', document.cookie);
+      
       const response = await fetch('/api/auth/me', {
         method: 'GET',
         credentials: 'include', // Include httpOnly cookies
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
+      console.log('🔍 AUTH: Response status:', response.status);
+      console.log('🔍 AUTH: Response headers:', response.headers);
+
       const data = await response.json();
+      console.log('🔍 AUTH: Response data:', data);
 
       if (data.success && data.user) {
         console.log('✅ AUTH: User authenticated -', data.user.email);
@@ -80,7 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           error: null,
         });
       } else {
-        console.log('❌ AUTH: No valid session');
+        console.log('❌ AUTH: No valid session -', data.error || 'Unknown error');
         setAuthState({
           user: null,
           loading: false,
@@ -112,8 +122,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       const data = await response.json();
+      console.log('🔍 AUTH: Login response:', data);
+      console.log('🔍 AUTH: Login response cookies:', response.headers.get('set-cookie'));
 
       if (data.success && data.user) {
+        console.log('✅ AUTH: Login successful, checking cookies...');
+        
+        // Wait a bit for cookie to be set
+        setTimeout(() => {
+          console.log('🍪 AUTH: Document cookie after login:', document.cookie);
+        }, 100);
+
         setAuthState({
           user: data.user,
           loading: false,
