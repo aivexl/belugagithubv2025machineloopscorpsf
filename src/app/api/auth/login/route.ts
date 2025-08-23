@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     const token = jwt.sign(jwtPayload, jwtSecret);
 
-    // Create response with httpOnly cookie
+    // Create response with both httpOnly cookie AND token in response for localStorage
     const response = NextResponse.json({
       success: true,
       user: {
@@ -58,24 +58,39 @@ export async function POST(request: NextRequest) {
         email: data.user.email,
         fullName: data.user.user_metadata?.full_name || null,
         avatarUrl: data.user.user_metadata?.avatar_url || null,
+      },
+      token: token, // Include token in response for localStorage fallback
+      sessionData: {
+        userId: data.user.id,
+        email: data.user.email,
+        supabaseToken: data.session.access_token,
+        expiresAt: Date.now() + (60 * 60 * 24 * 7 * 1000), // 7 days in milliseconds
       }
     });
 
-    // Set httpOnly cookie for security
-    response.cookies.set('auth-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days (longer for better UX)
+    // Try multiple cookie setting approaches for maximum compatibility
+    const cookieOptions = {
+      httpOnly: false, // Allow JS access for debugging and fallback
+      secure: false, // Allow in development
+      sameSite: 'lax' as const,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
-      domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost', // Auto-domain in production
-    });
+    };
 
-    console.log('🍪 AUTH: Cookie set successfully', {
+    // Set multiple cookie variants for compatibility
+    response.cookies.set('auth-token', token, cookieOptions);
+    response.cookies.set('beluga-auth', token, cookieOptions);
+    
+    // Also set headers for manual cookie setting
+    response.headers.set('Set-Cookie', [
+      `auth-token=${token}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`,
+      `beluga-auth=${token}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`
+    ].join(', '));
+
+    console.log('🍪 AUTH: Multiple cookies set successfully', {
       token: token.substring(0, 20) + '...',
       maxAge: 60 * 60 * 24 * 7,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      cookieOptions,
     });
 
     return response;

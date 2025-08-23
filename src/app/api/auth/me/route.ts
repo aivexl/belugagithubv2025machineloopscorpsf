@@ -13,12 +13,15 @@ export async function GET(request: NextRequest) {
     console.log('🔍 AUTH: /api/auth/me called');
     console.log('🍪 AUTH: All cookies:', request.cookies.getAll());
     
-    // Get token from httpOnly cookie
-    const token = request.cookies.get('auth-token')?.value;
+    // Try multiple token sources for maximum compatibility
+    let token = request.cookies.get('auth-token')?.value || 
+                request.cookies.get('beluga-auth')?.value ||
+                request.headers.get('authorization')?.replace('Bearer ', '');
+    
     console.log('🔍 AUTH: Token found:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
 
     if (!token) {
-      console.log('❌ AUTH: No token in cookies');
+      console.log('❌ AUTH: No token found in any source');
       return NextResponse.json(
         { success: false, error: 'No authentication token' },
         { status: 401 }
