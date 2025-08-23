@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { authDebugger } from '../../lib/auth/debugger';
+// import { authDebugger } from '../../lib/auth/debugger';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -80,11 +80,11 @@ export default function LoginModal({
     setLoading(true);
     setError('');
     
-    authDebugger.log('Sign In Started', 'LoginModal', { email: email.trim() }, 'info');
+    console.log('🔐 LOGIN: Sign In Started', { email: email.trim() });
 
     try {
       const result = await signIn(email.trim(), password);
-      authDebugger.log('Sign In Response', 'LoginModal', { success: result.success, error: result.error }, result.success ? 'success' : 'error');
+      console.log('🔐 LOGIN: Sign In Response', { success: result.success, error: result.error });
       
       if (result.error || !result.success) {
         setError(result.error || 'Login failed');

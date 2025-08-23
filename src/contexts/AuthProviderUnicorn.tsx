@@ -16,11 +16,10 @@ import React, {
   useRef,
 } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
-import { enterpriseTokenManager } from '@/lib/auth/tokenManager';
-import { enterpriseSessionManager } from '@/lib/auth/sessionManager';
-import type { SessionEvent } from '@/lib/auth/sessionManager';
-import { enterpriseContextValidator } from '@/lib/auth/contextValidator';
-import { authDebugger } from '@/lib/auth/debugger';
+import { enterpriseTokenManager } from '../lib/auth/tokenManager';
+import { enterpriseSessionManager } from '../lib/auth/sessionManager';
+import type { SessionEvent } from '../lib/auth/sessionManager';
+// import { authDebugger } from '../lib/auth/debugger';
 
 // =========================================================================
 // ENTERPRISE TYPE DEFINITIONS
@@ -101,12 +100,10 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
   // =========================================================================
   
   useEffect(() => {
-    // Register this provider with enterprise validator
-    enterpriseContextValidator.registerProvider('AuthProviderUnicorn');
+    console.log('🦄 AuthProviderUnicorn initialized');
     
     return () => {
-      // Cleanup registration on unmount
-      enterpriseContextValidator.unregisterProvider('AuthProviderUnicorn');
+      console.log('🦄 AuthProviderUnicorn cleanup');
     };
   }, []);
 
@@ -345,12 +342,12 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
 
   const signIn = useCallback(async (email: string, password: string): Promise<AuthOperationResult> => {
     try {
-      authDebugger.log('AuthProvider Sign In Started', 'AuthProviderUnicorn', { email }, 'info');
+      console.log('🔐 AUTH PROVIDER: Sign In Started', { email });
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
 
       const supabase = enterpriseTokenManager.getSupabaseClient();
       if (!supabase) {
-        authDebugger.log('Supabase Client Unavailable', 'AuthProviderUnicorn', {}, 'error');
+        console.error('🔐 AUTH PROVIDER: Supabase Client Unavailable');
         throw new Error('Authentication service unavailable');
       }
 
@@ -359,12 +356,12 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
         password,
       });
 
-      authDebugger.log('Supabase Auth Response', 'AuthProviderUnicorn', { 
+      console.log('🔐 AUTH PROVIDER: Supabase Auth Response', { 
         hasData: !!data, 
         hasSession: !!data?.session, 
         hasUser: !!data?.user, 
         error: error?.message 
-      }, error ? 'error' : 'success');
+      });
 
       if (error) {
         setAuthState(prev => ({ ...prev, isLoading: false, error: error.message }));
@@ -643,14 +640,10 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
 // =========================================================================
 
 export function useAuth(): AuthContextType {
-  // Enterprise-grade context validation
-  enterpriseContextValidator.validateHookUsage('useAuth', 'AuthProviderUnicorn');
-  
   const context = useContext(AuthContext);
   
   if (context === undefined) {
-    throw new Error('🚨 ENTERPRISE ERROR: useAuth must be used within an AuthProviderUnicorn. Current provider: ' + 
-      (enterpriseContextValidator.getProviderInfo().activeProvider || 'none'));
+    throw new Error('🚨 ENTERPRISE ERROR: useAuth must be used within an AuthProviderUnicorn');
   }
   
   return context;
