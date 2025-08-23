@@ -16,7 +16,7 @@ import React, {
   useRef,
 } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
-import { enterpriseTokenManager } from '../lib/auth/tokenManager';
+import { simpleAuthClient } from '../lib/auth/simpleAuth';
 import { enterpriseSessionManager } from '../lib/auth/sessionManager';
 import type { SessionEvent } from '../lib/auth/sessionManager';
 // import { authDebugger } from '../lib/auth/debugger';
@@ -101,6 +101,19 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
   
   useEffect(() => {
     console.log('🦄 AuthProviderUnicorn initialized');
+    
+    // Test simple auth client
+    const testAuth = async () => {
+      const isReady = simpleAuthClient.isReady();
+      console.log('🧪 Simple Auth Ready:', isReady);
+      
+      if (isReady) {
+        const connectionTest = await simpleAuthClient.testConnection();
+        console.log('🧪 Simple Auth Connection:', connectionTest);
+      }
+    };
+    
+    testAuth();
     
     return () => {
       console.log('🦄 AuthProviderUnicorn cleanup');
@@ -345,7 +358,7 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
       console.log('🔐 AUTH PROVIDER: Sign In Started', { email });
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
 
-      const supabase = enterpriseTokenManager.getSupabaseClient();
+      const supabase = simpleAuthClient.getClient();
       if (!supabase) {
         console.error('🔐 AUTH PROVIDER: Supabase Client Unavailable');
         throw new Error('Authentication service unavailable');
@@ -391,7 +404,7 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
 
-      const supabase = enterpriseTokenManager.getSupabaseClient();
+      const supabase = simpleAuthClient.getClient();
       if (!supabase) {
         throw new Error('Authentication service unavailable');
       }
@@ -448,7 +461,7 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
 
-      const supabase = enterpriseTokenManager.getSupabaseClient();
+      const supabase = simpleAuthClient.getClient();
       if (!supabase) {
         throw new Error('Authentication service unavailable');
       }
@@ -480,13 +493,21 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
 
   const refreshSession = useCallback(async (): Promise<AuthOperationResult> => {
     try {
-      const result = await enterpriseTokenManager.refreshTokens();
+      const supabase = simpleAuthClient.getClient();
+      if (!supabase) {
+        return { success: false, error: 'Authentication service unavailable' };
+      }
+      const { data, error } = await supabase.auth.refreshSession();
       
-      if (result.success) {
-        return { success: true, data: result.data };
+      if (error) {
+        setAuthState(prev => ({ ...prev, error: error.message }));
+        return { success: false, error: error.message };
+      }
+
+      if (data.session) {
+        return { success: true, data: data.session };
       } else {
-        setAuthState(prev => ({ ...prev, error: result.error || 'Refresh failed' }));
-        return { success: false, error: result.error || 'Refresh failed' };
+        return { success: false, error: 'No session returned' };
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Refresh failed';
@@ -505,7 +526,7 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
 
   const updateProfile = useCallback(async (updates: Record<string, any>): Promise<AuthOperationResult> => {
     try {
-      const supabase = enterpriseTokenManager.getSupabaseClient();
+      const supabase = simpleAuthClient.getClient();
       if (!supabase) {
         throw new Error('Authentication service unavailable');
       }
@@ -525,7 +546,7 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
 
   const resetPassword = useCallback(async (email: string): Promise<AuthOperationResult> => {
     try {
-      const supabase = enterpriseTokenManager.getSupabaseClient();
+      const supabase = simpleAuthClient.getClient();
       if (!supabase) {
         throw new Error('Authentication service unavailable');
       }
@@ -553,8 +574,8 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
     return {
       lastActivity: authState.lastActivity,
       idleTime: enterpriseSessionManager.getIdleTime(),
-      lastRefresh: enterpriseTokenManager.getLastRefreshTime(),
-      retryCount: enterpriseTokenManager.getRetryCount(),
+      lastRefresh: Date.now(),
+      retryCount: 0,
       sessionHealth: authState.sessionHealth,
     };
   }, [authState.lastActivity, authState.sessionHealth]);
