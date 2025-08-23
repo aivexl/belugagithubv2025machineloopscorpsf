@@ -41,9 +41,9 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   
-  // Experimental features - minimal for stability
+  // Experimental features - disabled for stability to avoid vendor-chunk issues
   experimental: {
-    optimizePackageImports: ['react', 'react-dom'],
+    // optimizePackageImports: ['react', 'react-dom'],
   },
   
   // Compiler options to reduce bundle size and warnings
@@ -54,73 +54,8 @@ const nextConfig = {
     styledComponents: true,
   },
   
-  // ENTERPRISE FIX: Webpack configuration for stable module resolution
-  webpack: (config, { dev, isServer }) => {
-    // ENTERPRISE FIX: Prevent webpack chunk ID collisions and module resolution issues
-    config.optimization = config.optimization || {};
-    
-    // Only apply optimizations for production to prevent development conflicts
-    if (!isServer && !dev) {
-      // ENTERPRISE FIX: Named chunks to prevent numeric ID conflicts
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        minSize: 20000,
-        maxSize: 244000,
-        cacheGroups: {
-          default: {
-            minChunks: 2,
-            priority: -20,
-            reuseExistingChunk: true,
-          },
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: -10,
-            reuseExistingChunk: true,
-          },
-          commons: {
-            name: 'commons',
-            chunks: 'initial',
-            minChunks: 2,
-            priority: -5,
-            reuseExistingChunk: true,
-          },
-        },
-      };
-      
-      // ENTERPRISE FIX: Use named IDs to prevent module resolution conflicts
-      config.optimization.moduleIds = 'named';
-      config.optimization.chunkIds = 'named';
-    } else {
-      // ENTERPRISE FIX: Development mode - simpler configuration
-      config.optimization.moduleIds = 'named';
-      config.optimization.chunkIds = 'named';
-    }
-    
-    // Fix for Supabase Edge Runtime compatibility
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        crypto: false,
-        stream: false,
-        url: false,
-        zlib: false,
-        http: false,
-        https: false,
-        assert: false,
-        os: false,
-        path: false,
-      };
-    }
-    
-    // ENTERPRISE FIX: Ensure stable module resolution
-    config.resolve.symlinks = false;
-    config.resolve.cacheWithContext = false;
-    
+  // Webpack configuration - keep defaults to avoid vendor-chunk mismatches
+  webpack: (config) => {
     return config;
   },
   
@@ -202,10 +137,7 @@ const nextConfig = {
   // Handle legacy pages structure compatibility
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
 
-  // Disable static optimization for error pages to prevent build issues
-  generateBuildId: async () => {
-    return 'build-' + Date.now();
-  },
+  // Use Next.js default build id generation
 };
 
 export default nextConfig;
