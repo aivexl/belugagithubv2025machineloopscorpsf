@@ -82,8 +82,30 @@ class EnterpriseAuth {
         nodeEnv: process.env.NODE_ENV,
       });
 
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      let supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      let supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      // Fallback: Try to get from window object if available (injected by vercel.json)
+      if (!supabaseUrl || !supabaseKey) {
+        console.log('🔧 AUTH: Trying fallback environment variables...');
+        
+        if (typeof window !== 'undefined' && (window as any).__ENV__) {
+          const env = (window as any).__ENV__;
+          supabaseUrl = supabaseUrl || env.NEXT_PUBLIC_SUPABASE_URL;
+          supabaseKey = supabaseKey || env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        }
+        
+        // Hard-coded fallback for production (from vercel.json)
+        if (!supabaseUrl) {
+          supabaseUrl = 'https://pedasqlddhrqvbwdlzge.supabase.co';
+          console.log('🔧 AUTH: Using hardcoded URL fallback');
+        }
+        
+        if (!supabaseKey) {
+          supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlZGFzcWxkZGhycXZid2RsemdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNjE3ODIsImV4cCI6MjA2ODYzNzc4Mn0.G2zTfu-4vVO7R86rU8KJ2xKrjGOCLus2Clm0ZobZYBM';
+          console.log('🔧 AUTH: Using hardcoded key fallback');
+        }
+      }
 
       console.log('🔧 AUTH: Supabase config:', {
         hasUrl: !!supabaseUrl,
@@ -339,10 +361,20 @@ class EnterpriseAuth {
   // ==========================================================================
 
   async signIn(email: string, password: string): Promise<AuthResult> {
+    console.log('🔐 AUTH: signIn called, ensuring initialization...');
     this.ensureInitialized();
     
     if (!this.client) {
-      return { success: false, error: 'Authentication not initialized' };
+      console.error('❌ AUTH: Client still null after ensureInitialized');
+      const status = this.getStatus();
+      console.error('❌ AUTH: Status:', status);
+      
+      // Try one more time to initialize
+      this.forceReinitialize();
+      
+      if (!this.client) {
+        return { success: false, error: 'Authentication system failed to initialize. Please refresh the page.' };
+      }
     }
 
     try {

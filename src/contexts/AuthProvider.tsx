@@ -49,18 +49,47 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     console.log('🔒 AuthProvider: Initializing...');
 
+    // Only run in browser
+    if (typeof window === 'undefined') {
+      console.log('🔒 AuthProvider: Server-side, skipping initialization');
+      return;
+    }
+
     // Log detailed auth status
     const status = auth.getStatus();
     console.log('🔧 AuthProvider: Auth status:', status);
 
-    // Initialize auth client when provider mounts
-    auth.initialize();
+    // Multiple initialization attempts to ensure it works
+    const initializeAuth = () => {
+      console.log('🔄 AuthProvider: Attempting auth initialization...');
+      auth.initialize();
+      
+      // Check if initialization was successful
+      setTimeout(() => {
+        const newStatus = auth.getStatus();
+        console.log('🔧 AuthProvider: Auth status after init:', newStatus);
+        
+        if (!newStatus.isReady) {
+          console.log('⚠️ AuthProvider: Auth not ready, forcing reinitialization...');
+          auth.forceReinitialize();
+        }
+      }, 500);
+    };
 
-    // Log status again after initialization
-    setTimeout(() => {
-      const newStatus = auth.getStatus();
-      console.log('🔧 AuthProvider: Auth status after init:', newStatus);
-    }, 100);
+    // Initialize immediately
+    initializeAuth();
+
+    // Also initialize on window load (fallback)
+    const handleWindowLoad = () => {
+      console.log('🔄 AuthProvider: Window loaded, reinitializing auth...');
+      initializeAuth();
+    };
+
+    if (document.readyState === 'complete') {
+      handleWindowLoad();
+    } else {
+      window.addEventListener('load', handleWindowLoad);
+    }
 
     const unsubscribe = auth.subscribe((state) => {
       console.log('🔄 AuthProvider: State update -', {
@@ -74,6 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return () => {
       console.log('🔒 AuthProvider: Cleanup');
+      window.removeEventListener('load', handleWindowLoad);
       unsubscribe();
     };
   }, []);
