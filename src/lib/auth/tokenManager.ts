@@ -62,7 +62,10 @@ class EnterpriseTokenManager {
   private listeners: Map<string, Array<(data: any) => void>> = new Map();
   
   private constructor() {
-    this.initializeClient();
+    // Defer initialization in SSR; initialize on-demand in browser
+    if (typeof window !== 'undefined') {
+      this.initializeClient();
+    }
     this.setupCrossTabSync();
     this.startPeriodicCheck();
   }
@@ -76,6 +79,12 @@ class EnterpriseTokenManager {
 
   private initializeClient(): void {
     try {
+      if (typeof window === 'undefined') {
+        // Skip browser client initialization on server
+        this.supabaseClient = null;
+        this.isInitialized = false;
+        return;
+      }
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -109,6 +118,11 @@ class EnterpriseTokenManager {
       console.error('❌ Failed to initialize Enterprise Token Manager (browser client):', error);
       // Fallback: try standard client to avoid total outage in edge cases
       try {
+        if (typeof window === 'undefined') {
+          this.supabaseClient = null;
+          this.isInitialized = false;
+          return;
+        }
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
         const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
         this.supabaseClient = createSupabaseClient(supabaseUrl, supabaseKey, {
@@ -138,6 +152,11 @@ class EnterpriseTokenManager {
   private ensureClient(): void {
     if (this.supabaseClient) return;
     try {
+      if (typeof window === 'undefined') {
+        this.supabaseClient = null;
+        this.isInitialized = false;
+        return;
+      }
       this.initializeClient();
     } catch (error) {
       console.error('❌ Failed to ensure Supabase client:', error);
