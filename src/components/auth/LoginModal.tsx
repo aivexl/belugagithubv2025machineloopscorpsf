@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from './AuthProvider';
 // import { authDebugger } from '../../lib/auth/debugger';
 
 interface LoginModalProps {
@@ -91,10 +91,10 @@ export default function LoginModal({
 
     try {
       const result = await signIn(email.trim(), password);
-      console.log('🔐 LOGIN: Sign In Response', { success: result.success, error: result.error });
+      console.log('🔐 LOGIN: Sign In Response', result);
       
-      if (!result.success) {
-        setError(result.error || 'Login failed');
+      if (result.error) {
+        setError(result.error.message || 'Login failed');
         setLoginAttempts(prev => prev + 1);
         
         // Lock account after 5 failed attempts

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useCallback, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from './AuthProvider';
 
 interface PasswordResetModalProps {
   isOpen: boolean;

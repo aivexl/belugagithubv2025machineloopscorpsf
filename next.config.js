@@ -1,143 +1,92 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable ESLint during build to resolve parsing issues
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  
-  // Disable TypeScript checking during build to resolve module resolution issues
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  
-  // Disable source maps in development to prevent 404 errors
-  productionBrowserSourceMaps: false,
-  
-  // Optimize images - use remotePatterns instead of deprecated domains
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'ui-avatars.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'assets.coingecko.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn.sanity.io',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-    formats: ['image/webp', 'image/avif'],
-    // Optimize image loading
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-  },
-  
-  // Experimental features - disabled for stability to avoid vendor-chunk issues
   experimental: {
-    // optimizePackageImports: ['react', 'react-dom'],
+    optimizePackageImports: ['@supabase/supabase-js', '@vercel/analytics']
   },
   
-  // Compiler options to reduce bundle size and warnings
-  compiler: {
-    // Remove console.log in production
-    removeConsole: process.env.NODE_ENV === 'production',
-    // Optimize CSS
-    styledComponents: true,
-  },
+  // Production optimizations
+  productionBrowserSourceMaps: false,
+  poweredByHeader: false,
   
-  // Webpack configuration - keep defaults to avoid vendor-chunk mismatches
-  webpack: (config) => {
-    return config;
-  },
+  // Compress responses
+  compress: true,
   
-  // Headers for better performance and security
+  // Security headers (complementing middleware)
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/:path*',
         headers: [
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
           },
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload'
           },
           {
             key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
-        ],
-      },
-    ];
+            value: '1; mode=block'
+          }
+        ]
+      }
+    ]
   },
-  
-  // Environment variables
+
+  // Environment-specific settings
   env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
+    CUSTOM_NODE_ENV: process.env.NODE_ENV,
   },
-  
-  // Redirects for better routing
-  async redirects() {
-    return [
-      {
-        source: '/old-page',
-        destination: '/new-page',
-        permanent: true,
-      },
-      // REMOVED: Problematic profile redirect causing infinite loops
-      // {
-      //   source: '/profile/:path*',
-      //   destination: '/profile',
-      //   permanent: false,
-      // },
-    ];
+
+  // Image optimization
+  images: {
+    domains: [
+      'cdn.sanity.io',
+      'assets.coingecko.com',
+      'images.unsplash.com'
+    ],
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 60,
   },
-  
-  // Rewrites for API routing
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'https://api.coingecko.com/api/v3/:path*',
-      },
-    ];
+
+  // Webpack optimizations
+  webpack: (config, { dev, isServer }) => {
+    if (!dev && !isServer) {
+      // Production client-side optimizations
+      config.optimization.splitChunks.cacheGroups = {
+        ...config.optimization.splitChunks.cacheGroups,
+        auth: {
+          name: 'auth',
+          chunks: 'all',
+          test: /[\\/]node_modules[\\/](@supabase|cookies-next)[\\/]/,
+          priority: 30,
+          reuseExistingChunk: true,
+        },
+        analytics: {
+          name: 'analytics',
+          chunks: 'all',
+          test: /[\\/]node_modules[\\/]@vercel[\\/]analytics[\\/]/,
+          priority: 25,
+          reuseExistingChunk: true,
+        }
+      }
+    }
+
+    // Suppress console warnings in production
+    if (!dev) {
+      config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true
+    }
+
+    return config
   },
-  
-  // Trailing slash configuration for better routing
-  trailingSlash: false,
-  
-  // Enable strict mode for better error detection
-  reactStrictMode: true,
-  
-  // Performance optimizations
-  compress: true,
-  
-  // Security headers
-  poweredByHeader: false,
 
-  // Handle legacy pages structure compatibility
-  pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
+  // Logging
+  logging: {
+    fetches: {
+      fullUrl: process.env.NODE_ENV === 'development'
+    }
+  }
+}
 
-  // Use Next.js default build id generation
-};
-
-export default nextConfig;
+export default nextConfig

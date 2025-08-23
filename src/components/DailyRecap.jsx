@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import Image from 'next/image';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from './auth/AuthProvider';
 
 const recapItems = [
   'Arus masuk Bitcoin ETF mencapai rekor tertinggi baru.',

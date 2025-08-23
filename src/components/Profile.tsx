@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from './auth/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { 
   AiOutlineUser, 

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from './AuthProvider';
 
 interface SignUpModalProps {
   isOpen: boolean;
@@ -96,14 +96,14 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
     }
 
     try {
-      const result = await signUp(email.trim(), password, fullName.trim());
+      const result = await signUp(email.trim(), password, { full_name: fullName.trim() });
       
-      if (!result.success) {
-        setError(result.error || 'Sign up failed');
+      if (result.error) {
+        setError(result.error.message || 'Sign up failed');
         setLoading(false);
       } else {
         setLoading(false);
-        setSuccess(result.message || 'Account created successfully!');
+        setSuccess('Account created successfully!');
         setTimeout(() => {
           onClose();
         }, 3000);

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../components/auth/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { 
   AiOutlineUser, 
