@@ -55,41 +55,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return;
     }
 
-    // Log detailed auth status
-    const status = auth.getStatus();
-    console.log('🔧 AuthProvider: Auth status:', status);
+    // Prevent multiple initializations
+    let initialized = false;
+    let initTimeout: NodeJS.Timeout;
 
-    // Multiple initialization attempts to ensure it works
-    const initializeAuth = () => {
-      console.log('🔄 AuthProvider: Attempting auth initialization...');
+    const initializeAuthOnce = () => {
+      if (initialized) {
+        console.log('🔒 AuthProvider: Already initialized, skipping');
+        return;
+      }
+
+      console.log('🔄 AuthProvider: Single initialization attempt...');
+      initialized = true;
+      
+      // Initialize auth client
       auth.initialize();
       
-      // Check if initialization was successful
-      setTimeout(() => {
-        const newStatus = auth.getStatus();
-        console.log('🔧 AuthProvider: Auth status after init:', newStatus);
+      // Wait for initialization to complete before checking status
+      initTimeout = setTimeout(() => {
+        const status = auth.getStatus();
+        console.log('🔧 AuthProvider: Final auth status:', status);
         
-        if (!newStatus.isReady) {
-          console.log('⚠️ AuthProvider: Auth not ready, forcing reinitialization...');
-          auth.forceReinitialize();
+        if (!status.isReady) {
+          console.log('⚠️ AuthProvider: Auth still not ready after initialization');
+          // Don't force reinitialize to prevent loops
         }
-      }, 500);
+      }, 1000);
     };
 
-    // Initialize immediately
-    initializeAuth();
-
-    // Also initialize on window load (fallback)
-    const handleWindowLoad = () => {
-      console.log('🔄 AuthProvider: Window loaded, reinitializing auth...');
-      initializeAuth();
-    };
-
-    if (document.readyState === 'complete') {
-      handleWindowLoad();
-    } else {
-      window.addEventListener('load', handleWindowLoad);
-    }
+    // Initialize once when provider mounts
+    initializeAuthOnce();
 
     const unsubscribe = auth.subscribe((state) => {
       console.log('🔄 AuthProvider: State update -', {
@@ -103,7 +98,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     return () => {
       console.log('🔒 AuthProvider: Cleanup');
-      window.removeEventListener('load', handleWindowLoad);
+      if (initTimeout) clearTimeout(initTimeout);
       unsubscribe();
     };
   }, []);

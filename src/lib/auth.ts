@@ -50,8 +50,11 @@ class EnterpriseAuth {
   private constructor() {
     // Don't initialize immediately - wait for browser context
     if (typeof window !== 'undefined') {
-      this.initializeClient();
-      this.setupAuthListener();
+      // Add a small delay to allow DOM to be ready
+      setTimeout(() => {
+        this.initializeClient();
+        this.setupAuthListener();
+      }, 100);
     }
   }
 
@@ -144,8 +147,31 @@ class EnterpriseAuth {
         auth: {
           autoRefreshToken: true,
           persistSession: true,
-          detectSessionInUrl: true,
+          detectSessionInUrl: false, // Disable to prevent URL-based session changes
           flowType: 'pkce',
+          storage: {
+            getItem: (key: string) => {
+              try {
+                return localStorage.getItem(key);
+              } catch {
+                return null;
+              }
+            },
+            setItem: (key: string, value: string) => {
+              try {
+                localStorage.setItem(key, value);
+              } catch {
+                // Ignore storage errors
+              }
+            },
+            removeItem: (key: string) => {
+              try {
+                localStorage.removeItem(key);
+              } catch {
+                // Ignore storage errors
+              }
+            },
+          },
         },
       });
 
@@ -181,8 +207,21 @@ class EnterpriseAuth {
     this.client.auth.onAuthStateChange(async (event, session) => {
       console.log('🔄 AUTH: State change -', event, session?.user?.email || 'no user');
 
+      // Prevent auto logout/login cycles during page refresh
+      if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+        // Only update state, don't trigger unnecessary actions
+        this.updateState({
+          user: session?.user || null,
+          session,
+          loading: false,
+          error: null,
+        });
+        return;
+      }
+
       switch (event) {
         case 'SIGNED_IN':
+          console.log('✅ AUTH: User signed in -', session?.user?.email);
           this.updateState({
             user: session?.user || null,
             session,
@@ -192,6 +231,8 @@ class EnterpriseAuth {
           break;
 
         case 'SIGNED_OUT':
+          console.log('❌ AUTH: User signed out');
+          // Only clear state if this is an intentional sign out
           this.updateState({
             user: null,
             session: null,
@@ -200,16 +241,8 @@ class EnterpriseAuth {
           });
           break;
 
-        case 'TOKEN_REFRESHED':
-          this.updateState({
-            user: session?.user || null,
-            session,
-            loading: false,
-            error: null,
-          });
-          break;
-
         case 'USER_UPDATED':
+          console.log('🔄 AUTH: User updated');
           this.updateState({
             user: session?.user || null,
             session,
@@ -219,7 +252,7 @@ class EnterpriseAuth {
           break;
 
         default:
-          // Initial session check
+          // For any other event, just update state without logging
           this.updateState({
             user: session?.user || null,
             session,
