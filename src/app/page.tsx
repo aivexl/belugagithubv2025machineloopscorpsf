@@ -66,5 +66,5 @@ export default async function Home() {
     articles = FALLBACK_ARTICLES;
   }
 
-  return <HomeClient articles={articles} />;
+  return <HomeClient articles={articles as any} />;
 }

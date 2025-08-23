@@ -41,10 +41,25 @@ const nextConfig = {
 
   // Image optimization
   images: {
-    domains: [
-      'cdn.sanity.io',
-      'assets.coingecko.com',
-      'images.unsplash.com'
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.sanity.io',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.coingecko.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60,
@@ -52,30 +67,19 @@ const nextConfig = {
 
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
+    // Simple optimization - no complex minifier configuration
     if (!dev && !isServer) {
-      // Production client-side optimizations
+      // Basic bundle optimization
       config.optimization.splitChunks.cacheGroups = {
         ...config.optimization.splitChunks.cacheGroups,
-        auth: {
-          name: 'auth',
+        vendor: {
+          name: 'vendor',
           chunks: 'all',
-          test: /[\\/]node_modules[\\/](@supabase|cookies-next)[\\/]/,
-          priority: 30,
-          reuseExistingChunk: true,
-        },
-        analytics: {
-          name: 'analytics',
-          chunks: 'all',
-          test: /[\\/]node_modules[\\/]@vercel[\\/]analytics[\\/]/,
-          priority: 25,
+          test: /[\\/]node_modules[\\/]/,
+          priority: 10,
           reuseExistingChunk: true,
         }
       }
-    }
-
-    // Suppress console warnings in production
-    if (!dev) {
-      config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true
     }
 
     return config

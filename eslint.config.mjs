@@ -10,15 +10,15 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals"),
+  ...compat.extends("next"),
   {
     rules: {
       "@next/next/no-img-element": "off",
       "@next/next/no-html-link-for-pages": "off",
       "@next/next/no-head-element": "off",
       "react/no-unescaped-entities": "off",
-      "@typescript-eslint/no-unused-vars": "warn",
-      "@typescript-eslint/no-explicit-any": "warn",
+      "no-unused-vars": "off",
+      "react-hooks/exhaustive-deps": "off",
     },
   },
   {

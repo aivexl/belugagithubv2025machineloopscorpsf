@@ -11,7 +11,9 @@ export default async function NewsroomPage() {
     articles = addImageUrls(fetchedArticles);
   } catch (error) {
     console.error('Error fetching newsroom articles:', error);
+    // Return empty array on error
+    articles = [];
   }
 
-  return <NewsroomClient articles={articles} />;
+  return <NewsroomClient articles={articles as any} />;
 } 

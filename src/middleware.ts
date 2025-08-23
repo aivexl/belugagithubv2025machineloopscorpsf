@@ -1,21 +1,13 @@
 /**
- * Production Security Middleware with Official Supabase SSR
- * Fortune 500 Grade Security & Session Management
+ * Production Security Middleware
+ * Fortune 500 Grade Security Headers
  */
 
-import { createClient } from '@/utils/supabase/middleware'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  const { supabase, response } = createClient(request)
-
-  // Refresh session if needed
-  try {
-    await supabase.auth.getUser()
-  } catch (error) {
-    console.warn('Auth session refresh failed:', error)
-  }
+  const response = NextResponse.next()
 
   // Security Headers - Fortune 500 Grade
   response.headers.set('X-Frame-Options', 'DENY')
