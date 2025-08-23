@@ -23,7 +23,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState<string[]>([]);
   
-  const { signUp, signInWithGoogle } = useAuth();
+  const { signUp } = useAuth();
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -170,24 +170,9 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
   }, [fullName, email, password, confirmPassword, acceptTerms, passwordStrength, signUp, onClose]);
 
   const handleGoogleSignIn = useCallback(async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const result = await signInWithGoogle();
-      
-      if (!result.success) {
-        setError(result.error || 'Google sign-up failed');
-      } else {
-        // Success - close modal
-        onClose();
-      }
-    } catch (err) {
-      setError('Google sign-up failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [signInWithGoogle, onClose]);
+    // Temporarily disabled - Google OAuth not yet implemented in new API
+    setError('Google sign-up is temporarily unavailable. Please use email/password.');
+  }, []);
 
   const handleClose = useCallback(() => {
     if (!loading) {

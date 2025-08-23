@@ -6,7 +6,24 @@ export function useAuth() {
   return useAuthProvider();
 }
 
-export type {
-  AuthState,
-  AuthResult
-} from '../lib/auth';
+// Re-export types for backward compatibility
+export interface User {
+  id: string;
+  email: string;
+  fullName?: string | null;
+  avatarUrl?: string | null;
+}
+
+export interface AuthState {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface AuthResult {
+  success: boolean;
+  error?: string;
+  user?: User;
+  message?: string;
+  requiresConfirmation?: boolean;
+}

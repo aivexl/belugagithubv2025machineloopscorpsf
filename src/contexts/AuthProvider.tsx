@@ -6,21 +6,37 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '../lib/auth';
-import type { AuthState, AuthResult } from '../lib/auth';
-import type { User } from '@supabase/supabase-js';
 
 // =============================================================================
-// CONTEXT TYPES
+// TYPES
 // =============================================================================
+
+interface User {
+  id: string;
+  email: string;
+  fullName?: string | null;
+  avatarUrl?: string | null;
+}
+
+interface AuthState {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+}
+
+interface AuthResult {
+  success: boolean;
+  error?: string;
+  user?: User;
+  message?: string;
+  requiresConfirmation?: boolean;
+}
 
 interface AuthContextValue extends AuthState {
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string, fullName?: string) => Promise<AuthResult>;
-  signInWithGoogle: () => Promise<AuthResult>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<AuthResult>;
-  updateProfile: (updates: { full_name?: string; avatar_url?: string }) => Promise<AuthResult>;
+  checkAuth: () => Promise<void>;
 }
 
 // =============================================================================
@@ -40,78 +56,179 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
-    session: null,
     loading: true,
     error: null,
   });
 
-  // Subscribe to auth state changes
-  useEffect(() => {
-    console.log('🔒 AuthProvider: Initializing...');
+  // Check authentication status on mount
+  const checkAuth = async () => {
+    try {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include', // Include httpOnly cookies
+      });
 
-    // Only run in browser
-    if (typeof window === 'undefined') {
-      console.log('🔒 AuthProvider: Server-side, skipping initialization');
-      return;
+      const data = await response.json();
+
+      if (data.success && data.user) {
+        console.log('✅ AUTH: User authenticated -', data.user.email);
+        setAuthState({
+          user: data.user,
+          loading: false,
+          error: null,
+        });
+      } else {
+        console.log('❌ AUTH: No valid session');
+        setAuthState({
+          user: null,
+          loading: false,
+          error: null,
+        });
+      }
+    } catch (error: any) {
+      console.error('❌ AUTH: Session check failed:', error);
+      setAuthState({
+        user: null,
+        loading: false,
+        error: 'Session check failed',
+      });
     }
+  };
 
-    // Prevent multiple initializations
-    let initialized = false;
-    let initTimeout: NodeJS.Timeout;
+  // Sign in method
+  const signIn = async (email: string, password: string): Promise<AuthResult> => {
+    try {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
 
-    const initializeAuthOnce = () => {
-      if (initialized) {
-        console.log('🔒 AuthProvider: Already initialized, skipping');
-        return;
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.user) {
+        setAuthState({
+          user: data.user,
+          loading: false,
+          error: null,
+        });
+        return { success: true, user: data.user };
+      } else {
+        setAuthState(prev => ({
+          ...prev,
+          loading: false,
+          error: data.error || 'Login failed',
+        }));
+        return { success: false, error: data.error || 'Login failed' };
+      }
+    } catch (error: any) {
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      setAuthState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+      }));
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  // Sign up method
+  const signUp = async (email: string, password: string, fullName?: string): Promise<AuthResult> => {
+    try {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
+
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, password, fullName }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (data.requiresConfirmation) {
+          setAuthState(prev => ({ ...prev, loading: false }));
+          return { 
+            success: true, 
+            message: data.message,
+            requiresConfirmation: true 
+          };
+        } else if (data.user) {
+          setAuthState({
+            user: data.user,
+            loading: false,
+            error: null,
+          });
+          return { success: true, user: data.user, message: data.message };
+        }
       }
 
-      console.log('🔄 AuthProvider: Single initialization attempt...');
-      initialized = true;
-      
-      // Initialize auth client
-      auth.initialize();
-      
-      // Wait for initialization to complete before checking status
-      initTimeout = setTimeout(() => {
-        const status = auth.getStatus();
-        console.log('🔧 AuthProvider: Final auth status:', status);
-        
-        if (!status.isReady) {
-          console.log('⚠️ AuthProvider: Auth still not ready after initialization');
-          // Don't force reinitialize to prevent loops
-        }
-      }, 1000);
-    };
+      setAuthState(prev => ({
+        ...prev,
+        loading: false,
+        error: data.error || 'Signup failed',
+      }));
+      return { success: false, error: data.error || 'Signup failed' };
 
-    // Initialize once when provider mounts
-    initializeAuthOnce();
+    } catch (error: any) {
+      const errorMessage = error instanceof Error ? error.message : 'Signup failed';
+      setAuthState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+      }));
+      return { success: false, error: errorMessage };
+    }
+  };
 
-    const unsubscribe = auth.subscribe((state) => {
-      console.log('🔄 AuthProvider: State update -', {
-        hasUser: !!state.user,
-        hasSession: !!state.session,
-        loading: state.loading,
-        error: state.error,
+  // Sign out method
+  const signOut = async (): Promise<void> => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
       });
-      setAuthState(state);
-    });
 
-    return () => {
-      console.log('🔒 AuthProvider: Cleanup');
-      if (initTimeout) clearTimeout(initTimeout);
-      unsubscribe();
-    };
+      console.log('✅ AUTH: User signed out');
+      setAuthState({
+        user: null,
+        loading: false,
+        error: null,
+      });
+    } catch (error: any) {
+      console.error('❌ AUTH: Logout error:', error);
+      // Force logout even if API call fails
+      setAuthState({
+        user: null,
+        loading: false,
+        error: null,
+      });
+    }
+  };
+
+  // Auto-login check on mount
+  useEffect(() => {
+    console.log('🔒 AUTH: Checking authentication status...');
+    checkAuth();
   }, []);
 
-  // Context value with all auth methods
+  // Context value
   const contextValue: AuthContextValue = {
     ...authState,
-    signIn: auth.signIn.bind(auth),
-    signUp: auth.signUp.bind(auth),
-    signInWithGoogle: auth.signInWithGoogle.bind(auth),
-    signOut: auth.signOut.bind(auth),
-    resetPassword: auth.resetPassword.bind(auth),
-    updateProfile: auth.updateProfile.bind(auth),
+    signIn,
+    signUp,
+    signOut,
+    checkAuth,
   };
 
   return (

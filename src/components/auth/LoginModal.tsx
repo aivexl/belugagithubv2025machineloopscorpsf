@@ -26,7 +26,7 @@ export default function LoginModal({
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState(0);
   
-  const { signIn, signInWithGoogle } = useAuth();
+  const { signIn } = useAuth();
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -104,26 +104,9 @@ export default function LoginModal({
   }, [email, password, signIn, loginAttempts, isLocked, lockoutTime, onClose]);
 
   const handleGoogleSignIn = useCallback(async () => {
-    if (isLocked) return;
-    
-    setLoading(true);
-    setError('');
-
-    try {
-      const result = await signInWithGoogle();
-      
-      if (!result.success) {
-        setError(result.error || 'Google sign-in failed');
-      } else {
-        // Success - close modal
-        onClose();
-      }
-    } catch (err) {
-      setError('Google sign-in failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [signInWithGoogle, isLocked, onClose]);
+    // Temporarily disabled - Google OAuth not yet implemented in new API
+    setError('Google sign-in is temporarily unavailable. Please use email/password.');
+  }, []);
 
   const handleClose = useCallback(() => {
     if (!loading) {
