@@ -60,84 +60,90 @@ export function AuthProvider({ children }: AuthProviderProps) {
     error: null,
   });
 
-  // Check authentication status on mount
+  // Check authentication status on mount - localStorage-first approach
   const checkAuth = async () => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       
       console.log('🔍 AUTH: Checking authentication...');
-      console.log('🍪 AUTH: Document cookie:', document.cookie);
-      console.log('💾 AUTH: localStorage token:', localStorage.getItem('beluga-auth-token') ? 'EXISTS' : 'NOT FOUND');
       
-      // Get token from localStorage as fallback
+      // Get stored data from localStorage
       const storedToken = localStorage.getItem('beluga-auth-token');
       const storedUser = localStorage.getItem('beluga-user-data');
+      const storedSessionData = localStorage.getItem('beluga-session-data');
       
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      
-      // Add Authorization header if we have stored token
-      if (storedToken) {
-        headers['Authorization'] = `Bearer ${storedToken}`;
-        console.log('🔑 AUTH: Using stored token for auth check');
-      }
-      
-      const response = await fetch('/api/auth/me', {
-        method: 'GET',
-        credentials: 'include', // Include httpOnly cookies
-        headers,
+      console.log('💾 AUTH: Stored data check:', {
+        token: storedToken ? 'EXISTS' : 'NOT FOUND',
+        user: storedUser ? 'EXISTS' : 'NOT FOUND',
+        session: storedSessionData ? 'EXISTS' : 'NOT FOUND',
       });
-
-      console.log('🔍 AUTH: Response status:', response.status);
-
-      const data = await response.json();
-      console.log('🔍 AUTH: Response data:', data);
-
-      if (data.success && data.user) {
-        console.log('✅ AUTH: User authenticated -', data.user.email);
-        
-        // Store user data in localStorage for persistence
-        localStorage.setItem('beluga-user-data', JSON.stringify(data.user));
-        
-        setAuthState({
-          user: data.user,
-          loading: false,
-          error: null,
-        });
-      } else {
-        console.log('❌ AUTH: No valid session -', data.error || 'Unknown error');
-        
-        // If API fails but we have stored user data, use it temporarily
-        if (storedUser && storedToken) {
-          try {
-            const userData = JSON.parse(storedUser);
-            console.log('🔄 AUTH: Using stored user data as fallback');
+      
+      // If we have stored data, validate it first
+      if (storedToken && storedUser && storedSessionData) {
+        try {
+          const userData = JSON.parse(storedUser);
+          const sessionData = JSON.parse(storedSessionData);
+          
+          // Check if session is expired
+          const now = Date.now();
+          if (sessionData.expiresAt && now < sessionData.expiresAt) {
+            console.log('✅ AUTH: Using valid stored session data');
             setAuthState({
               user: userData,
               loading: false,
               error: null,
             });
-            return; // Exit early with stored data
-          } catch (e) {
-            console.log('❌ AUTH: Stored user data corrupted, clearing');
-            localStorage.removeItem('beluga-user-data');
+            return; // Exit early with valid stored data
+          } else {
+            console.log('⏰ AUTH: Stored session expired, clearing');
             localStorage.removeItem('beluga-auth-token');
+            localStorage.removeItem('beluga-user-data');
+            localStorage.removeItem('beluga-session-data');
           }
+        } catch (e) {
+          console.log('❌ AUTH: Stored data corrupted, clearing');
+          localStorage.removeItem('beluga-auth-token');
+          localStorage.removeItem('beluga-user-data');
+          localStorage.removeItem('beluga-session-data');
         }
-        
-        // Clear any stored data if auth failed
-        localStorage.removeItem('beluga-user-data');
-        localStorage.removeItem('beluga-auth-token');
-        
-        setAuthState({
-          user: null,
-          loading: false,
-          error: null,
-        });
       }
+      
+      // If no valid stored data, try API validation
+      if (storedToken) {
+        console.log('🔑 AUTH: Attempting API validation with stored token');
+        
+        const response = await fetch('/api/auth/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${storedToken}`,
+          },
+        });
+
+        const data = await response.json();
+        console.log('🔍 AUTH: API validation result:', data);
+
+        if (data.success && data.user) {
+          console.log('✅ AUTH: API validation successful');
+          setAuthState({
+            user: data.user,
+            loading: false,
+            error: null,
+          });
+          return;
+        }
+      }
+      
+      // If we reach here, no valid authentication
+      console.log('❌ AUTH: No valid authentication found');
+      setAuthState({
+        user: null,
+        loading: false,
+        error: null,
+      });
+      
     } catch (error: any) {
-      console.error('❌ AUTH: Session check failed:', error);
+      console.error('❌ AUTH: Authentication check failed:', error);
       
       // Try to use stored data as last resort
       const storedUser = localStorage.getItem('beluga-user-data');
@@ -146,7 +152,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (storedUser && storedToken) {
         try {
           const userData = JSON.parse(storedUser);
-          console.log('🆘 AUTH: Network failed, using stored data');
+          console.log('🆘 AUTH: Using stored data as fallback after error');
           setAuthState({
             user: userData,
             loading: false,
@@ -161,7 +167,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setAuthState({
         user: null,
         loading: false,
-        error: 'Session check failed',
+        error: 'Authentication check failed',
       });
     }
   };
@@ -367,12 +373,7 @@ export function useUser(): User | null {
   return user;
 }
 
-export function useSession() {
-  const { session } = useAuth();
-  return session;
-}
-
 export function useAuthState() {
-  const { user, session, loading, error } = useAuth();
-  return { user, session, loading, error, isAuthenticated: !!user };
+  const { user, loading, error } = useAuth();
+  return { user, loading, error, isAuthenticated: !!user };
 }
