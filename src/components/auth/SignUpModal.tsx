@@ -23,7 +23,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState<string[]>([]);
   
-  const { signUp, signInWithGoogle, authError } = useAuth();
+  const { signUp, signInWithGoogle, error: authError } = useAuth();
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -151,11 +151,13 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
     }
 
     try {
-      const { error } = await signUp(email.trim(), password, fullName.trim());
+      const result = await signUp(email.trim(), password, { fullName: fullName.trim() });
       
-      if (error) {
-        setError(error.message);
+      if (result.error || !result.success) {
+        setError(result.error || 'Sign up failed');
+        setLoading(false);
       } else {
+        setLoading(false);
         setSuccess('Check your email for a confirmation link!');
         setTimeout(() => {
           onClose();
@@ -172,10 +174,13 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
     setError('');
 
     try {
-      const { error } = await signInWithGoogle();
+      const result = await signInWithGoogle();
       
-      if (error) {
-        setError(error.message);
+      if (result.error || !result.success) {
+        setError(result.error || 'Google sign-up failed');
+      } else {
+        // Success - close modal
+        onClose();
       }
     } catch (err) {
       setError('Google sign-up failed. Please try again.');

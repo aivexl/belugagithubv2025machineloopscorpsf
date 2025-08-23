@@ -19,6 +19,8 @@ import type { User, Session } from '@supabase/supabase-js';
 import { enterpriseTokenManager } from '@/lib/auth/tokenManager';
 import { enterpriseSessionManager } from '@/lib/auth/sessionManager';
 import type { SessionEvent } from '@/lib/auth/sessionManager';
+import { enterpriseContextValidator } from '@/lib/auth/contextValidator';
+import { authDebugger } from '@/lib/auth/debugger';
 
 // =========================================================================
 // ENTERPRISE TYPE DEFINITIONS
@@ -94,6 +96,20 @@ interface AuthProviderProps {
 }
 
 export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps) {
+  // =========================================================================
+  // ENTERPRISE CONTEXT VALIDATION
+  // =========================================================================
+  
+  useEffect(() => {
+    // Register this provider with enterprise validator
+    enterpriseContextValidator.registerProvider('AuthProviderUnicorn');
+    
+    return () => {
+      // Cleanup registration on unmount
+      enterpriseContextValidator.unregisterProvider('AuthProviderUnicorn');
+    };
+  }, []);
+
   // =========================================================================
   // STATE MANAGEMENT
   // =========================================================================
@@ -329,10 +345,12 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
 
   const signIn = useCallback(async (email: string, password: string): Promise<AuthOperationResult> => {
     try {
+      authDebugger.log('AuthProvider Sign In Started', 'AuthProviderUnicorn', { email }, 'info');
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
 
       const supabase = enterpriseTokenManager.getSupabaseClient();
       if (!supabase) {
+        authDebugger.log('Supabase Client Unavailable', 'AuthProviderUnicorn', {}, 'error');
         throw new Error('Authentication service unavailable');
       }
 
@@ -341,6 +359,13 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
         password,
       });
 
+      authDebugger.log('Supabase Auth Response', 'AuthProviderUnicorn', { 
+        hasData: !!data, 
+        hasSession: !!data?.session, 
+        hasUser: !!data?.user, 
+        error: error?.message 
+      }, error ? 'error' : 'success');
+
       if (error) {
         setAuthState(prev => ({ ...prev, isLoading: false, error: error.message }));
         return { success: false, error: error.message };
@@ -348,9 +373,11 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
 
       if (data.session && data.user) {
         // Session will be handled by session manager events
+        setAuthState(prev => ({ ...prev, isLoading: false }));
         return { success: true, data: { user: data.user, session: data.session } };
       }
 
+      setAuthState(prev => ({ ...prev, isLoading: false, error: 'No session returned' }));
       return { success: false, error: 'No session returned' };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Sign in failed';
@@ -462,7 +489,7 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
         return { success: true, data: result.data };
       } else {
         setAuthState(prev => ({ ...prev, error: result.error || 'Refresh failed' }));
-        return { success: false, error: result.error };
+        return { success: false, error: result.error || 'Refresh failed' };
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Refresh failed';
@@ -540,12 +567,16 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
   }, []);
 
   const updateConfig = useCallback((newConfig: Partial<AuthProviderConfig>) => {
-    setProviderConfig(prev => ({ ...prev, ...newConfig }));
-    
-    // Update session manager config
-    enterpriseSessionManager.updateConfig({
-      maxIdleTime: (newConfig.idleTimeoutMinutes || prev.idleTimeoutMinutes) * 60 * 1000,
-      autoRefreshThreshold: (newConfig.refreshThresholdMinutes || prev.refreshThresholdMinutes) * 60 * 1000,
+    setProviderConfig(prev => {
+      const updated = { ...prev, ...newConfig };
+      
+      // Update session manager config
+      enterpriseSessionManager.updateConfig({
+        maxIdleTime: (newConfig.idleTimeoutMinutes || updated.idleTimeoutMinutes) * 60 * 1000,
+        autoRefreshThreshold: (newConfig.refreshThresholdMinutes || updated.refreshThresholdMinutes) * 60 * 1000,
+      });
+      
+      return updated;
     });
   }, []);
 
@@ -612,10 +643,14 @@ export function AuthProviderUnicorn({ children, config = {} }: AuthProviderProps
 // =========================================================================
 
 export function useAuth(): AuthContextType {
+  // Enterprise-grade context validation
+  enterpriseContextValidator.validateHookUsage('useAuth', 'AuthProviderUnicorn');
+  
   const context = useContext(AuthContext);
   
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProviderUnicorn');
+    throw new Error('🚨 ENTERPRISE ERROR: useAuth must be used within an AuthProviderUnicorn. Current provider: ' + 
+      (enterpriseContextValidator.getProviderInfo().activeProvider || 'none'));
   }
   
   return context;

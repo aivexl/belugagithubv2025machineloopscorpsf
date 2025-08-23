@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { authDebugger } from '../../lib/auth/debugger';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ export default function LoginModal({
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState(0);
   
-  const { signIn, signInWithGoogle, authError } = useAuth();
+  const { signIn, signInWithGoogle, error: authError } = useAuth();
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -78,12 +79,15 @@ export default function LoginModal({
 
     setLoading(true);
     setError('');
+    
+    authDebugger.log('Sign In Started', 'LoginModal', { email: email.trim() }, 'info');
 
     try {
-      const { error } = await signIn(email.trim(), password);
+      const result = await signIn(email.trim(), password);
+      authDebugger.log('Sign In Response', 'LoginModal', { success: result.success, error: result.error }, result.success ? 'success' : 'error');
       
-      if (error) {
-        setError(error.message);
+      if (result.error || !result.success) {
+        setError(result.error || 'Login failed');
         setLoginAttempts(prev => prev + 1);
         
         // Lock account after 5 failed attempts
@@ -92,8 +96,10 @@ export default function LoginModal({
           setLockoutTime(Date.now() + (15 * 60 * 1000)); // 15 minutes
           setError('Account locked due to too many failed attempts. Try again in 15 minutes.');
         }
+        setLoading(false); // CRITICAL FIX: Reset loading state on error
       } else {
         // Success - close modal
+        setLoading(false); // CRITICAL FIX: Reset loading state on success
         onClose();
       }
     } catch (_err) {
@@ -109,17 +115,20 @@ export default function LoginModal({
     setError('');
 
     try {
-      const { error } = await signInWithGoogle();
+      const result = await signInWithGoogle();
       
-      if (error) {
-        setError(error.message);
+      if (result.error || !result.success) {
+        setError(result.error || 'Google sign-in failed');
+      } else {
+        // Success - close modal
+        onClose();
       }
     } catch (err) {
       setError('Google sign-in failed. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [signInWithGoogle, isLocked]);
+  }, [signInWithGoogle, isLocked, onClose]);
 
   const handleClose = useCallback(() => {
     if (!loading) {
