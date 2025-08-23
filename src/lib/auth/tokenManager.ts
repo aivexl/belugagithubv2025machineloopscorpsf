@@ -64,7 +64,7 @@ class EnterpriseTokenManager {
   private constructor() {
     // Defer initialization in SSR; initialize on-demand in browser
     if (typeof window !== 'undefined') {
-      this.initializeClient();
+    this.initializeClient();
     }
     this.setupCrossTabSync();
     this.startPeriodicCheck();
@@ -95,7 +95,7 @@ class EnterpriseTokenManager {
       // Primary attempt: Browser client (best for app router + client components)
       this.supabaseClient = createBrowserClient(supabaseUrl, supabaseKey, {
         auth: {
-          autoRefreshToken: false, // We handle this manually for enterprise control
+          autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
           flowType: 'pkce',
@@ -127,7 +127,7 @@ class EnterpriseTokenManager {
         const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
         this.supabaseClient = createSupabaseClient(supabaseUrl, supabaseKey, {
           auth: {
-            autoRefreshToken: false,
+            autoRefreshToken: true,
             persistSession: true,
             detectSessionInUrl: true,
             flowType: 'pkce',
@@ -168,63 +168,18 @@ class EnterpriseTokenManager {
   // =========================================================================
 
   private secureGetItem(key: string): string | null {
+    // Pass-through localStorage for Supabase compatibility
     try {
-      // Try multiple storage mechanisms with fallback
-      const sources = [
-        () => localStorage.getItem(key),
-        () => sessionStorage.getItem(key),
-        () => this.getCookieValue(key),
-      ];
-
-      for (const getSource of sources) {
-        try {
-          const value = getSource();
-          if (value) {
-            // Validate data integrity
-            if (this.validateStoredData(key, value)) {
-              return value;
-            }
-          }
-        } catch (error) {
-          console.warn(`Storage source failed for key ${key}:`, error);
-          continue;
-        }
-      }
-
-      return null;
-    } catch (error) {
-      console.warn('Secure storage get error:', error);
+      return localStorage.getItem(key);
+    } catch (_e) {
       return null;
     }
   }
 
   private secureSetItem(key: string, value: string): void {
+    // Store raw value for Supabase compatibility
     try {
-      // Add timestamp and integrity check
-      const secureValue = this.addIntegrityCheck(value);
-      
-      // Store in multiple locations for redundancy
-      const storageOperations = [
-        () => localStorage.setItem(key, secureValue),
-        () => sessionStorage.setItem(key, secureValue),
-        () => this.setCookieValue(key, secureValue),
-      ];
-
-      let successCount = 0;
-      for (const operation of storageOperations) {
-        try {
-          operation();
-          successCount++;
-        } catch (error) {
-          console.warn(`Storage operation failed for key ${key}:`, error);
-        }
-      }
-
-      if (successCount === 0) {
-        throw new Error('All storage operations failed');
-      }
-
-      // Notify other tabs about the change
+      localStorage.setItem(key, value);
       this.broadcastStorageChange(key, value);
     } catch (error) {
       console.error('Secure storage set error:', error);
@@ -233,21 +188,7 @@ class EnterpriseTokenManager {
 
   private secureRemoveItem(key: string): void {
     try {
-      const removeOperations = [
-        () => localStorage.removeItem(key),
-        () => sessionStorage.removeItem(key),
-        () => this.removeCookieValue(key),
-      ];
-
-      for (const operation of removeOperations) {
-        try {
-          operation();
-        } catch (error) {
-          console.warn(`Storage removal failed for key ${key}:`, error);
-        }
-      }
-
-      // Notify other tabs about the removal
+      localStorage.removeItem(key);
       this.broadcastStorageChange(key, null);
     } catch (error) {
       console.error('Secure storage remove error:', error);
