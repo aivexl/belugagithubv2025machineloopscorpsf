@@ -74,13 +74,50 @@ class EnterpriseAuth {
         return;
       }
 
+      console.log('🔧 AUTH: Starting client initialization...');
+      console.log('🔧 AUTH: Environment check:', {
+        hasWindow: typeof window !== 'undefined',
+        hasProcess: typeof process !== 'undefined',
+        hasEnv: !!process.env,
+        nodeEnv: process.env.NODE_ENV,
+      });
+
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+      console.log('🔧 AUTH: Supabase config:', {
+        hasUrl: !!supabaseUrl,
+        hasKey: !!supabaseKey,
+        urlLength: supabaseUrl?.length || 0,
+        keyLength: supabaseKey?.length || 0,
+        urlStart: supabaseUrl?.substring(0, 20) + '...',
+        keyStart: supabaseKey?.substring(0, 20) + '...',
+      });
+
       if (!supabaseUrl || !supabaseKey) {
+        console.error('❌ AUTH: Missing environment variables');
+        console.error('❌ AUTH: NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl);
+        console.error('❌ AUTH: NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseKey);
         throw new Error('Missing Supabase environment variables');
       }
 
+      // Validate URL format
+      try {
+        new URL(supabaseUrl);
+        console.log('✅ AUTH: URL format validated');
+      } catch (urlError) {
+        console.error('❌ AUTH: Invalid URL format:', supabaseUrl);
+        throw new Error('Invalid Supabase URL format');
+      }
+
+      // Validate key format (should be a JWT-like string)
+      if (supabaseKey.length < 50) {
+        console.error('❌ AUTH: Key too short:', supabaseKey.length);
+        throw new Error('Invalid Supabase key format');
+      }
+
+      console.log('🔧 AUTH: Creating Supabase client...');
+      
       this.client = createClient(supabaseUrl, supabaseKey, {
         auth: {
           autoRefreshToken: true,
@@ -91,11 +128,23 @@ class EnterpriseAuth {
       });
 
       console.log('✅ AUTH: Client initialized successfully');
+      console.log('🔧 AUTH: Client type:', typeof this.client);
+      console.log('🔧 AUTH: Client auth:', typeof this.client.auth);
+      
+      // Test the client immediately
+      this.testClientConnection();
+      
     } catch (error) {
       console.error('❌ AUTH: Initialization failed:', error);
+      console.error('❌ AUTH: Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+      
       this.updateState({ 
         loading: false, 
-        error: 'Authentication system initialization failed' 
+        error: `Authentication system initialization failed: ${error.message}` 
       });
     }
   }
@@ -203,20 +252,86 @@ class EnterpriseAuth {
     return this.client !== null;
   }
 
+  // Get detailed status for debugging
+  getStatus(): {
+    hasWindow: boolean;
+    hasClient: boolean;
+    hasEnv: boolean;
+    hasUrl: boolean;
+    hasKey: boolean;
+    isReady: boolean;
+    error: string | null;
+  } {
+    return {
+      hasWindow: typeof window !== 'undefined',
+      hasClient: this.client !== null,
+      hasEnv: typeof process !== 'undefined' && !!process.env,
+      hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      isReady: this.isReady(),
+      error: this.currentState.error,
+    };
+  }
+
+  // Force reinitialization (useful for debugging)
+  forceReinitialize(): void {
+    console.log('🔄 AUTH: Force reinitialization requested');
+    this.client = null;
+    this.ensureInitialized();
+  }
+
   // Ensure client is initialized (call this before any auth operations)
   private ensureInitialized(): void {
-    if (typeof window === 'undefined') return;
+    console.log('🔧 AUTH: ensureInitialized called', {
+      hasWindow: typeof window !== 'undefined',
+      hasClient: !!this.client,
+      isReady: this.isReady(),
+    });
+    
+    if (typeof window === 'undefined') {
+      console.log('🔒 AUTH: Server-side, cannot initialize');
+      return;
+    }
     
     if (!this.client) {
       console.log('🔄 AUTH: Lazy initializing client...');
       this.initializeClient();
       this.setupAuthListener();
+    } else {
+      console.log('✅ AUTH: Client already initialized');
     }
   }
 
   // Public method to manually trigger initialization (for testing)
   public initialize(): void {
+    console.log('🔧 AUTH: Manual initialization requested');
     this.ensureInitialized();
+  }
+
+  // Test client connection after initialization
+  private async testClientConnection(): Promise<void> {
+    if (!this.client) {
+      console.log('🔧 AUTH: No client to test');
+      return;
+    }
+
+    try {
+      console.log('🧪 AUTH: Testing client connection...');
+      const { data, error } = await this.client.auth.getSession();
+      
+      if (error) {
+        console.warn('⚠️ AUTH: Client test failed:', error.message);
+      } else {
+        console.log('✅ AUTH: Client connection test successful');
+        console.log('🧪 AUTH: Session data:', {
+          hasSession: !!data.session,
+          hasUser: !!data.user,
+          userEmail: data.user?.email || 'no user',
+        });
+      }
+    } catch (testError) {
+      console.error('❌ AUTH: Client test error:', testError);
+    }
   }
 
   // ==========================================================================

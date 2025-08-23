@@ -49,8 +49,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     console.log('🔒 AuthProvider: Initializing...');
 
+    // Log detailed auth status
+    const status = auth.getStatus();
+    console.log('🔧 AuthProvider: Auth status:', status);
+
     // Initialize auth client when provider mounts
     auth.initialize();
+
+    // Log status again after initialization
+    setTimeout(() => {
+      const newStatus = auth.getStatus();
+      console.log('🔧 AuthProvider: Auth status after init:', newStatus);
+    }, 100);
 
     const unsubscribe = auth.subscribe((state) => {
       console.log('🔄 AuthProvider: State update -', {
