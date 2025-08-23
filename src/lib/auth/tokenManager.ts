@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { createBrowserClient } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import type { SupabaseClient, Session, User } from '@supabase/supabase-js';
 
 // Enterprise Configuration
@@ -82,6 +83,7 @@ class EnterpriseTokenManager {
         throw new Error('Missing Supabase environment variables');
       }
 
+      // Primary attempt: Browser client (best for app router + client components)
       this.supabaseClient = createBrowserClient(supabaseUrl, supabaseKey, {
         auth: {
           autoRefreshToken: false, // We handle this manually for enterprise control
@@ -104,7 +106,41 @@ class EnterpriseTokenManager {
       this.isInitialized = true;
       console.log('🚀 Enterprise Token Manager initialized successfully');
     } catch (error) {
-      console.error('❌ Failed to initialize Enterprise Token Manager:', error);
+      console.error('❌ Failed to initialize Enterprise Token Manager (browser client):', error);
+      // Fallback: try standard client to avoid total outage in edge cases
+      try {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+        this.supabaseClient = createSupabaseClient(supabaseUrl, supabaseKey, {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: true,
+            detectSessionInUrl: true,
+            flowType: 'pkce',
+          },
+          global: {
+            headers: {
+              'X-Client-Info': TOKEN_CONFIG.SECURITY.CLIENT_ID,
+            },
+          },
+        });
+        this.isInitialized = true;
+        console.log('✅ Enterprise Token Manager fallback client initialized');
+      } catch (fallbackError) {
+        console.error('❌ Enterprise Token Manager fallback initialization failed:', fallbackError);
+        this.supabaseClient = null;
+        this.isInitialized = false;
+      }
+    }
+  }
+
+  // Ensure a client instance exists; reinitialize on-demand if not
+  private ensureClient(): void {
+    if (this.supabaseClient) return;
+    try {
+      this.initializeClient();
+    } catch (error) {
+      console.error('❌ Failed to ensure Supabase client:', error);
     }
   }
 
@@ -663,6 +699,7 @@ class EnterpriseTokenManager {
   }
 
   getSupabaseClient(): SupabaseClient | null {
+    this.ensureClient();
     return this.supabaseClient;
   }
 

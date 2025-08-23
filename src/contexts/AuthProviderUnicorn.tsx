@@ -643,7 +643,7 @@ export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   
   if (context === undefined) {
-    throw new Error('🚨 ENTERPRISE ERROR: useAuth must be used within an AuthProviderUnicorn');
+    throw new Error('useAuth must be used within an AuthProviderUnicorn');
   }
   
   return context;
