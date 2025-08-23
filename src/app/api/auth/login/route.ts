@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pedasqlddhrqvbvbwdlzge.supabase.co';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlZGFzcWxkZGhycXZid2RsemdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNjE3ODIsImV4cCI6MjA2ODYzNzc4Mn0.G2zTfu-4vVO7R86rU8KJ2xKrjGOCLus2Clm0ZobZYBM';
-const jwtSecret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production-2024-enterprise-grade-security';
+const jwtSecret = process.env.JWT_SECRET || 'mGvXklk4df50cNpXj09+9TlpfCrPqqYICH75UV2WfBm7Za8fB4SRjktrlcUUhkSn8teF4eM1Kn2co+Dipu7V8w==';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -40,12 +40,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create JWT token
+    // Create JWT token with Supabase-compatible expiry (3600 seconds = 1 hour)
     const jwtPayload = {
       userId: data.user.id,
       email: data.user.email,
       supabaseToken: data.session.access_token,
-      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7), // 7 days (match cookie)
+      exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour (match Supabase)
     };
 
     const token = jwt.sign(jwtPayload, jwtSecret);
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         userId: data.user.id,
         email: data.user.email,
         supabaseToken: data.session.access_token,
-        expiresAt: Date.now() + (60 * 60 * 24 * 7 * 1000), // 7 days in milliseconds
+        expiresAt: Date.now() + (3600 * 1000), // 1 hour in milliseconds (match JWT)
       }
     });
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       httpOnly: false, // Allow JS access for debugging and fallback
       secure: false, // Allow in development
       sameSite: 'lax' as const,
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 3600, // 1 hour (match JWT expiry)
       path: '/',
     };
 
@@ -83,13 +83,13 @@ export async function POST(request: NextRequest) {
     
     // Also set headers for manual cookie setting
     response.headers.set('Set-Cookie', [
-      `auth-token=${token}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`,
-      `beluga-auth=${token}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`
+      `auth-token=${token}; Path=/; Max-Age=3600; SameSite=Lax`,
+      `beluga-auth=${token}; Path=/; Max-Age=3600; SameSite=Lax`
     ].join(', '));
 
     console.log('🍪 AUTH: Multiple cookies set successfully', {
       token: token.substring(0, 20) + '...',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 3600, // 1 hour
       cookieOptions,
     });
 
