@@ -48,8 +48,11 @@ class EnterpriseAuth {
   };
 
   private constructor() {
-    this.initializeClient();
-    this.setupAuthListener();
+    // Don't initialize immediately - wait for browser context
+    if (typeof window !== 'undefined') {
+      this.initializeClient();
+      this.setupAuthListener();
+    }
   }
 
   static getInstance(): EnterpriseAuth {
@@ -200,11 +203,29 @@ class EnterpriseAuth {
     return this.client !== null;
   }
 
+  // Ensure client is initialized (call this before any auth operations)
+  private ensureInitialized(): void {
+    if (typeof window === 'undefined') return;
+    
+    if (!this.client) {
+      console.log('🔄 AUTH: Lazy initializing client...');
+      this.initializeClient();
+      this.setupAuthListener();
+    }
+  }
+
+  // Public method to manually trigger initialization (for testing)
+  public initialize(): void {
+    this.ensureInitialized();
+  }
+
   // ==========================================================================
   // AUTHENTICATION METHODS
   // ==========================================================================
 
   async signIn(email: string, password: string): Promise<AuthResult> {
+    this.ensureInitialized();
+    
     if (!this.client) {
       return { success: false, error: 'Authentication not initialized' };
     }
@@ -237,6 +258,8 @@ class EnterpriseAuth {
   }
 
   async signUp(email: string, password: string, fullName?: string): Promise<AuthResult> {
+    this.ensureInitialized();
+    
     if (!this.client) {
       return { success: false, error: 'Authentication not initialized' };
     }
@@ -284,6 +307,8 @@ class EnterpriseAuth {
   }
 
   async signInWithGoogle(): Promise<AuthResult> {
+    this.ensureInitialized();
+    
     if (!this.client) {
       return { success: false, error: 'Authentication not initialized' };
     }
@@ -314,6 +339,8 @@ class EnterpriseAuth {
   }
 
   async signOut(): Promise<void> {
+    this.ensureInitialized();
+    
     if (!this.client) return;
 
     try {
@@ -332,6 +359,8 @@ class EnterpriseAuth {
   }
 
   async resetPassword(email: string): Promise<AuthResult> {
+    this.ensureInitialized();
+    
     if (!this.client) {
       return { success: false, error: 'Authentication not initialized' };
     }
@@ -357,6 +386,8 @@ class EnterpriseAuth {
   }
 
   async updateProfile(updates: { full_name?: string; avatar_url?: string }): Promise<AuthResult> {
+    this.ensureInitialized();
+    
     if (!this.client) {
       return { success: false, error: 'Authentication not initialized' };
     }

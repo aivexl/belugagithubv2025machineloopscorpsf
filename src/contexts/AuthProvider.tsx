@@ -49,6 +49,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     console.log('🔒 AuthProvider: Initializing...');
 
+    // Initialize auth client when provider mounts
+    auth.initialize();
+
     const unsubscribe = auth.subscribe((state) => {
       console.log('🔄 AuthProvider: State update -', {
         hasUser: !!state.user,
