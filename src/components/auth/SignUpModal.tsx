@@ -23,7 +23,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState<string[]>([]);
   
-  const { signUp, signInWithGoogle, error: authError } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -41,12 +41,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
     }
   }, [isOpen]);
 
-  // Handle auth errors from context
-  useEffect(() => {
-    if (authError) {
-      setError(authError);
-    }
-  }, [authError]);
+  // No need for auth error handling from context - handled directly in methods
 
   // Password strength checker
   const checkPasswordStrength = useCallback((password: string) => {
@@ -151,14 +146,19 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
     }
 
     try {
-      const result = await signUp(email.trim(), password, { fullName: fullName.trim() });
+      const result = await signUp(email.trim(), password, fullName.trim());
       
-      if (result.error || !result.success) {
+      if (!result.success) {
         setError(result.error || 'Sign up failed');
         setLoading(false);
       } else {
         setLoading(false);
-        setSuccess('Check your email for a confirmation link!');
+        if (result.error) {
+          // Email confirmation required
+          setSuccess(result.error);
+        } else {
+          setSuccess('Account created successfully!');
+        }
         setTimeout(() => {
           onClose();
         }, 3000);
@@ -176,7 +176,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
     try {
       const result = await signInWithGoogle();
       
-      if (result.error || !result.success) {
+      if (!result.success) {
         setError(result.error || 'Google sign-up failed');
       } else {
         // Success - close modal
@@ -187,7 +187,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToLogin }: SignUp
     } finally {
       setLoading(false);
     }
-  }, [signInWithGoogle]);
+  }, [signInWithGoogle, onClose]);
 
   const handleClose = useCallback(() => {
     if (!loading) {

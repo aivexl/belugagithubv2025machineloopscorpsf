@@ -1,15 +1,12 @@
 'use client';
 
-import { useAuth as useAuthUnicorn } from '../contexts/AuthProviderUnicorn';
+import { useAuth as useAuthProvider } from '../contexts/AuthProvider';
 
 export function useAuth() {
-  return useAuthUnicorn();
+  return useAuthProvider();
 }
 
-export type { 
-  AuthContextType,
+export type {
   AuthState,
-  AuthOperationResult,
-  AuthProviderConfig,
-  SessionEvent
-} from '../contexts/AuthProviderUnicorn';
+  AuthResult
+} from '../lib/auth';

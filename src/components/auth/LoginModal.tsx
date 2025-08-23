@@ -26,7 +26,7 @@ export default function LoginModal({
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState(0);
   
-  const { signIn, signInWithGoogle, error: authError } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -40,12 +40,7 @@ export default function LoginModal({
     }
   }, [isOpen]);
 
-  // Handle auth errors from context
-  useEffect(() => {
-    if (authError) {
-      setError(authError);
-    }
-  }, [authError]);
+  // No need for auth error handling from context - handled directly in methods
 
   // Check lockout status
   useEffect(() => {
@@ -86,7 +81,7 @@ export default function LoginModal({
       const result = await signIn(email.trim(), password);
       console.log('🔐 LOGIN: Sign In Response', { success: result.success, error: result.error });
       
-      if (result.error || !result.success) {
+      if (!result.success) {
         setError(result.error || 'Login failed');
         setLoginAttempts(prev => prev + 1);
         
@@ -96,10 +91,10 @@ export default function LoginModal({
           setLockoutTime(Date.now() + (15 * 60 * 1000)); // 15 minutes
           setError('Account locked due to too many failed attempts. Try again in 15 minutes.');
         }
-        setLoading(false); // CRITICAL FIX: Reset loading state on error
+        setLoading(false);
       } else {
         // Success - close modal
-        setLoading(false); // CRITICAL FIX: Reset loading state on success
+        setLoading(false);
         onClose();
       }
     } catch (_err) {
@@ -117,7 +112,7 @@ export default function LoginModal({
     try {
       const result = await signInWithGoogle();
       
-      if (result.error || !result.success) {
+      if (!result.success) {
         setError(result.error || 'Google sign-in failed');
       } else {
         // Success - close modal
