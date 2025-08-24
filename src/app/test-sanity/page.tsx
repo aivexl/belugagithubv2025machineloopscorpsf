@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { getAllArticles, getArticlesByCategory } from '../../utils/sanity';
+import { getAllArticles, getArticlesByCategory, type SanityArticle } from '../../utils/sanity';
 
 export default function TestSanityPage() {
-  const [allArticles, setAllArticles] = useState([]);
-  const [newsroomArticles, setNewsroomArticles] = useState([]);
-  const [academyArticles, setAcademyArticles] = useState([]);
+  const [allArticles, setAllArticles] = useState<SanityArticle[]>([]);
+  const [newsroomArticles, setNewsroomArticles] = useState<SanityArticle[]>([]);
+  const [academyArticles, setAcademyArticles] = useState<SanityArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,9 +29,9 @@ export default function TestSanityPage() {
         setAllArticles(all);
         setNewsroomArticles(newsroom);
         setAcademyArticles(academy);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching articles:', err);
-        setError(err.message);
+        setError(err.message || 'Failed to fetch articles');
       } finally {
         setLoading(false);
       }

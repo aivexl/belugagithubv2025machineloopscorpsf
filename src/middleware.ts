@@ -1,12 +1,12 @@
 /**
- * Production Security Middleware
+ * Production Security Middleware - Edge Runtime Compatible
  * Fortune 500 Grade Security Headers
  */
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const response = NextResponse.next()
 
   // Security Headers - Fortune 500 Grade

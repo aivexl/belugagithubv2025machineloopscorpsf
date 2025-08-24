@@ -11,14 +11,14 @@ import TokenHolders from "../../../../components/token/TokenHolders";
 import TokenSnipers from "../../../../components/token/TokenSnipers";
 import TokenHolderInsights from "../../../../components/token/TokenHolderInsights";
 
-const API_KEY = process.env.NEXT_PUBLIC_MORALIS_API_KEY;
+const API_KEY = process.env['NEXT_PUBLIC_MORALIS_API_KEY'];
 
 // Map URL path segments to Moralis chain IDs (used in getApiChainId function)
 
 const TokenPage = () => {
   const params = useParams();
-  const chainPath = params.chainId as string;
-  const tokenAddress = params.tokenAddress as string;
+  const chainPath = params?.chainId as string;
+  const tokenAddress = params?.tokenAddress as string;
   
   const [loadingState, setLoadingState] = useState("initial"); // 'initial', 'data', 'complete'
   const [tokenInfo, setTokenInfo] = useState(null);
@@ -46,7 +46,7 @@ const TokenPage = () => {
       ronin: "0x7e4",
     };
 
-    return chainMap[chainPath] || chainPath;
+    return chainMap[chainPath as keyof typeof chainMap] || chainPath;
   };
 
   const chainId = getApiChainId(chainPath);

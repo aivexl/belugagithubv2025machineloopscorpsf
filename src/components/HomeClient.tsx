@@ -42,8 +42,12 @@ export default function HomeClient({ articles = [] }: HomeClientProps) {
         <section className="col-span-1 lg:col-span-2 space-y-4 md:gap-6">
           {/* Prioritas slider: showInSlider > featured > terbaru, maksimal 8, urutan: showInSlider dulu */}
           {(() => {
-            let sliderArticles = [];
-            const sorted = [...articles].sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+            let sliderArticles: SanityArticleWithImage[] = [];
+            const sorted = [...articles].sort((a, b) => {
+              const dateA = new Date(a.publishedAt || 0).getTime();
+              const dateB = new Date(b.publishedAt || 0).getTime();
+              return dateB - dateA;
+            });
             const showInSlider = sorted.filter(a => a.showInSlider);
             sliderArticles = [...showInSlider];
             if (sliderArticles.length < 8) {

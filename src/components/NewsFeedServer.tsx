@@ -30,8 +30,8 @@ const NewsFeedServer = React.memo(({ articles = [], noTitle = false, initialCoun
   const sortedArticles = useMemo(() => {
     return articles
       .sort((a, b) => {
-        const dateA = new Date(a.publishedAt || 0);
-        const dateB = new Date(b.publishedAt || 0);
+        const dateA = new Date(a.publishedAt || 0).getTime();
+        const dateB = new Date(b.publishedAt || 0).getTime();
         return dateB - dateA;
       })
       .slice(0, displayCount);
@@ -72,7 +72,8 @@ const NewsFeedServer = React.memo(({ articles = [], noTitle = false, initialCoun
                 alt={article.title}
                 className="w-32 h-24 object-cover rounded-lg flex-shrink-0 group-hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
-                  e.target.src = PLACEHOLDER;
+                  const target = e.target as HTMLImageElement;
+                  target.src = PLACEHOLDER;
                 }}
               />
               <div className="flex-1 min-w-0">

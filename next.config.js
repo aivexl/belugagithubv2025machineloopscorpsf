@@ -45,19 +45,16 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn.sanity.io',
-        port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'assets.coingecko.com',
-        port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
-        port: '',
         pathname: '/**',
       }
     ],
@@ -65,19 +62,29 @@ const nextConfig = {
     minimumCacheTTL: 60,
   },
 
-  // Webpack optimizations
+  // Webpack optimizations - Simplified for production
   webpack: (config, { dev, isServer }) => {
-    // Simple optimization - no complex minifier configuration
+    // Basic production optimizations
     if (!dev && !isServer) {
-      // Basic bundle optimization
-      config.optimization.splitChunks.cacheGroups = {
-        ...config.optimization.splitChunks.cacheGroups,
-        vendor: {
-          name: 'vendor',
-          chunks: 'all',
-          test: /[\\/]node_modules[\\/]/,
-          priority: 10,
-          reuseExistingChunk: true,
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          vendor: {
+            name: 'vendor',
+            chunks: 'all',
+            test: /node_modules/,
+            priority: 20
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true
+          }
         }
       }
     }

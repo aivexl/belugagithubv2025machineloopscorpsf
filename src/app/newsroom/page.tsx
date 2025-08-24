@@ -8,12 +8,12 @@ export default async function NewsroomPage() {
   
   try {
     const fetchedArticles = await getArticlesByCategory('newsroom');
-    articles = addImageUrls(fetchedArticles);
+    articles = addImageUrls(fetchedArticles || []);
   } catch (error) {
     console.error('Error fetching newsroom articles:', error);
-    // Return empty array on error
+    // Ensure articles remains an empty array on error
     articles = [];
   }
 
-  return <NewsroomClient articles={articles as any} />;
+  return <NewsroomClient articles={articles as SanityArticleWithImage[]} />;
 } 

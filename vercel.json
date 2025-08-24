@@ -1,21 +1,17 @@
 {
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "outputDirectory": ".next",
   "framework": "nextjs",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
+  "regions": ["sin1"],
   "functions": {
-    "src/app/api/**/*.ts": {
+    "src/app/**/*.tsx": {
       "maxDuration": 30
     }
   },
   "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "https://pedasqlddhrqvbwdlzge.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlZGFzcWxkZGhycXZid2RsemdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNjE3ODIsImV4cCI6MjA2ODYzNzc4Mn0.G2zTfu-4vVO7R86rU8KJ2xKrjGOCLus2Clm0ZobZYBM",
-    "NEXT_PUBLIC_PRODUCTION_DOMAIN": "https://belugagithubv2025machineloopscorpsf-gold.vercel.app",
-    "NEXT_PUBLIC_DEVELOPMENT_DOMAIN": "http://localhost:3000",
-    "NODE_ENV": "production",
-    "NEXT_PUBLIC_APP_ENV": "production",
-    "NEXT_PUBLIC_ENABLE_DEBUG_MODE": "false",
-    "NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING": "true"
+    "NEXT_PUBLIC_SUPABASE_URL": "https://sqjqirkrcfczypxygdtm.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxanFpcmtyY2ZjenlweHlnZHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5NzE5MDAsImV4cCI6MjA3MTU0NzkwMH0.7Tnurb-zS8n_KeuE_K2rA_RlLSVsk2E4S3YiTf9MfhI"
   }
 }
