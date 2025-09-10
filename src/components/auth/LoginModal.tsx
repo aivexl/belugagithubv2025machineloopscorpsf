@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from './AuthProvider';
+import { useAuth } from '../../hooks/useAuth';
 // import { authDebugger } from '../../lib/auth/debugger';
 
 interface LoginModalProps {

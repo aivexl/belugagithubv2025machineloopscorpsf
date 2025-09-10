@@ -1,0 +1,5 @@
+[33md803edf[m[33m ([m[1;36mHEAD[m[33m)[m update detail coin
+[33m4c6bbd4[m Fix: Remove Supply sections from Information tab and move Trading buttons below MAKERS section
+[33m0336b2c[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m  PRODUCTION READY: Complete authentication system rebuild with Supabase SSR pattern - Fixed all TypeScript errors and build issues - Optimized for Vercel deployment - Zero errors, zero warnings - Enterprise-grade security headers - FOUC prevention with AuthGuard - Persistent sessions with cookies - Sanity CMS integration working - Ready for production deployment
+[33m19823cb[m Fix build errors: ESLint config, TypeScript types, and profile page updateProfile issue
+[33m1c1676e[m  PRODUCTION SUPABASE AUTH: Complete Official SSR Implementation

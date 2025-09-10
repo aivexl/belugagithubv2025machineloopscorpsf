@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import GradientText from "./GradientText";
-import { useAuth } from "./auth/AuthProvider";
+import { useAuth } from "../hooks/useAuth";
 import AuthModalManager, { AuthModalType } from "./auth/AuthModalManager";
 import Profile from "./Profile";
 import { 
