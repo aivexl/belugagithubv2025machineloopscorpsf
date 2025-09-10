@@ -186,7 +186,7 @@ export default function RootLayout({
                 <ConsoleSilencer />
                 <PerformanceMonitor />
                 <Navbar />
-                <main className="flex-1 pb-20 xl:pb-0 xl:ml-20">
+                <main className="flex-1 xl:ml-20">
                   {children}
                 </main>
                 <Footer />

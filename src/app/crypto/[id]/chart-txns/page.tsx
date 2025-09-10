@@ -27,18 +27,15 @@ export default async function ChartTxnsPage({ params }: ChartTxnsPageProps) {
   const coinData = await fetchCoinData(id);
   
   return (
-    <div className="min-h-screen bg-dex-bg-primary">
-      <div className="h-screen flex flex-col">
-        {/* Main Content */}
-        <div className="flex-1 p-4">
-          <DexScreenerChartTxnsLayout
-            coinData={coinData}
-            symbol={coinData?.symbol || id}
-          />
-          {/* Debug info */}
-          <div className="text-xs text-gray-500 mt-2">
-            Debug: ID={id}, Symbol={coinData?.symbol}, Name={coinData?.name}
-          </div>
+    <div className="min-h-screen bg-dex-bg-primary flex flex-col">
+      <div className="flex-1 p-4">
+        <DexScreenerChartTxnsLayout
+          coinData={coinData}
+          symbol={coinData?.symbol || id}
+        />
+        {/* Debug info */}
+        <div className="text-xs text-gray-500 mt-2">
+          Debug: ID={id}, Symbol={coinData?.symbol}, Name={coinData?.name}
         </div>
       </div>
     </div>

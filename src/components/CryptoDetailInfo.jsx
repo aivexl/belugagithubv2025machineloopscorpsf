@@ -193,6 +193,51 @@ export default function CryptoDetailInfo({
         </div>
       )}
 
+      {/* Supply Metrics */}
+      {showSupplyInfo && (
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
+          <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">Supply</h3>
+          
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
+              <p className="text-gray-400 text-xs mb-1 truncate font-medium">Circulating Supply</p>
+              <div className="font-semibold text-xs truncate">
+                {formatNumber(detailedData?.market_data?.circulating_supply || coinData.circulating_supply)}
+              </div>
+              <div className="text-gray-500 text-xs truncate">
+                {coinData.symbol?.toUpperCase()}
+              </div>
+            </div>
+            
+            <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
+              <p className="text-gray-400 text-xs mb-1 truncate font-medium">Total Supply</p>
+              <div className="font-semibold text-xs truncate">
+                {(detailedData?.market_data?.total_supply || coinData.total_supply) ? 
+                  formatNumber(detailedData.market_data?.total_supply || coinData.total_supply) : 
+                  'Unlimited'
+                }
+              </div>
+              <div className="text-gray-500 text-xs truncate">
+                {(detailedData?.market_data?.total_supply || coinData.total_supply) ? coinData.symbol?.toUpperCase() : ''}
+              </div>
+            </div>
+            
+            <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
+              <p className="text-gray-400 text-xs mb-1 truncate font-medium">Max Supply</p>
+              <div className="font-semibold text-xs truncate">
+                {(detailedData?.market_data?.max_supply || coinData.max_supply) ? 
+                  formatNumber(detailedData.market_data?.max_supply || coinData.max_supply) : 
+                  'Unlimited'
+                }
+              </div>
+              <div className="text-gray-500 text-xs truncate">
+                {(detailedData?.market_data?.max_supply || coinData.max_supply) ? coinData.symbol?.toUpperCase() : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Supply Information */}
       {showSupplyInfo && detailedData && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">

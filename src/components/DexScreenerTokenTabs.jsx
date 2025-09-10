@@ -4,7 +4,7 @@ import React from "react";
 
 const DexScreenerTokenTabs = ({ activeTab, onChange, isSolana }) => {
   const tabs = [
-    { id: "transactions", label: "Transactions" },
+    { id: "information", label: "Information" },
     ...(isSolana
       ? []
       : [

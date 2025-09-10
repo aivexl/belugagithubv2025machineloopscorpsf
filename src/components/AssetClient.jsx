@@ -347,8 +347,8 @@ export default function AssetClient() {
                   filter={activeSection === 'top-100' ? 'top-100' : cryptoFilter}
                   dateRange={dateRange}
                   onCoinClick={(coin) => {
-                    // Navigate to detail page instead of showing overlay
-                    router.push(`/crypto/${coin.id}`);
+                    // Navigate to chart-txns page
+                    router.push(`/crypto/${coin.id}/chart-txns`);
                   }}
                 />
                             ) : (
@@ -357,8 +357,8 @@ export default function AssetClient() {
                   filter={cryptoFilter}
                   dateRange={dateRange}
                   onCoinClick={(coin) => {
-                    // Navigate to detail page instead of showing overlay
-                    router.push(`/crypto/${coin.id}`);
+                    // Navigate to chart-txns page
+                    router.push(`/crypto/${coin.id}/chart-txns`);
                   }}
                 />
               )}
@@ -541,8 +541,8 @@ export default function AssetClient() {
             <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-2">
                               <TrendingCoins100 
                   onCoinClick={(coin) => {
-                    // Navigate to detail page instead of showing overlay
-                    router.push(`/crypto/${coin.id}`);
+                    // Navigate to chart-txns page
+                    router.push(`/crypto/${coin.id}/chart-txns`);
                   }}
                 />
             </div>

@@ -205,7 +205,7 @@ async function fetchFromDexScreener(tokenAddress, chain) {
         name: pair.baseToken?.name || 'Token',
         symbol: pair.baseToken?.symbol?.toUpperCase() || 'TOKEN',
         price_usd: priceUsd,
-        price_change_24h: 0, // DexScreener doesn't provide this
+        price_change_24h: parseFloat(pair.priceChange?.h24) || 0, // Use DexScreener period change
         market_cap: fdv,
         volume_24h: volume24h,
         circulating_supply: 0, // Not available from DexScreener
@@ -218,11 +218,11 @@ async function fetchFromDexScreener(tokenAddress, chain) {
         ath_change_percentage: 0, // Not available from DexScreener
         atl: 0, // Not available from DexScreener
         atl_change_percentage: 0, // Not available from DexScreener
-        price_change_percentage_1h: 0, // Not available from DexScreener
-        price_change_percentage_24h: 0, // Not available from DexScreener
-        price_change_percentage_7d: 0, // Not available from DexScreener
-        price_change_percentage_30d: 0, // Not available from DexScreener
-        price_change_percentage_1y: 0, // Not available from DexScreener
+        price_change_percentage_1h: parseFloat(pair.priceChange?.h1) || 0,
+        price_change_percentage_24h: parseFloat(pair.priceChange?.h24) || 0,
+        price_change_percentage_7d: parseFloat(pair.priceChange?.h24) * 7 || 0, // Estimate
+        price_change_percentage_30d: parseFloat(pair.priceChange?.h24) * 30 || 0, // Estimate
+        price_change_percentage_1y: parseFloat(pair.priceChange?.h24) * 365 || 0, // Estimate
         market_cap_rank: 0, // Not available from DexScreener
         coingecko_rank: 0, // Not available from DexScreener
         coingecko_score: 0, // Not available from DexScreener

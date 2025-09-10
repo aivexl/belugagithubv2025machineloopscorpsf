@@ -1,16 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import DexScreenerPriceChart from "./DexScreenerPriceChart";
+import DexScreenerTokenChart from "./DexScreenerTokenChart";
 import DexScreenerTokenTransactions from "./DexScreenerTokenTransactions";
 import DexScreenerTokenHolders from "./DexScreenerTokenHolders";
 import DexScreenerTokenTabs from "./DexScreenerTokenTabs";
 import TokenSidebar from "./token/TokenSidebar";
-import CryptoDetailInfo from "./CryptoDetailInfo";
 import { fetchDetailedCoinData, createPairData } from "../utils/coinDataUtils";
 
 const DexScreenerChartTxnsLayout = ({ coinData, symbol }) => {
-  const [activeTab, setActiveTab] = useState("information");
+  const [activeTab, setActiveTab] = useState("transactions");
   const [timeFrame, setTimeFrame] = useState("1d");
   const [chartHeight, setChartHeight] = useState(400);
   const [isDragging, setIsDragging] = useState(false);
@@ -18,8 +17,6 @@ const DexScreenerChartTxnsLayout = ({ coinData, symbol }) => {
   const [startHeight, setStartHeight] = useState(0);
   const [isClient, setIsClient] = useState(false);
   const [detailedCoinData, setDetailedCoinData] = useState(null);
-  const [sidebarPrice, setSidebarPrice] = useState(0);
-  const [sidebarPriceFlash, setSidebarPriceFlash] = useState("");
 
   // Set client-side flag to prevent hydration issues
   useEffect(() => {
@@ -95,13 +92,6 @@ const DexScreenerChartTxnsLayout = ({ coinData, symbol }) => {
     setActiveTab(tabId);
   };
 
-  // Handle price update from sidebar
-  const handlePriceUpdate = (price, flash) => {
-    console.log('Layout received price update:', { price, flash });
-    setSidebarPrice(price);
-    setSidebarPriceFlash(flash);
-  };
-
   // Check if it's Solana
   const isSolana = mockPair?.chainId === "solana";
 
@@ -131,60 +121,16 @@ const DexScreenerChartTxnsLayout = ({ coinData, symbol }) => {
       {/* Main Content */}
       <div className="flex flex-col flex-1">
       {/* Chart Section */}
-      <div className="flex flex-col bg-dex-bg-secondary rounded-lg p-4" style={{ height: `${chartHeight}px` }}>
-        {/* Top bar with token info and controls */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center">
-            <div className="flex items-center mr-4">
-              <img
-                src={coinData?.image?.small || coinData?.image?.thumb || "/images/token-default.svg"}
-                alt={coinData?.name || symbol}
-                className="w-6 h-6 mr-2 rounded-full"
-                onError={(e) => {
-                  e.target.onError = null;
-                  e.target.src = "/images/token-default.svg";
-                }}
-              />
-              <span className="font-medium text-dex-text-primary">
-                {coinData?.symbol?.toUpperCase() || symbol?.toUpperCase()}
-              </span>
-              <span className="ml-2 text-dex-text-secondary">
-                Price Chart
-              </span>
-            </div>
-
-            <div className="text-dex-text-secondary text-sm">
-              <span>Real-time data from CoinGecko</span>
-            </div>
-          </div>
-
-          {/* Time Range Selector */}
-          <div className="flex items-center">
-            <div className="inline-flex rounded-md bg-dex-bg-primary p-1">
-              {["1d", "7d", "30d", "1y"].map((range) => (
-                <button
-                  key={range}
-                  onClick={() => setTimeFrame(range)}
-                  className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
-                    timeFrame === range
-                      ? 'bg-dex-blue text-white'
-                      : 'text-dex-text-secondary hover:text-white hover:bg-dex-bg-secondary'
-                  }`}
-                >
-                  {range === "1d" ? "24H" : range === "7d" ? "7D" : range === "30d" ? "30D" : "1Y"}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Chart Container */}
-        <div className="flex-1">
-          <DexScreenerPriceChart
-            cryptoId={coinData?.id || symbol}
-            timeRange={timeFrame}
-            currentPrice={sidebarPrice}
-            priceFlash={sidebarPriceFlash}
+      <div
+        className="relative bg-dex-bg-secondary rounded-lg p-4"
+        style={{ height: `${chartHeight}px` }}
+      >
+        <div className="absolute inset-0">
+          <DexScreenerTokenChart 
+            key={`chart-${coinData?.id || symbol}-${timeFrame}`}
+            pair={mockPair}
+            timeFrame={timeFrame}
+            onTimeFrameChange={handleTimeFrameChange}
           />
         </div>
       </div>
@@ -208,15 +154,10 @@ const DexScreenerChartTxnsLayout = ({ coinData, symbol }) => {
 
       {/* Content Section */}
       <div className="flex-1 bg-dex-bg-primary p-4">
-        {activeTab === "information" && (
-          <CryptoDetailInfo
-            coinData={coinData}
-            detailedData={detailedCoinData}
-            showOverview={false}
-            showPerformance={false}
-            showSupplyInfo={false}
-            showAbout={true}
-            className=""
+        {activeTab === "transactions" && (
+          <DexScreenerTokenTransactions
+            pair={mockPair}
+            chainId={mockPair.chainId}
           />
         )}
         {activeTab === "holders" && !isSolana && (
@@ -244,10 +185,9 @@ const DexScreenerChartTxnsLayout = ({ coinData, symbol }) => {
         pair={mockPair}
         timeFrame={timeFrame}
         chainId={mockPair.chainId}
-        onPriceUpdate={handlePriceUpdate}
       />
     </div>
   );
 };
 
-export default DexScreenerChartTxnsLayout; 
+export default DexScreenerChartTxnsLayout;

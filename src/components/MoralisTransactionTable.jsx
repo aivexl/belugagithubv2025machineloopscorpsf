@@ -431,3 +431,5 @@ const MoralisTransactionTable = ({ data, loading, error, pagination, onLoadMore,
 };
 
 export default MoralisTransactionTable; 
+
+
