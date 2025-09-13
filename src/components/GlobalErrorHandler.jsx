@@ -72,7 +72,10 @@ const GlobalErrorHandler = () => {
         message.includes('404') ||
         message.includes('source map') ||
         message.includes('Failed to load image') ||
-        message.includes('EnterpriseImage: Failed to load image')
+        message.includes('EnterpriseImage: Failed to load image') ||
+        message.includes('Failed to fetch version for package') ||
+        message.includes('sanity') ||
+        message.includes('TypeError: Failed to fetch')
       ) {
         return; // Don't log these errors
       }

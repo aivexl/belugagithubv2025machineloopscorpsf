@@ -19,6 +19,10 @@ export default defineConfig({
   dataset,
   // Add and edit the content schema in the './sanity/schemaTypes' folder
   schema,
+  // Disable version checking to prevent fetch errors
+  unstable_noAuthBoundary: true,
+  // Disable telemetry to prevent network calls
+  telemetry: false,
   plugins: [
     structureTool({structure}),
     // Vision is for querying with GROQ from inside the Studio
