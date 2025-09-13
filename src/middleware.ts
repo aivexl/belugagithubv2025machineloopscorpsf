@@ -18,17 +18,36 @@ export function middleware(request: NextRequest) {
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   response.headers.set('X-XSS-Protection', '1; mode=block')
   
-  // Content Security Policy - Optimized for Supabase Auth
-  response.headers.set(
-    'Content-Security-Policy',
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com https://cdn.sanity.io; " +
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-    "font-src 'self' https://fonts.gstatic.com; " +
-    "img-src 'self' data: https: http:; " +
-    "connect-src 'self' https://sqjqirkrcfczypxygdtm.supabase.co https://*.supabase.co https://api.coingecko.com https://va.vercel-scripts.com https://cdn.sanity.io wss://*.supabase.co; " +
-    "frame-ancestors 'none';"
-  )
+  // Check if this is a Sanity Studio route
+  const isStudioRoute = request.nextUrl.pathname.startsWith('/studio')
+  
+  // Content Security Policy - Dynamic based on route
+  let cspPolicy: string
+  
+  if (isStudioRoute) {
+    // Enhanced CSP for Sanity Studio
+    cspPolicy = 
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com https://cdn.sanity.io https://core.sanity-cdn.com https://*.sanity.io https://qaofdbqx.sanity.studio https://qaofdbqx.api.sanity.io; " +
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.sanity.io https://*.sanity.io https://qaofdbqx.sanity.studio; " +
+      "font-src 'self' https://fonts.gstatic.com https://cdn.sanity.io https://*.sanity.io https://qaofdbqx.sanity.studio; " +
+      "img-src 'self' data: https: http: blob: https://cdn.sanity.io https://*.sanity.io https://qaofdbqx.sanity.studio; " +
+      "connect-src 'self' https://sqjqirkrcfczypxygdtm.supabase.co https://*.supabase.co https://api.coingecko.com https://va.vercel-scripts.com https://cdn.sanity.io https://qaofdbqx.api.sanity.io https://*.sanity.io https://*.sanity-cdn.com https://core.sanity-cdn.com wss://*.supabase.co wss://*.sanity.io; " +
+      "frame-src 'self' https://*.sanity.io https://qaofdbqx.sanity.studio https://core.sanity-cdn.com; " +
+      "frame-ancestors 'none';"
+  } else {
+    // Standard CSP for main application
+    cspPolicy = 
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com https://cdn.sanity.io; " +
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+      "font-src 'self' https://fonts.gstatic.com; " +
+      "img-src 'self' data: https: http:; " +
+      "connect-src 'self' https://sqjqirkrcfczypxygdtm.supabase.co https://*.supabase.co https://api.coingecko.com https://va.vercel-scripts.com https://cdn.sanity.io wss://*.supabase.co; " +
+      "frame-ancestors 'none';"
+  }
+  
+  response.headers.set('Content-Security-Policy', cspPolicy)
   
   // CORS Headers for API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {

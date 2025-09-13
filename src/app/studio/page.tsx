@@ -1,24 +1,46 @@
-import { Metadata, Viewport } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Sanity Studio - Beluga Crypto CMS',
-  description: 'Content management system for Beluga Crypto platform',
-}
+import { useEffect, useState } from 'react'
+import { NextStudio } from 'next-sanity/studio'
+import config from '../../../sanity.config'
 
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-}
+export default function StudioPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-export default function StudioLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      try {
+        // Try to access Sanity API to check authentication
+        const response = await fetch('/api/auth/check')
+        if (response.ok) {
+          setIsAuthenticated(true)
+        }
+      } catch (error) {
+        console.log('Not authenticated')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading Sanity Studio...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -39,23 +61,11 @@ export default function StudioLayout({
               </svg>
               Login with GitHub
             </a>
-            
-            <div className="text-center">
-              <p className="text-sm text-gray-500">
-                Or access studio directly
-              </p>
-              <a
-                href="/studio"
-                className="text-sm text-indigo-600 hover:text-indigo-500"
-              >
-                Go to Studio →
-              </a>
-            </div>
           </div>
         </div>
       </div>
-      
-      {children}
-    </div>
-  )
+    )
+  }
+
+  return <NextStudio config={config} />
 }

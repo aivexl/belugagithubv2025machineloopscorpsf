@@ -19,8 +19,16 @@ export default defineConfig({
   dataset,
   // Add and edit the content schema in the './sanity/schemaTypes' folder
   schema,
+  // Configure authentication providers
   auth: {
-    token: process.env.SANITY_AUTH_TOKEN,
+    providers: [
+      {
+        name: 'github',
+        title: 'GitHub',
+        url: 'https://api.sanity.io/v1/auth/providers/github',
+        logo: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
+      },
+    ],
   },
   plugins: [
     structureTool({structure}),
