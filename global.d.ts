@@ -95,6 +95,10 @@ declare global {
       environment: string;
       features: Record<string, boolean>;
     };
+    
+    // ENTERPRISE-LEVEL: CSP Monitoring
+    cspMonitor?: any;
+    CSPValidator?: any;
   }
   
   // ENTERPRISE-LEVEL: Global error handling

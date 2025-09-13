@@ -282,8 +282,8 @@ export class CSPValidator {
 
 // Export for global use
 if (typeof window !== 'undefined') {
-  (window as any).cspMonitor = cspMonitor
-  (window as any).CSPValidator = CSPValidator
+  window.cspMonitor = cspMonitor;
+  window.CSPValidator = CSPValidator;
 }
 
 
