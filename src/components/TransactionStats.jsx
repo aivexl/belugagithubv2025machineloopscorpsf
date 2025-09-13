@@ -239,3 +239,5 @@ const TransactionStats = ({ data, coinData }) => {
 export default TransactionStats; 
 
 
+
+
