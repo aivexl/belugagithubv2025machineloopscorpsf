@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useHomepageCrypto } from './HomepageCryptoProvider';
+import { formatCryptoPrice, formatPercentageChange } from '../utils/numberFormatting';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -88,13 +89,13 @@ export default function CryptoTicker() {
               priceFlash[coin.id] === 'down' ? 'text-red-400 scale-110' : '',
               !priceFlash[coin.id] ? 'text-gray-300' : ''
             )}>
-              ${coin.current_price >= 1 ? coin.current_price.toFixed(2) : coin.current_price.toFixed(6)}
+              {formatCryptoPrice(coin.current_price)}
             </span>
             <span className={classNames(
               'text-xs',
               coin.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'
             )}>
-              {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h.toFixed(2)}%
+              {formatPercentageChange(coin.price_change_percentage_24h)}
             </span>
           </div>
         ))}
@@ -119,13 +120,13 @@ export default function CryptoTicker() {
               priceFlash[coin.id] === 'down' ? 'text-red-400 scale-110' : '',
               !priceFlash[coin.id] ? 'text-gray-300' : ''
             )}>
-              ${coin.current_price >= 1 ? coin.current_price.toFixed(2) : coin.current_price.toFixed(6)}
+              {formatCryptoPrice(coin.current_price)}
             </span>
             <span className={classNames(
               'text-xs',
               coin.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'
             )}>
-              {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h.toFixed(2)}%
+              {formatPercentageChange(coin.price_change_percentage_24h)}
             </span>
           </div>
         ))}

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useHomepageCrypto } from './HomepageCryptoProvider';
+import { formatVolume, formatCryptoPrice, formatPercentageChange } from '../utils/numberFormatting';
 
 // ENTERPRISE-LEVEL: Use isolated homepage crypto data
 export default function Top100Trending() {
@@ -71,15 +72,15 @@ export default function Top100Trending() {
                   <span className="text-gray-400 text-xs uppercase">{coin.symbol}</span>
                 </div>
                 <div className="text-gray-400 text-xs">
-                  Volume: ${(coin.total_volume || 0).toLocaleString()}
+                  Volume: {formatVolume(coin.total_volume)}
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-white font-medium text-sm">
-                  ${coin.current_price?.toFixed(4) || '0.0000'}
+                  {formatCryptoPrice(coin.current_price)}
                 </div>
                 <div className={`text-xs ${coin.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h?.toFixed(2)}%
+                  {formatPercentageChange(coin.price_change_percentage_24h)}
                 </div>
               </div>
             </div>

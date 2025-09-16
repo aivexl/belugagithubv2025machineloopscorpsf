@@ -2,19 +2,14 @@
 
 import React from 'react';
 import { useHomepageCrypto } from './HomepageCryptoProvider';
+import { formatLargeNumber, formatCryptoPrice, formatPercentageChange } from '../utils/numberFormatting';
 
 function formatNumber(num) {
-  if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
-  if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-  if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-  if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
-  return num.toFixed(2);
+  return formatLargeNumber(num);
 }
 
 function formatPrice(price) {
-  if (price >= 1) return '$' + price.toFixed(2);
-  if (price >= 0.01) return '$' + price.toFixed(4);
-  return '$' + price.toFixed(6);
+  return formatCryptoPrice(price);
 }
 
 export default function Top10MarketCap() {
@@ -91,7 +86,7 @@ export default function Top10MarketCap() {
                   {formatPrice(coin.current_price)}
                 </div>
                 <div className={`text-xs ${coin.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h?.toFixed(2)}%
+                  {formatPercentageChange(coin.price_change_percentage_24h)}
                 </div>
               </div>
             </div>
