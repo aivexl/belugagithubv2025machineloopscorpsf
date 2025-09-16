@@ -1,6 +1,15 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getAllArticles } from '../utils/sanity';
+import { CoinLogosOnly } from './CoinTags';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/id';
+
+// Configure dayjs
+dayjs.extend(relativeTime);
+dayjs.locale('id');
 
 // Utility functions
 const formatPrice = (price) => {
@@ -94,6 +103,72 @@ export default function CryptoDetailInfo({
   showAbout = true,
   className = ""
 }) {
+  const [relatedArticles, setRelatedArticles] = useState([]);
+  const [loadingArticles, setLoadingArticles] = useState(false);
+  const [academyArticles, setAcademyArticles] = useState([]);
+  const [loadingAcademy, setLoadingAcademy] = useState(false);
+
+  // Fetch articles related to this coin
+  useEffect(() => {
+    const fetchRelatedArticles = async () => {
+      if (!coinData?.symbol) return;
+      
+      setLoadingArticles(true);
+      try {
+        const articles = await getAllArticles();
+        // Filter articles that have coin tags matching this coin's symbol
+        const filtered = articles.filter(article => 
+          article.coinTags?.some(coinTag => 
+            coinTag.symbol?.toLowerCase() === coinData.symbol?.toLowerCase()
+          )
+        );
+        // Sort by publishedAt and take first 4
+        const sorted = filtered
+          .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+          .slice(0, 4);
+        setRelatedArticles(sorted);
+      } catch (error) {
+        console.error('Error fetching related articles:', error);
+        setRelatedArticles([]);
+      } finally {
+        setLoadingArticles(false);
+      }
+    };
+
+    fetchRelatedArticles();
+  }, [coinData?.symbol]);
+
+  // Fetch academy articles related to this coin
+  useEffect(() => {
+    const fetchAcademyArticles = async () => {
+      if (!coinData?.symbol) return;
+      
+      setLoadingAcademy(true);
+      try {
+        const articles = await getAllArticles();
+        // Filter academy articles that have coin tags matching this coin's symbol
+        const filtered = articles.filter(article => 
+          article.category === 'academy' &&
+          article.coinTags?.some(coinTag => 
+            coinTag.symbol?.toLowerCase() === coinData.symbol?.toLowerCase()
+          )
+        );
+        // Sort by publishedAt and take first 4
+        const sorted = filtered
+          .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+          .slice(0, 4);
+        setAcademyArticles(sorted);
+      } catch (error) {
+        console.error('Error fetching academy articles:', error);
+        setAcademyArticles([]);
+      } finally {
+        setLoadingAcademy(false);
+      }
+    };
+
+    fetchAcademyArticles();
+  }, [coinData?.symbol]);
+
   if (!coinData) return null;
 
   return (
@@ -330,6 +405,163 @@ export default function CryptoDetailInfo({
           </div>
         </div>
       )}
+
+      {/* Market Section */}
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
+        <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">{coinData.symbol?.toUpperCase()} Market</h3>
+        <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
+          <div className="text-gray-500 text-sm mb-2">Coming Soon</div>
+          <div className="text-gray-600 text-xs">Market data will be available here</div>
+        </div>
+      </div>
+
+      {/* News Section */}
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
+        <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">{coinData.symbol?.toUpperCase()} News</h3>
+        
+        {loadingArticles ? (
+          <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
+            <div className="text-gray-500 text-sm mb-2">Loading...</div>
+            <div className="text-gray-600 text-xs">Fetching latest news</div>
+          </div>
+        ) : relatedArticles.length > 0 ? (
+          <div className="space-y-3">
+            {relatedArticles.map((article) => (
+              <div key={article._id} className="bg-gray-700/30 rounded-lg p-3 hover:bg-gray-700/50 transition-colors">
+                <div className="flex items-start gap-3">
+                  {/* Article Image */}
+                  <div className="w-16 h-12 bg-gray-600 rounded flex-shrink-0 overflow-hidden">
+                    {article.image?.asset ? (
+                      <img 
+                        src={`https://cdn.sanity.io/images/qaofdbqx/production/${article.image.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp')}`}
+                        alt={article.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-600 flex items-center justify-center">
+                        <span className="text-gray-400 text-xs">No Image</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Article Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`px-2 py-1 text-xs font-medium rounded text-white ${
+                        article.category === 'newsroom' ? 'bg-blue-600' : 'bg-blue-500'
+                      }`}>
+                        {article.category === 'newsroom' ? 'News' : 'Academy'}
+                      </span>
+                      {/* Coin Logos */}
+                      {article.coinTags && article.coinTags.length > 0 && (
+                        <CoinLogosOnly 
+                          coinTags={article.coinTags} 
+                          size="xs"
+                          maxDisplay={3}
+                        />
+                      )}
+                    </div>
+                    
+                    <h4 className="text-white font-medium text-sm line-clamp-2 mb-1">
+                      {article.title}
+                    </h4>
+                    
+                    <div className="flex items-center justify-between text-xs text-gray-400">
+                      <span>{article.source || 'Dunia Crypto'}</span>
+                      <span>{dayjs(article.publishedAt).fromNow()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
+            <div className="text-gray-500 text-sm mb-2">Coming Soon</div>
+            <div className="text-gray-600 text-xs">News articles will be available here</div>
+          </div>
+        )}
+      </div>
+
+      {/* Academy Section */}
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
+        <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">{coinData.symbol?.toUpperCase()} Academy</h3>
+        
+        {loadingAcademy ? (
+          <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
+            <div className="text-gray-500 text-sm mb-2">Loading...</div>
+            <div className="text-gray-600 text-xs">Fetching academy content</div>
+          </div>
+        ) : academyArticles.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {academyArticles.map((article) => (
+              <div key={article._id} className="bg-gray-700/30 rounded-lg overflow-hidden hover:bg-gray-700/50 transition-colors group">
+                {/* Article Header with Pattern Background */}
+                <div className="relative h-20 bg-gradient-to-br from-gray-700 to-gray-800 overflow-hidden">
+                  {/* Abstract Pattern */}
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute top-2 left-2 w-1 h-1 bg-white rounded-full"></div>
+                    <div className="absolute top-4 left-6 w-1 h-1 bg-white rounded-full"></div>
+                    <div className="absolute top-6 left-3 w-1 h-1 bg-white rounded-full"></div>
+                    <div className="absolute top-8 left-8 w-1 h-1 bg-white rounded-full"></div>
+                    <div className="absolute top-10 left-2 w-1 h-1 bg-white rounded-full"></div>
+                    <div className="absolute top-12 left-5 w-1 h-1 bg-white rounded-full"></div>
+                  </div>
+                  
+                  {/* Brand Logo */}
+                  <div className="absolute top-3 left-3">
+                    <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">DC</span>
+                    </div>
+                  </div>
+                  
+                  {/* Coin Logos */}
+                  <div className="absolute top-3 right-3">
+                    {article.coinTags && article.coinTags.length > 0 && (
+                      <CoinLogosOnly 
+                        coinTags={article.coinTags} 
+                        size="xs"
+                        maxDisplay={3}
+                      />
+                    )}
+                  </div>
+                  
+                  {/* Category Badge */}
+                  <div className="absolute bottom-2 right-2">
+                    <span className="px-2 py-1 text-xs font-medium rounded text-white bg-blue-500">
+                      Academy
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Article Content */}
+                <div className="p-3">
+                  <div className="text-xs text-gray-400 mb-1">Research</div>
+                  <div className="text-xs text-gray-400 text-right mb-2">
+                    {dayjs(article.publishedAt).format('MMM D, YYYY')}
+                  </div>
+                  
+                  <h4 className="text-white font-medium text-sm line-clamp-2 mb-2 group-hover:text-blue-400 transition-colors">
+                    {article.title}
+                  </h4>
+                  
+                  {/* Author Info */}
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <div className="w-4 h-4 bg-gray-600 rounded-full"></div>
+                    <div className="w-4 h-4 bg-gray-600 rounded-full"></div>
+                    <span>Dunia Crypto Team</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
+            <div className="text-gray-500 text-sm mb-2">Coming Soon</div>
+            <div className="text-gray-600 text-xs">Academy content will be available here</div>
+          </div>
+        )}
+      </div>
     </div>
   );
 } 

@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/id';
 import type { SanityArticleWithImage } from '../utils/sanity';
+import { CoinLogosOnly } from './CoinTags';
 
 // Configure dayjs
 dayjs.extend(relativeTime);
@@ -80,15 +81,27 @@ const NewsFeedServer = React.memo(({ articles = [], noTitle = false, initialCoun
                 <h3 className="text-white font-semibold text-lg line-clamp-2 group-hover:text-blue-300 transition mb-2 leading-tight">
                   {article.title}
                 </h3>
-                <div className="flex items-center gap-2 text-xs text-gray-400">
-                  <span className={`inline-block px-2 py-1 rounded text-white font-medium ${
-                    article.category === 'newsroom' ? 'bg-blue-700' : 'bg-blue-500'
-                  }`}>
-                    {article.category === 'newsroom' ? 'News' : 'Academy'}
-                  </span>
-                  <span>
+                <div className="mb-2">
+                  {/* Label and Coin Logos in same row */}
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className={`inline-block px-1.5 py-0.5 text-xs rounded text-white font-medium ${
+                      article.category === 'newsroom' ? 'bg-blue-700' : 'bg-blue-500'
+                    }`}>
+                      {article.category === 'newsroom' ? 'News' : 'Academy'}
+                    </span>
+                    {/* Coin Logos Beside Label */}
+                    {article.coinTags && article.coinTags.length > 0 && (
+                      <CoinLogosOnly 
+                        coinTags={article.coinTags} 
+                        size="xs"
+                        maxDisplay={3}
+                      />
+                    )}
+                  </div>
+                  {/* Date below label */}
+                  <div className="text-xs text-gray-400">
                     {isClient ? dayjs(article.publishedAt).fromNow() : 'Loading...'}
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>

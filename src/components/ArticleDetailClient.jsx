@@ -6,6 +6,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/id';
 import { CoinGeckoProvider } from './CoinGeckoContext';
 import SubscribeContainer from './SubscribeContainer';
+import { CoinLogosOnly } from './CoinTags';
 
 // Configure dayjs
 dayjs.extend(relativeTime);
@@ -45,6 +46,18 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
               </div>
               {/* Title Overlay */}
               <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4 md:p-6">
+                {/* Coin Logos Above Title */}
+                {article.coinTags && article.coinTags.length > 0 && (
+                  <div className="mb-2">
+                    <CoinLogosOnly 
+                      coinTags={article.coinTags} 
+                      size="md"
+                      maxDisplay={5}
+                      className="justify-start"
+                    />
+                  </div>
+                )}
+                
                 <h1 className="text-lg md:text-2xl font-bold text-white line-clamp-2 drop-shadow-lg mb-8">
                   {article.title}
                 </h1>
@@ -197,4 +210,4 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
       </main>
     </CoinGeckoProvider>
   );
-} 
+}

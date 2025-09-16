@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/id';
 import type { SanityArticleWithImage } from '../utils/sanity';
+import { CoinLogosOnly } from './CoinTags';
 
 // Configure dayjs
 dayjs.extend(relativeTime);
@@ -113,16 +114,22 @@ export default function NewsroomClient({ articles = [] }: NewsroomClientProps) {
 
                     {/* Article Content */}
                     <div className="p-4 flex flex-col flex-1">
-                      {/* Category Badge & Date */}
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="px-2 py-1 text-xs font-medium rounded text-white bg-blue-600">
-                          News
-                        </span>
-                        {article.publishedAt && (
-                          <span className="text-xs text-gray-400">
-                            {dayjs(article.publishedAt).fromNow()}
+                      {/* Category Badge */}
+                      <div className="mb-3">
+                        {/* Label and Coin Logos in same row */}
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-1.5 py-0.5 text-xs font-medium rounded text-white bg-blue-600">
+                            News
                           </span>
-                        )}
+                          {/* Coin Logos Beside Label */}
+                          {article.coinTags && article.coinTags.length > 0 && (
+                            <CoinLogosOnly 
+                              coinTags={article.coinTags} 
+                              size="xs"
+                              maxDisplay={3}
+                            />
+                          )}
+                        </div>
                       </div>
 
                       {/* Title */}
@@ -143,11 +150,17 @@ export default function NewsroomClient({ articles = [] }: NewsroomClientProps) {
                         )}
                       </div>
 
-                      {/* Source - Fixed at bottom */}
-                      <div className="flex flex-wrap gap-1 mt-auto">
+                      {/* Source and Date - Fixed at bottom */}
+                      <div className="flex justify-between items-center mt-auto">
                         <span className="px-2 py-1 bg-gray-700 text-gray-400 text-xs rounded">
                           {article.source || 'Dunia Crypto'}
                         </span>
+                        {/* Date at bottom right */}
+                        {article.publishedAt && (
+                          <div className="text-xs text-gray-400">
+                            {dayjs(article.publishedAt).fromNow()}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

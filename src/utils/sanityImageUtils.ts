@@ -2,6 +2,9 @@
 
 import { urlFor } from '../sanity/lib/image';
 
+// Re-export urlFor for use in components
+export { urlFor };
+
 export interface SanityImage {
   asset: {
     _ref: string;

@@ -35,6 +35,22 @@ export interface SanityArticle {
   level?: string[] // ['newbie', 'intermediate', 'expert']
   topics?: string[] // ['DeFi', 'NFT', 'Wallet', etc.]
   networks?: string[] // ['Bitcoin Network', 'Ethereum Network', etc.]
+  // Coin tags
+  coinTags?: Array<{
+    _id: string
+    name: string
+    symbol: string
+    logo: {
+      asset: {
+        _ref: string
+        _type: string
+      }
+      alt?: string
+    }
+    category: string
+    isActive: boolean
+    link?: string
+  }>
 }
 
 export interface SanityArticleWithImage extends SanityArticle {
@@ -58,7 +74,16 @@ export async function getAllArticles(): Promise<SanityArticle[]> {
       showInSlider,
       level,
       topics,
-      networks
+      networks,
+      coinTags[]->{
+        _id,
+        name,
+        symbol,
+        logo,
+        category,
+        isActive,
+        link
+      }
     }
   `
   return client.fetch(query)
@@ -66,24 +91,32 @@ export async function getAllArticles(): Promise<SanityArticle[]> {
 
 // Fetch articles by category
 export async function getArticlesByCategory(category: 'newsroom' | 'academy'): Promise<SanityArticle[]> {
-  const query = `
-    *[_type == "article" && category == $category] | order(publishedAt desc) {
+const query = `
+  *[_type == "article" && category == $category] | order(publishedAt desc) {
+    _id,
+    title,
+    slug,
+    excerpt,
+    content,
+    image,
+    category,
+    source,
+    publishedAt,
+    featured,
+    showInSlider,
+    level,
+    topics,
+    networks,
+    coinTags[]->{
       _id,
-      title,
-      slug,
-      excerpt,
-      content,
-      image,
+      name,
+      symbol,
+      logo,
       category,
-      source,
-      publishedAt,
-      featured,
-      showInSlider,
-      level,
-      topics,
-      networks
+      isActive
     }
-  `
+  }
+`
   return client.fetch(query, { category })
 }
 
@@ -104,7 +137,16 @@ export async function getArticleBySlug(slug: string): Promise<SanityArticle | nu
       showInSlider,
       level,
       topics,
-      networks
+      networks,
+      coinTags[]->{
+        _id,
+        name,
+        symbol,
+        logo,
+        category,
+        isActive,
+        link
+      }
     }
   `
   return client.fetch(query, { slug })
@@ -127,7 +169,16 @@ export async function getFeaturedArticles(): Promise<SanityArticle[]> {
       showInSlider,
       level,
       topics,
-      networks
+      networks,
+      coinTags[]->{
+        _id,
+        name,
+        symbol,
+        logo,
+        category,
+        isActive,
+        link
+      }
     }
   `
   return client.fetch(query)

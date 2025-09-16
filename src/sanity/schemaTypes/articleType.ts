@@ -133,6 +133,22 @@ export const articleType = defineType({
       description: 'Aktifkan jika ingin artikel ini tampil di slider homepage',
       initialValue: false,
     }),
+    defineField({
+      name: 'coinTags',
+      type: 'array',
+      title: 'Coin Tags',
+      description: 'Pilih cryptocurrency yang terkait dengan artikel ini',
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'coinTag'}],
+          options: {
+            filter: 'isActive == true',
+          },
+        },
+      ],
+      validation: (Rule) => Rule.max(10).error('Maksimal 10 coin tags per artikel'),
+    }),
   ],
   preview: {
     select: {

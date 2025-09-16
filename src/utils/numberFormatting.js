@@ -56,3 +56,4 @@ export function formatVolume(volume) {
 export function formatMarketCap(marketCap) {
   return formatLargeNumber(marketCap);
 }
+

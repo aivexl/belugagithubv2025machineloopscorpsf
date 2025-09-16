@@ -2,9 +2,17 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/id';
 import { useAcademyFilters } from './AcademyFiltersProvider';
 import { client } from '../sanity/lib/client';
 import { validateAndGetImageUrl } from '../utils/sanityImageUtils';
+import { CoinLogosOnly } from './CoinTags';
+
+// Configure dayjs
+dayjs.extend(relativeTime);
+dayjs.locale('id');
 
 // ENTERPRISE-LEVEL SANITY QUERY FUNCTION
 async function getArticlesByCategory(category) {
@@ -30,7 +38,15 @@ async function getArticlesByCategory(category) {
         showInSlider,
         level,
         topics,
-        networks
+        networks,
+        coinTags[]->{
+          _id,
+          name,
+          symbol,
+          logo,
+          category,
+          isActive
+        }
       }
     `;
     
@@ -296,9 +312,20 @@ export default function AcademyClientEnterprise() {
                 <div className="p-4 flex flex-col flex-1">
                   {/* Category Badge */}
                   <div className="mb-3">
-                    <span className="px-2 py-1 text-xs font-medium rounded text-white bg-blue-500">
+          {/* Label and Coin Logos in same row */}
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="px-1.5 py-0.5 text-xs font-medium rounded text-white bg-blue-500">
                       Academy
                     </span>
+            {/* Coin Logos Beside Label */}
+            {article.coinTags && article.coinTags.length > 0 && (
+              <CoinLogosOnly 
+                coinTags={article.coinTags} 
+                size="xs"
+                maxDisplay={2}
+              />
+            )}
+          </div>
                   </div>
 
                   {/* Title */}

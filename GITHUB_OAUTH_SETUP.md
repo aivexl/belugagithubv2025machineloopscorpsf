@@ -81,3 +81,4 @@ Untuk production, update:
 - **Homepage URL**: `https://your-domain.com`
 - **Authorization callback URL**: `https://your-domain.com/api/auth/github/callback`
 - **NEXTAUTH_URL**: `https://your-domain.com`
+

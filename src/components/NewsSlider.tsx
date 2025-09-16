@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { CoinLogosOnly } from './CoinTags';
 
 const PLACEHOLDER = '/Asset/duniacrypto.png';
 
@@ -9,6 +10,21 @@ type SanityArticle = {
   imageUrl?: string;
   category?: string;
   publishedAt?: string;
+  coinTags?: Array<{
+    _id: string;
+    name: string;
+    symbol: string;
+    logo: {
+      asset: {
+        _ref: string;
+        _type: string;
+      };
+      alt?: string;
+    };
+    category: string;
+    isActive: boolean;
+    link?: string;
+  }>;
 };
 
 type NewsSliderProps = {
@@ -25,7 +41,8 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
     title: article.title,
     url: `/${article.category === 'newsroom' ? 'newsroom' : 'academy'}/${article.slug.current}`,
     image: article.imageUrl || PLACEHOLDER,
-    category: article.category || 'academy'
+    category: article.category || 'academy',
+    coinTags: article.coinTags || []
   }));
 
   useEffect(() => {
@@ -106,6 +123,19 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
                 </span>
               </div>
               <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4 rounded-b-lg">
+                {/* Coin Logos Above Title */}
+                {item.coinTags && item.coinTags.length > 0 && (
+                  <div className="mb-2">
+                    <CoinLogosOnly 
+                      coinTags={item.coinTags} 
+                      size="sm"
+                      maxDisplay={4}
+                      className="justify-start"
+                      disableLinks={true}
+                    />
+                  </div>
+                )}
+                
                 <div className="text-lg md:text-2xl font-bold text-white line-clamp-2 drop-shadow-lg mb-8">
                   {item.title}
                 </div>
