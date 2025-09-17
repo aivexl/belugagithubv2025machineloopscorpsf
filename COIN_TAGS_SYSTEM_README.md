@@ -248,3 +248,4 @@ Untuk pertanyaan atau masalah terkait sistem coin tags:
 **Sistem Coin Tags v1.0** - Beluga.id Platform
 *Terakhir diupdate: Januari 2025*
 
+
