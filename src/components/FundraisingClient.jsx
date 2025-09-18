@@ -10,28 +10,35 @@ export default function FundraisingClient() {
   const [activeStatus, setActiveStatus] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
-  const [isClient, setIsClient] = useState(false);
+  const [persistentFundraising, setPersistentFundraising] = useState([]);
 
-  // Get persistent data only on client side
-  const persistentFundraising = isClient ? getPersistentData('fundraising') : [];
-
-  // Set client flag after hydration
+  // Load persistent data from API
   useEffect(() => {
-    setIsClient(true);
-    setLoading(false);
+    const loadPersistentData = async () => {
+      try {
+        setLoading(true);
+        const data = await fundraisingAPI.getAll();
+        setPersistentFundraising(data || []);
+      } catch (error) {
+        console.error('Error loading persistent fundraising:', error);
+        setPersistentFundraising([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPersistentData();
   }, []);
 
   // Use only persistent data from admin panel
   const allFundraising = useMemo(() => {
-    if (!isClient) return [];
-    
     // Return only persistent fundraising data with admin source flag
     return persistentFundraising.map(fund => ({
       ...fund,
       source: 'admin',
       isAdminAdded: true
     }));
-  }, [persistentFundraising, isClient]);
+  }, [persistentFundraising]);
 
   // Funding types for filtering
   const types = ['All', ...new Set(allFundraising.map(fund => fund.round || fund.category))];
@@ -120,7 +127,21 @@ export default function FundraisingClient() {
 
           {/* Refresh Button */}
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              const loadPersistentData = async () => {
+                try {
+                  setLoading(true);
+                  const data = await fundraisingAPI.getAll();
+                  setPersistentFundraising(data || []);
+                } catch (error) {
+                  console.error('Error loading persistent fundraising:', error);
+                  setPersistentFundraising([]);
+                } finally {
+                  setLoading(false);
+                }
+              };
+              loadPersistentData();
+            }}
             disabled={loading}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 border border-blue-500 rounded-lg text-white hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
           >

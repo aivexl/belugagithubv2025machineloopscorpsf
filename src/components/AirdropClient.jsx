@@ -16,16 +16,23 @@ export default function AirdropClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [apiAirdrops, setApiAirdrops] = useState([]);
+  const [persistentAirdrops, setPersistentAirdrops] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [isClient, setIsClient] = useState(false);
   const itemsPerPage = 10;
 
-  // Get persistent data only on client side
-  const persistentAirdrops = isClient ? getPersistentData('airdrop') : [];
-
-  // Set client flag after hydration
+  // Load persistent data from API
   useEffect(() => {
-    setIsClient(true);
+    const loadPersistentData = async () => {
+      try {
+        const data = await airdropsAPI.getAll();
+        setPersistentAirdrops(data || []);
+      } catch (error) {
+        console.error('Error loading persistent airdrops:', error);
+        setPersistentAirdrops([]);
+      }
+    };
+
+    loadPersistentData();
   }, []);
 
   // Fetch airdrop data from API

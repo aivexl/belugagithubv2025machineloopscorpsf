@@ -6,26 +6,31 @@ import { icoIdoAPI } from '@/utils/apiClient';
 
 export default function IcoIdoClient() {
   const [apiIcoIdos, setApiIcoIdos] = useState([]);
+  const [persistentIcoIdos, setPersistentIcoIdos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStatus, setActiveStatus] = useState('All');
   const [selectedNetwork, setSelectedNetwork] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
-  const [isClient, setIsClient] = useState(false);
 
-  // Get persistent data only on client side
-  const persistentIcoIdos = isClient ? getPersistentData('ico-ido') : [];
-
-  // Set client flag after hydration
+  // Load persistent data from API
   useEffect(() => {
-    setIsClient(true);
+    const loadPersistentData = async () => {
+      try {
+        const data = await icoIdoAPI.getAll();
+        setPersistentIcoIdos(data || []);
+      } catch (error) {
+        console.error('Error loading persistent ICO/IDO:', error);
+        setPersistentIcoIdos([]);
+      }
+    };
+
+    loadPersistentData();
   }, []);
 
   // Combine API data and persistent data
   const allIcoIdos = useMemo(() => {
-    if (!isClient) return apiIcoIdos;
-    
     // Combine API data with persistent data
     const combined = [...apiIcoIdos];
     
@@ -47,7 +52,7 @@ export default function IcoIdoClient() {
     });
     
     return combined;
-  }, [apiIcoIdos, persistentIcoIdos, isClient]);
+  }, [apiIcoIdos, persistentIcoIdos]);
 
   // Networks and types for filtering
   const networks = ['All', ...new Set(allIcoIdos.map(ico => ico.network))];
