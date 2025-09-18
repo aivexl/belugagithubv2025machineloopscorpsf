@@ -16,7 +16,7 @@ import {
   FiDollarSign,
   FiBook
 } from 'react-icons/fi';
-import { usePersistentData } from '@/utils/persistentData';
+import { getAPIForCategory } from '@/utils/apiClient';
 import { getFormFields } from './FormFields';
 
 const ADMIN_TABS = [
@@ -34,12 +34,34 @@ export default function CryptoAdminPanel() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValue, setFilterValue] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({});
+  
+  // Data state
+  const [data, setData] = useState([]);
 
-  // Use persistent data hook
-  const { data, loading, addItem, updateItem, deleteItem, refreshData } = usePersistentData(activeTab);
+  // Get API functions for current category
+  const api = getAPIForCategory(activeTab);
+
+  // Load data when tab changes
+  useEffect(() => {
+    loadData();
+  }, [activeTab]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const result = await api.getAll();
+      setData(result || []);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter data
   const filteredData = data.filter(item => {
@@ -96,20 +118,40 @@ export default function CryptoAdminPanel() {
   };
 
   // Handle save item
-  const handleSave = () => {
-    if (isAddingNew) {
-      addItem(formData);
-    } else if (editingItem) {
-      updateItem(editingItem.id, formData);
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      
+      if (isAddingNew) {
+        await api.create(formData);
+      } else if (editingItem) {
+        await api.update({ ...formData, id: editingItem.id });
+      }
+      
+      // Reload data after save
+      await loadData();
+      resetForm();
+    } catch (error) {
+      console.error('Error saving item:', error);
+      alert('Failed to save item. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    
-    resetForm();
   };
 
   // Handle delete item
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (confirm('Are you sure you want to delete this item?')) {
-      deleteItem(id);
+      try {
+        setLoading(true);
+        await api.delete(id);
+        await loadData(); // Reload data after delete
+      } catch (error) {
+        console.error('Error deleting item:', error);
+        alert('Failed to delete item. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -491,7 +533,7 @@ export default function CryptoAdminPanel() {
               Filters
             </button>
             <button
-              onClick={refreshData}
+              onClick={loadData}
               className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <FiRefreshCw className="w-4 h-4 mr-2" />

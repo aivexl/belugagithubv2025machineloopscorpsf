@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { FiSearch, FiFilter, FiGlobe, FiCalendar, FiMapPin, FiGift, FiDollarSign, FiUsers, FiClock, FiRefreshCw } from 'react-icons/fi';
-import { getPersistentData } from '@/utils/persistentData';
+import { airdropsAPI } from '@/utils/apiClient';
 
 export default function AirdropClient() {
   const [activeStatus, setActiveStatus] = useState('All');

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { FiSearch, FiRefreshCw, FiFilter, FiGlobe, FiExternalLink, FiCalendar, FiDollarSign, FiUsers, FiTrendingUp } from 'react-icons/fi';
-import { getPersistentData } from '@/utils/persistentData';
+import { fundraisingAPI } from '@/utils/apiClient';
 
 export default function FundraisingClient() {
   const [loading, setLoading] = useState(true);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { FiSearch, FiRefreshCw, FiFilter, FiGlobe, FiExternalLink, FiCalendar, FiDollarSign, FiTrendingUp } from 'react-icons/fi';
-import { getPersistentData } from '@/utils/persistentData';
+import { icoIdoAPI } from '@/utils/apiClient';
 
 export default function IcoIdoClient() {
   const [apiIcoIdos, setApiIcoIdos] = useState([]);

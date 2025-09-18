@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { FiSearch, FiFilter, FiGlobe, FiCalendar, FiMapPin, FiExternalLink, FiStar } from 'react-icons/fi';
-import { getPersistentData } from '@/utils/persistentData';
+import { exchangesAPI } from '@/utils/apiClient';
 
 export default function ExchangesClient() {
   const [activeType, setActiveType] = useState('All');
@@ -12,15 +12,26 @@ export default function ExchangesClient() {
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [isClient, setIsClient] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [exchangesData, setExchangesData] = useState([]);
   const itemsPerPage = 10;
 
-  // Get persistent data only on client side
-  const exchangesData = isClient ? getPersistentData('exchanges') : [];
-
-  // Set client flag after hydration
+  // Load data from API
   useEffect(() => {
-    setIsClient(true);
+    const loadExchanges = async () => {
+      try {
+        setLoading(true);
+        const data = await exchangesAPI.getAll();
+        setExchangesData(data || []);
+      } catch (error) {
+        console.error('Error loading exchanges:', error);
+        setExchangesData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadExchanges();
   }, []);
 
   // Filter dan sort exchanges
@@ -91,8 +102,8 @@ export default function ExchangesClient() {
     return [];
   };
 
-  // Show loading state during hydration
-  if (!isClient) {
+  // Show loading state
+  if (loading) {
     return (
       <div className="min-h-screen bg-duniacrypto-panel text-white">
         {/* Header */}
