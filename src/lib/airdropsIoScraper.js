@@ -48,8 +48,8 @@ export class AirdropsIoScraper {
             }
             
             // Look for parent container with more info
-            const parent = element.closest('div, section, article');
-            if (parent) {
+            const parent = $el.closest('div, section, article');
+            if (parent.length > 0) {
               const parentText = parent.text().trim();
               if (parentText.length > action.length) {
                 action = parentText.substring(0, 150);

@@ -1,20 +1,57 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { FiSearch, FiRefreshCw, FiFilter, FiGlobe, FiExternalLink, FiCalendar, FiDollarSign, FiTrendingUp } from 'react-icons/fi';
+import { getPersistentData } from '@/utils/persistentData';
 
 export default function IcoIdoClient() {
-  const [icoIdos, setIcoIdos] = useState([]);
+  const [apiIcoIdos, setApiIcoIdos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStatus, setActiveStatus] = useState('All');
   const [selectedNetwork, setSelectedNetwork] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Get persistent data only on client side
+  const persistentIcoIdos = isClient ? getPersistentData('ico-ido') : [];
+
+  // Set client flag after hydration
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Combine API data and persistent data
+  const allIcoIdos = useMemo(() => {
+    if (!isClient) return apiIcoIdos;
+    
+    // Combine API data with persistent data
+    const combined = [...apiIcoIdos];
+    
+    // Add persistent ico/ido that are not already in API data
+    persistentIcoIdos.forEach(persistentIcoIdo => {
+      const exists = combined.some(apiIcoIdo => 
+        apiIcoIdo.project === persistentIcoIdo.project && 
+        apiIcoIdo.token === persistentIcoIdo.token
+      );
+      
+      if (!exists) {
+        // Add a flag to identify admin-added ico/ido
+        combined.push({
+          ...persistentIcoIdo,
+          source: 'admin',
+          isAdminAdded: true
+        });
+      }
+    });
+    
+    return combined;
+  }, [apiIcoIdos, persistentIcoIdos, isClient]);
 
   // Networks and types for filtering
-  const networks = ['All', 'Ethereum', 'Solana', 'Polygon', 'Avalanche', 'BSC', 'Arbitrum', 'Optimism', 'Multi-chain'];
-  const types = ['All', 'ICO', 'IDO', 'IEO', 'Private Sale'];
+  const networks = ['All', ...new Set(allIcoIdos.map(ico => ico.network))];
+  const types = ['All', ...new Set(allIcoIdos.map(ico => ico.type))];
 
   useEffect(() => {
     fetchIcoIdos();
@@ -27,7 +64,7 @@ export default function IcoIdoClient() {
       const data = await response.json();
       
       if (data.success) {
-        setIcoIdos(data.data);
+        setApiIcoIdos(data.data);
       } else {
         console.error('Failed to fetch ICO/IDO data:', data.error);
       }
@@ -39,7 +76,7 @@ export default function IcoIdoClient() {
   };
 
   // Filter ICO/IDOs based on search and filters
-  const filteredIcoIdos = icoIdos.filter((ico) => {
+  const filteredIcoIdos = allIcoIdos.filter((ico) => {
     const matchesSearch = 
       ico.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ico.token.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -58,11 +95,27 @@ export default function IcoIdoClient() {
     e.target.nextSibling.style.display = 'flex';
   };
 
-  if (loading && icoIdos.length === 0) {
+  if (loading && allIcoIdos.length === 0) {
     return (
       <div className="min-h-screen bg-duniacrypto-panel text-white">
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+        {/* Header */}
+        <div className="bg-duniacrypto-panel py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 className="text-4xl font-bold text-center mb-4 text-white">
+              ICO/IDO Projects
+            </h1>
+            <p className="text-xl text-center text-gray-300">
+              Discover the latest Initial Coin Offerings and Initial DEX Offerings
+            </p>
+          </div>
+        </div>
+
+        {/* Loading Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <p className="mt-2 text-gray-400">Loading ICO/IDO projects...</p>
+          </div>
         </div>
       </div>
     );
@@ -180,7 +233,7 @@ export default function IcoIdoClient() {
         {/* Results Count */}
         <div className="mb-6">
           <p className="text-gray-400">
-            Showing {filteredIcoIdos.length} of {icoIdos.length} ICO/IDO projects
+            Showing {filteredIcoIdos.length} of {allIcoIdos.length} ICO/IDO projects
           </p>
         </div>
 
@@ -192,24 +245,32 @@ export default function IcoIdoClient() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredIcoIdos.map((ico) => (
+            {filteredIcoIdos.map((ico, index) => (
               <div
-                key={ico.id}
-                className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden hover:border-blue-500 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10"
+                key={`${ico.id}-${ico.source || 'api'}-${index}`}
+                className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden hover:border-blue-500 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10 flex flex-col h-full"
               >
                 {/* Header with Logo and Project Info */}
                 <div className="p-6 border-b border-gray-700">
                   <div className="flex items-start gap-4">
                     <div className="relative">
-                      <img
-                        src={ico.logo}
-                        alt={`${ico.project} logo`}
-                        className="w-16 h-16 rounded-lg object-cover"
-                        onError={handleLogoError}
-                      />
-                      <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-white bg-gray-700 rounded-lg">
-                        {ico.token ? ico.token.charAt(0) : ico.project.charAt(0)}
-                      </span>
+                      {ico.logo ? (
+                        <>
+                          <img
+                            src={ico.logo}
+                            alt={`${ico.project} logo`}
+                            className="w-16 h-16 rounded-lg object-cover"
+                            onError={handleLogoError}
+                          />
+                          <span className="absolute inset-0 items-center justify-center text-lg font-bold text-white bg-gray-700 rounded-lg hidden">
+                            {ico.token ? ico.token.charAt(0) : ico.project.charAt(0)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="w-16 h-16 flex items-center justify-center text-lg font-bold text-white bg-gray-700 rounded-lg">
+                          {ico.token ? ico.token.charAt(0) : ico.project.charAt(0)}
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
@@ -224,43 +285,37 @@ export default function IcoIdoClient() {
                         </span>
                       </div>
                       <div className="text-sm text-gray-300">{ico.token}</div>
-                      <div className="text-xs text-gray-400">{ico.type} • {ico.network}</div>
+                      <div className="text-xs text-gray-400">{ico.category || ico.type} • {ico.network}</div>
                     </div>
                   </div>
                 </div>
 
                 {/* Project Details */}
-                <div className="p-6 space-y-4">
-                  <p className="text-gray-300 text-sm">{ico.description}</p>
+                <div className="p-6 space-y-4 flex-1 flex flex-col">
+                  <p className="text-gray-300 text-sm" style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>{ico.description}</p>
                   
-                  {/* Key Metrics */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-gray-700 rounded-lg">
-                      <div className="text-xs text-gray-400 mb-1">Token Price</div>
-                      <div className="text-lg font-bold text-white">{ico.price}</div>
+                  {/* Key Metrics - 5 consistent metrics */}
+                  <div className="space-y-3 flex-1">
+                    <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                      <span className="text-xs text-gray-400">Token Price</span>
+                      <span className="text-sm font-medium text-white">{ico.price || ico.currentPrice || 'TBD'}</span>
                     </div>
-                    <div className="text-center p-3 bg-gray-700 rounded-lg">
-                      <div className="text-xs text-gray-400 mb-1">Hard Cap</div>
-                      <div className="text-lg font-bold text-white">{ico.hardCap}</div>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                      <span className="text-xs text-gray-400">Amount Raised</span>
+                      <span className="text-sm font-medium text-white">{ico.raised || 'TBD'}</span>
                     </div>
-                  </div>
-
-                  {/* Timeline */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <FiCalendar className="text-gray-400" />
-                      <span className="text-gray-300">Start: {ico.startDate}</span>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                      <span className="text-xs text-gray-400">Participants</span>
+                      <span className="text-sm font-medium text-white">{ico.participants || 'TBD'}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <FiCalendar className="text-gray-400" />
-                      <span className="text-gray-300">End: {ico.endDate}</span>
+                    <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                      <span className="text-xs text-gray-400">ROI</span>
+                      <span className="text-sm font-medium text-white">{ico.roi || 'TBD'}</span>
                     </div>
-                  </div>
-
-                  {/* Soft Cap */}
-                  <div className="flex items-center gap-2 text-sm">
-                    <FiTrendingUp className="text-gray-400" />
-                    <span className="text-gray-300">Soft Cap: {ico.softCap}</span>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-xs text-gray-400">Vesting</span>
+                      <span className="text-sm font-medium text-white">{ico.vesting || 'TBD'}</span>
+                    </div>
                   </div>
 
                   {/* Action Button */}
@@ -268,7 +323,7 @@ export default function IcoIdoClient() {
                     href={ico.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 mt-auto"
                   >
                     <FiExternalLink />
                     Visit Project

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { FiSearch, FiFilter, FiGlobe, FiCalendar, FiMapPin, FiGift, FiDollarSign, FiUsers, FiClock, FiRefreshCw } from 'react-icons/fi';
+import { getPersistentData } from '@/utils/persistentData';
 
 export default function AirdropClient() {
   const [activeStatus, setActiveStatus] = useState('All');
@@ -14,9 +15,18 @@ export default function AirdropClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [airdrops, setAirdrops] = useState([]);
+  const [apiAirdrops, setApiAirdrops] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [isClient, setIsClient] = useState(false);
   const itemsPerPage = 10;
+
+  // Get persistent data only on client side
+  const persistentAirdrops = isClient ? getPersistentData('airdrop') : [];
+
+  // Set client flag after hydration
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Fetch airdrop data from API
   const fetchAirdrops = async () => {
@@ -31,7 +41,7 @@ export default function AirdropClient() {
       
       const data = await response.json();
       if (data.success) {
-        setAirdrops(data.data);
+        setApiAirdrops(data.data);
         setLastUpdated(new Date());
       } else {
         throw new Error(data.error || 'Failed to fetch airdrops');
@@ -40,7 +50,7 @@ export default function AirdropClient() {
       console.error('Error fetching airdrops:', err);
       setError(err.message);
       // Fallback to sample data if API fails
-      setAirdrops(getSampleData());
+      setApiAirdrops(getSampleData());
     } finally {
       setLoading(false);
     }
@@ -93,9 +103,36 @@ export default function AirdropClient() {
     fetchAirdrops();
   }, []);
 
+  // Combine API data and persistent data
+  const allAirdrops = useMemo(() => {
+    if (!isClient) return apiAirdrops;
+    
+    // Combine API data with persistent data
+    const combined = [...apiAirdrops];
+    
+    // Add persistent airdrops that are not already in API data
+    persistentAirdrops.forEach(persistentAirdrop => {
+      const exists = combined.some(apiAirdrop => 
+        apiAirdrop.project === persistentAirdrop.project && 
+        apiAirdrop.token === persistentAirdrop.token
+      );
+      
+      if (!exists) {
+        // Add a flag to identify admin-added airdrops
+        combined.push({
+          ...persistentAirdrop,
+          source: 'admin',
+          isAdminAdded: true
+        });
+      }
+    });
+    
+    return combined;
+  }, [apiAirdrops, persistentAirdrops, isClient]);
+
   // Filter dan sort airdrops
   const filteredAndSortedAirdrops = useMemo(() => {
-    let filtered = airdrops.filter(airdrop => {
+    let filtered = allAirdrops.filter(airdrop => {
       const matchesStatus = activeStatus === 'All' || airdrop.status === activeStatus;
       const matchesSearch = airdrop.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            airdrop.token.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -125,7 +162,7 @@ export default function AirdropClient() {
     });
 
     return filtered;
-  }, [airdrops, activeStatus, searchQuery, selectedNetwork, selectedType, sortBy, sortOrder]);
+  }, [allAirdrops, activeStatus, searchQuery, selectedNetwork, selectedType, sortBy, sortOrder]);
 
   // Pagination
   const totalPages = Math.ceil(filteredAndSortedAirdrops.length / itemsPerPage);
@@ -138,8 +175,8 @@ export default function AirdropClient() {
   }, [activeStatus, searchQuery, selectedNetwork, selectedType]);
 
   // Get unique networks and types
-  const networks = ['All', ...new Set(airdrops.map(airdrop => airdrop.network))];
-  const types = ['All', ...new Set(airdrops.map(airdrop => airdrop.type))];
+  const networks = ['All', ...new Set(allAirdrops.map(airdrop => airdrop.network))];
+  const types = ['All', ...new Set(allAirdrops.map(airdrop => airdrop.type))];
 
   // Format date
   const formatDate = (dateString) => {
@@ -171,12 +208,27 @@ export default function AirdropClient() {
     e.target.nextSibling.style.display = 'flex';
   };
 
-  if (loading && airdrops.length === 0) {
+  if (loading && allAirdrops.length === 0) {
     return (
       <div className="min-h-screen bg-duniacrypto-panel text-white">
+        {/* Header */}
+        <div className="bg-duniacrypto-panel py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 className="text-4xl font-bold text-center mb-4 text-white">
+              Cryptocurrency Airdrops
+            </h1>
+            <p className="text-xl text-center text-gray-300">
+              Discover the latest cryptocurrency airdrops and free token distributions
+            </p>
+          </div>
+        </div>
 
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+        {/* Loading Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <p className="mt-2 text-gray-400">Loading airdrops...</p>
+          </div>
         </div>
       </div>
     );
@@ -304,24 +356,24 @@ export default function AirdropClient() {
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-sm">
-            <div className="text-2xl font-bold text-blue-400">{airdrops.length}</div>
+            <div className="text-2xl font-bold text-blue-400">{allAirdrops.length}</div>
             <div className="text-sm text-gray-300">Total Airdrops</div>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-sm">
             <div className="text-2xl font-bold text-green-400">
-              {airdrops.filter(a => a.status === 'Active').length}
+              {allAirdrops.filter(a => a.status === 'Active').length}
             </div>
             <div className="text-sm text-gray-300">Active</div>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-sm">
             <div className="text-2xl font-bold text-blue-400">
-              {airdrops.filter(a => a.status === 'Upcoming').length}
+              {allAirdrops.filter(a => a.status === 'Upcoming').length}
             </div>
             <div className="text-sm text-gray-300">Upcoming</div>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-sm">
             <div className="text-2xl font-bold text-indigo-400">
-              {new Set(airdrops.map(a => a.network)).size}
+              {new Set(allAirdrops.map(a => a.network)).size}
             </div>
             <div className="text-sm text-gray-300">Networks</div>
           </div>
@@ -382,8 +434,8 @@ export default function AirdropClient() {
                 </tr>
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-700">
-                {paginatedAirdrops.map((airdrop) => (
-                  <tr key={airdrop.id} className="hover:bg-gray-700 transition-colors duration-200">
+                {paginatedAirdrops.map((airdrop, index) => (
+                  <tr key={`${airdrop.id}-${airdrop.source || 'api'}-${index}`} className="hover:bg-gray-700 transition-colors duration-200">
                     <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-12 w-12 bg-gray-600 rounded-lg flex items-center justify-center mr-3 overflow-hidden">

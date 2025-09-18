@@ -116,53 +116,6 @@ const airdrops = [
   }
 ];
 
-const fundraising = [
-  {
-    id: 1,
-    project: 'EigenLayer',
-    token: 'EIGEN',
-    network: 'Ethereum',
-    category: 'Restaking',
-    fundingRound: 'Series B',
-    amount: '$100M',
-    valuation: '$1.5B',
-    date: '2024-01-15',
-    investors: 'a16z, Paradigm, Polychain',
-    description: 'EigenLayer is a protocol built on Ethereum that introduces restaking, a new primitive in cryptoeconomic security.',
-    status: 'Active',
-    link: 'https://eigenlayer.xyz'
-  },
-  {
-    id: 2,
-    project: 'Scroll',
-    token: 'SCROLL',
-    network: 'Ethereum L2',
-    category: 'ZK-Rollup',
-    fundingRound: 'Series A',
-    amount: '50M',
-    valuation: '1.8B',
-    date: '2023-12-20',
-    investors: 'Polychain, Sequoia, Bain Capital',
-    description: 'Scroll is a zkEVM-based zkRollup on Ethereum that enables native compatibility for existing Ethereum applications.',
-    status: 'Active',
-    link: 'https://scroll.io'
-  },
-  {
-    id: 3,
-    project: 'Manta Network',
-    token: 'MANTA',
-    network: 'Polkadot',
-    category: 'Privacy',
-    fundingRound: 'Series B',
-    amount: '35M',
-    valuation: '500M',
-    date: '2023-11-10',
-    investors: 'LongHash Ventures, ParaFi, CMS',
-    description: 'Manta Network is a privacy-preserving DeFi protocol built on Polkadot.',
-    status: 'Active',
-    link: 'https://manta.network'
-  }
-];
 
 const ico = [
   {
@@ -243,9 +196,6 @@ export async function GET(request) {
       case 'airdrops':
         data = airdrops;
         break;
-      case 'fundraising':
-        data = fundraising;
-        break;
       case 'ico':
         data = ico;
         break;
@@ -256,7 +206,6 @@ export async function GET(request) {
         data = {
           exchanges,
           airdrops,
-          fundraising,
           ico,
           market: marketData
         };
