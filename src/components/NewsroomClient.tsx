@@ -127,6 +127,7 @@ export default function NewsroomClient({ articles = [] }: NewsroomClientProps) {
                               coinTags={article.coinTags} 
                               size="xs"
                               maxDisplay={3}
+                              disableLinks={true}
                             />
                           )}
                         </div>

@@ -323,6 +323,7 @@ export default function AcademyClientEnterprise() {
                 coinTags={article.coinTags} 
                 size="xs"
                 maxDisplay={2}
+                disableLinks={true}
               />
             )}
           </div>

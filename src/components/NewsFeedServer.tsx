@@ -95,6 +95,7 @@ const NewsFeedServer = React.memo(({ articles = [], noTitle = false, initialCoun
                         coinTags={article.coinTags} 
                         size="xs"
                         maxDisplay={3}
+                        disableLinks={true}
                       />
                     )}
                   </div>

@@ -33,6 +33,7 @@ type NewsSliderProps = {
 
 const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
   const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Convert Sanity articles to slider format
@@ -45,17 +46,47 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
     coinTags: article.coinTags || []
   }));
 
-  useEffect(() => {
-    if (sliderArticles.length === 0) return;
+  // Function to start the interval
+  const startInterval = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
     intervalRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % sliderArticles.length);
     }, 4000);
+  };
+
+  // Function to stop the interval
+  const stopInterval = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (sliderArticles.length === 0) return;
+    
+    if (!isPaused) {
+      startInterval();
+    } else {
+      stopInterval();
+    }
+
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      stopInterval();
     };
-  }, [sliderArticles.length]);
+  }, [sliderArticles.length, isPaused]);
+
+  // Handle mouse enter (pause slider)
+  const handleMouseEnter = () => {
+    setIsPaused(true);
+  };
+
+  // Handle mouse leave (resume slider)
+  const handleMouseLeave = () => {
+    setIsPaused(false);
+  };
 
   const handlePrev = () => {
     setCurrent((prev) => (prev - 1 + sliderArticles.length) % sliderArticles.length);
@@ -79,7 +110,12 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
   }
 
   return (
-    <div className="relative bg-duniacrypto-panel rounded-lg shadow p-0 overflow-hidden w-full max-w-full mb-6" style={{height: '400px'}}>
+    <div 
+      className="relative bg-duniacrypto-panel rounded-lg shadow p-0 overflow-hidden w-full max-w-full mb-6" 
+      style={{height: '400px'}}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
         <button
           className="bg-duniacrypto-card rounded-full p-2 hover:bg-duniacrypto-green/20 focus:outline-none"
