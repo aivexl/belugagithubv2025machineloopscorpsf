@@ -2,79 +2,45 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { FiSearch, FiRefreshCw, FiFilter, FiGlobe, FiExternalLink, FiCalendar, FiDollarSign, FiTrendingUp } from 'react-icons/fi';
-import { icoIdoAPI } from '@/utils/apiClient';
+import { getDatabaseData } from '@/utils/databaseServiceAPI';
 
 export default function IcoIdoClient() {
-  const [apiIcoIdos, setApiIcoIdos] = useState([]);
-  const [persistentIcoIdos, setPersistentIcoIdos] = useState([]);
+  const [adminIcoIdos, setAdminIcoIdos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStatus, setActiveStatus] = useState('All');
   const [selectedNetwork, setSelectedNetwork] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
-  // Load persistent data from API
+  // Set client flag after hydration
   useEffect(() => {
-    const loadPersistentData = async () => {
-      try {
-        const data = await icoIdoAPI.getAll();
-        setPersistentIcoIdos(data || []);
-      } catch (error) {
-        console.error('Error loading persistent ICO/IDO:', error);
-        setPersistentIcoIdos([]);
-      }
-    };
-
-    loadPersistentData();
+    setIsClient(true);
+    fetchAdminIcoIdos();
   }, []);
 
-  // Combine API data and persistent data
+  // Use only admin data
   const allIcoIdos = useMemo(() => {
-    // Combine API data with persistent data
-    const combined = [...apiIcoIdos];
+    if (!isClient) return adminIcoIdos;
     
-    // Add persistent ico/ido that are not already in API data
-    persistentIcoIdos.forEach(persistentIcoIdo => {
-      const exists = combined.some(apiIcoIdo => 
-        apiIcoIdo.project === persistentIcoIdo.project && 
-        apiIcoIdo.token === persistentIcoIdo.token
-      );
-      
-      if (!exists) {
-        // Add a flag to identify admin-added ico/ido
-        combined.push({
-          ...persistentIcoIdo,
-          source: 'admin',
-          isAdminAdded: true
-        });
-      }
-    });
-    
-    return combined;
-  }, [apiIcoIdos, persistentIcoIdos]);
+    // Return only admin data
+    return adminIcoIdos;
+  }, [adminIcoIdos, isClient]);
 
   // Networks and types for filtering
   const networks = ['All', ...new Set(allIcoIdos.map(ico => ico.network))];
   const types = ['All', ...new Set(allIcoIdos.map(ico => ico.type))];
 
-  useEffect(() => {
-    fetchIcoIdos();
-  }, []);
-
-  const fetchIcoIdos = async () => {
+  // Fetch ICO/IDO data from admin panel database
+  const fetchAdminIcoIdos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/dummy-data?type=ico');
-      const data = await response.json();
-      
-      if (data.success) {
-        setApiIcoIdos(data.data);
-      } else {
-        console.error('Failed to fetch ICO/IDO data:', data.error);
-      }
+      const data = await getDatabaseData('ico-ido');
+      setAdminIcoIdos(data || []);
     } catch (error) {
-      console.error('Error fetching ICO/IDO data:', error);
+      console.error('Error loading admin ICO/IDO:', error);
+      setAdminIcoIdos([]);
     } finally {
       setLoading(false);
     }
@@ -166,7 +132,7 @@ export default function IcoIdoClient() {
 
           {/* Refresh Button */}
           <button
-            onClick={fetchIcoIdos}
+            onClick={fetchAdminIcoIdos}
             disabled={loading}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 border border-blue-500 rounded-lg text-white hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
           >

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { FiSearch, FiFilter, FiGlobe, FiCalendar, FiMapPin, FiExternalLink, FiStar } from 'react-icons/fi';
-import { exchangesAPI } from '@/utils/apiClient';
+import { getDatabaseData } from '@/utils/databaseServiceAPI';
 
 export default function ExchangesClient() {
   const [activeType, setActiveType] = useState('All');
@@ -12,26 +12,26 @@ export default function ExchangesClient() {
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [exchangesData, setExchangesData] = useState([]);
-  const itemsPerPage = 10;
+  const [loading, setLoading] = useState(true);
+  const itemsPerPage = 10; // Number of exchanges per page
 
-  // Load data from API
+  // Load data from database
   useEffect(() => {
-    const loadExchanges = async () => {
+    const loadExchangesData = async () => {
       try {
         setLoading(true);
-        const data = await exchangesAPI.getAll();
-        setExchangesData(data || []);
+        const data = await getDatabaseData('exchanges');
+        setExchangesData(data);
       } catch (error) {
-        console.error('Error loading exchanges:', error);
+        console.error('Error loading exchanges data:', error);
         setExchangesData([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadExchanges();
+    loadExchangesData();
   }, []);
 
   // Filter dan sort exchanges
@@ -100,6 +100,13 @@ export default function ExchangesClient() {
       return features.split(',').map(feature => feature.trim()).filter(feature => feature);
     }
     return [];
+  };
+
+  // Helper function untuk generate exchange logo
+  const generateExchangeLogo = (name) => {
+    if (!name) return '/images/exchanges/default-exchange.svg';
+    const firstLetter = name.charAt(0).toUpperCase();
+    return `https://ui-avatars.com/api/?name=${firstLetter}&background=F7931A&color=fff&size=64&font-size=0.4`;
   };
 
   // Show loading state
@@ -267,10 +274,10 @@ export default function ExchangesClient() {
                         <div className="flex-shrink-0 h-10 w-10">
                           <img 
                             className="h-10 w-10 rounded-full" 
-                            src={exchange.logo || '/images/exchanges/default-exchange.svg'} 
+                            src={exchange.logo || exchange.logo_url || generateExchangeLogo(exchange.name)} 
                             alt={exchange.name}
                             onError={(e) => {
-                              e.target.src = '/images/exchanges/default-exchange.svg';
+                              e.target.src = generateExchangeLogo(exchange.name);
                             }}
                           />
                         </div>

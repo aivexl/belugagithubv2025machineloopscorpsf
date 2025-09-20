@@ -2,43 +2,44 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { FiSearch, FiRefreshCw, FiFilter, FiGlobe, FiExternalLink, FiCalendar, FiDollarSign, FiUsers, FiTrendingUp } from 'react-icons/fi';
-import { fundraisingAPI } from '@/utils/apiClient';
+import { getDatabaseData } from '@/utils/databaseServiceAPI';
 
 export default function FundraisingClient() {
+  const [adminFundraising, setAdminFundraising] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStatus, setActiveStatus] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
-  const [persistentFundraising, setPersistentFundraising] = useState([]);
+  const [isClient, setIsClient] = useState(false);
 
-  // Load persistent data from API
+  // Set client flag after hydration
   useEffect(() => {
-    const loadPersistentData = async () => {
-      try {
-        setLoading(true);
-        const data = await fundraisingAPI.getAll();
-        setPersistentFundraising(data || []);
-      } catch (error) {
-        console.error('Error loading persistent fundraising:', error);
-        setPersistentFundraising([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPersistentData();
+    setIsClient(true);
+    fetchAdminFundraising();
   }, []);
 
-  // Use only persistent data from admin panel
+  // Fetch fundraising data from admin panel database
+  const fetchAdminFundraising = async () => {
+    try {
+      setLoading(true);
+      const data = await getDatabaseData('fundraising');
+      setAdminFundraising(data || []);
+    } catch (error) {
+      console.error('Error loading admin fundraising:', error);
+      setAdminFundraising([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Use only admin data
   const allFundraising = useMemo(() => {
-    // Return only persistent fundraising data with admin source flag
-    return persistentFundraising.map(fund => ({
-      ...fund,
-      source: 'admin',
-      isAdminAdded: true
-    }));
-  }, [persistentFundraising]);
+    if (!isClient) return adminFundraising;
+    
+    // Return only admin data
+    return adminFundraising;
+  }, [adminFundraising, isClient]);
 
   // Funding types for filtering
   const types = ['All', ...new Set(allFundraising.map(fund => fund.round || fund.category))];
@@ -127,21 +128,7 @@ export default function FundraisingClient() {
 
           {/* Refresh Button */}
           <button
-            onClick={() => {
-              const loadPersistentData = async () => {
-                try {
-                  setLoading(true);
-                  const data = await fundraisingAPI.getAll();
-                  setPersistentFundraising(data || []);
-                } catch (error) {
-                  console.error('Error loading persistent fundraising:', error);
-                  setPersistentFundraising([]);
-                } finally {
-                  setLoading(false);
-                }
-              };
-              loadPersistentData();
-            }}
+            onClick={fetchAdminFundraising}
             disabled={loading}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 border border-blue-500 rounded-lg text-white hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
           >

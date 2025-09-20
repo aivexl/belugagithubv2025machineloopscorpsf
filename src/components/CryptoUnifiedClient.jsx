@@ -135,6 +135,13 @@ export default function CryptoUnifiedClient() {
     });
   };
 
+  // Helper function untuk generate exchange logo
+  const generateExchangeLogo = (name) => {
+    if (!name) return '/images/exchanges/default-exchange.svg';
+    const firstLetter = name.charAt(0).toUpperCase();
+    return `https://ui-avatars.com/api/?name=${firstLetter}&background=F7931A&color=fff&size=64&font-size=0.4`;
+  };
+
   // Render table headers based on active tab
   const renderTableHeaders = () => {
     switch (activeTab) {
@@ -223,10 +230,10 @@ export default function CryptoUnifiedClient() {
                   <div className="flex-shrink-0 h-10 w-10">
                     <img 
                       className="h-10 w-10 rounded-full" 
-                      src={item.logo || '/images/exchanges/default-exchange.svg'} 
+                      src={item.logo || item.logo_url || generateExchangeLogo(item.name)} 
                       alt={item.name}
                       onError={(e) => {
-                        e.target.src = '/images/exchanges/default-exchange.svg';
+                        e.target.src = generateExchangeLogo(item.name);
                       }}
                     />
                   </div>

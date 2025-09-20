@@ -16,7 +16,7 @@ import {
   FiDollarSign,
   FiBook
 } from 'react-icons/fi';
-import { getAPIForCategory } from '@/utils/apiClient';
+import { useSupabaseData } from '@/utils/useSupabaseData';
 import { getFormFields } from './FormFields';
 
 const ADMIN_TABS = [
@@ -34,34 +34,25 @@ export default function CryptoAdminPanel() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValue, setFilterValue] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({});
-  
-  // Data state
-  const [data, setData] = useState([]);
 
-  // Get API functions for current category
-  const api = getAPIForCategory(activeTab);
+  // Use Supabase data hook
+  const { data, loading, error, stats, addItem, updateItem, deleteItem, refreshData } = useSupabaseData(activeTab);
 
-  // Load data when tab changes
+  // Debug logging
   useEffect(() => {
-    loadData();
-  }, [activeTab]);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const result = await api.getAll();
-      setData(result || []);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    console.log('Admin Panel - Active Tab:', activeTab);
+    console.log('Admin Panel - Data:', data);
+    console.log('Admin Panel - Loading:', loading);
+    console.log('Admin Panel - Error:', error);
+    console.log('Admin Panel - Form Data:', formData);
+    console.log('Admin Panel - Is Adding New:', isAddingNew);
+    console.log('Admin Panel - Editing Item:', editingItem);
+    console.log('Admin Panel - Data Length:', data?.length);
+    console.log('Admin Panel - Data Type:', typeof data);
+  }, [activeTab, data, loading, error, formData, isAddingNew, editingItem]);
 
   // Filter data
   const filteredData = data.filter(item => {
@@ -97,6 +88,26 @@ export default function CryptoAdminPanel() {
     return matchesFilter && matchesSearch;
   });
 
+  // Reset form when tab changes
+  useEffect(() => {
+    console.log('Tab changed to:', activeTab, '- Resetting form');
+    resetForm();
+  }, [activeTab]);
+
+  // Debug data loading
+  useEffect(() => {
+    if (data && data.length > 0) {
+      console.log('Data loaded successfully for', activeTab, ':', data.length, 'items');
+      console.log('First item:', data[0]);
+    } else if (data && data.length === 0) {
+      console.log('No data found for', activeTab);
+    } else if (loading) {
+      console.log('Loading data for', activeTab);
+    } else if (error) {
+      console.log('Error loading data for', activeTab, ':', error);
+    }
+  }, [data, loading, error, activeTab]);
+
   // Reset form
   const resetForm = () => {
     setFormData({});
@@ -112,6 +123,7 @@ export default function CryptoAdminPanel() {
 
   // Handle edit item
   const handleEdit = (item) => {
+    console.log('Editing item:', item);
     setFormData({ ...item });
     setEditingItem(item);
     setIsAddingNew(false);
@@ -120,22 +132,21 @@ export default function CryptoAdminPanel() {
   // Handle save item
   const handleSave = async () => {
     try {
-      setLoading(true);
+      console.log('Saving item with form data:', formData);
+      console.log('Active tab:', activeTab);
       
       if (isAddingNew) {
-        await api.create(formData);
+        const result = await addItem(formData);
+        console.log('Item added successfully:', result);
       } else if (editingItem) {
-        await api.update({ ...formData, id: editingItem.id });
+        const result = await updateItem(editingItem.id, formData);
+        console.log('Item updated successfully:', result);
       }
       
-      // Reload data after save
-      await loadData();
       resetForm();
     } catch (error) {
       console.error('Error saving item:', error);
-      alert('Failed to save item. Please try again.');
-    } finally {
-      setLoading(false);
+      alert('Error saving item: ' + error.message);
     }
   };
 
@@ -143,24 +154,28 @@ export default function CryptoAdminPanel() {
   const handleDelete = async (id) => {
     if (confirm('Are you sure you want to delete this item?')) {
       try {
-        setLoading(true);
-        await api.delete(id);
-        await loadData(); // Reload data after delete
+        await deleteItem(id);
       } catch (error) {
         console.error('Error deleting item:', error);
-        alert('Failed to delete item. Please try again.');
-      } finally {
-        setLoading(false);
+        alert('Error deleting item: ' + error.message);
       }
     }
   };
 
   // Handle form input change
   const handleInputChange = (field, value) => {
+    console.log('Form input change:', field, value);
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  // Helper function untuk generate exchange logo
+  const generateExchangeLogo = (name) => {
+    if (!name) return '/images/exchanges/default-exchange.svg';
+    const firstLetter = name.charAt(0).toUpperCase();
+    return `https://ui-avatars.com/api/?name=${firstLetter}&background=F7931A&color=fff&size=64&font-size=0.4`;
   };
 
   // Render form fields based on active tab
@@ -254,10 +269,10 @@ export default function CryptoAdminPanel() {
                 <div className="flex items-center">
                   <img 
                     className="h-8 w-8 rounded-full mr-3" 
-                    src={item.logo || '/images/exchanges/default-exchange.svg'} 
+                    src={item.logo || item.logo_url || generateExchangeLogo(item.name)} 
                     alt={item.name}
                     onError={(e) => {
-                      e.target.src = '/images/exchanges/default-exchange.svg';
+                      e.target.src = generateExchangeLogo(item.name);
                     }}
                   />
                   <div>
@@ -485,6 +500,58 @@ export default function CryptoAdminPanel() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Crypto Ecosystem Admin Panel</h1>
           <p className="text-gray-300">Manage all crypto ecosystem data</p>
+          
+          {/* Error Display */}
+          {error && (
+            <div className="mt-4 p-4 bg-red-900 border border-red-700 rounded-lg">
+              <div className="flex items-center">
+                <div className="text-red-200">
+                  <strong>Error:</strong> {error}
+                </div>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="ml-4 px-3 py-1 bg-red-700 text-white rounded text-sm hover:bg-red-600"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Stats Display */}
+          {stats && (
+            <div className="mt-4 flex items-center gap-4 text-sm text-gray-400">
+              <span>Total Items: <span className="text-blue-400 font-semibold">{stats.total}</span></span>
+              <span>Category: <span className="text-green-400 font-semibold">{ADMIN_TABS.find(tab => tab.id === activeTab)?.label}</span></span>
+            </div>
+          )}
+
+          {/* Error Display */}
+          {error && (
+            <div className="mt-4 p-4 bg-red-900 border border-red-700 rounded-lg">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-200">Error loading data</h3>
+                  <div className="mt-2 text-sm text-red-300">
+                    <p>{error}</p>
+                  </div>
+                  <div className="mt-3">
+                    <button
+                      onClick={() => refreshData()}
+                      className="text-sm bg-red-800 text-red-200 px-3 py-1 rounded hover:bg-red-700"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tabs */}
@@ -533,7 +600,7 @@ export default function CryptoAdminPanel() {
               Filters
             </button>
             <button
-              onClick={loadData}
+              onClick={refreshData}
               className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <FiRefreshCw className="w-4 h-4 mr-2" />

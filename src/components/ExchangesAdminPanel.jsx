@@ -56,6 +56,13 @@ export default function ExchangesAdminPanel() {
     setIsAddingNew(false);
   };
 
+  // Helper function untuk generate exchange logo
+  const generateExchangeLogo = (name) => {
+    if (!name) return '/images/exchanges/default-exchange.svg';
+    const firstLetter = name.charAt(0).toUpperCase();
+    return `https://ui-avatars.com/api/?name=${firstLetter}&background=F7931A&color=fff&size=64&font-size=0.4`;
+  };
+
   // Handle add new exchange
   const handleAddNew = () => {
     resetForm();
@@ -383,10 +390,10 @@ export default function ExchangesAdminPanel() {
                       <div className="flex items-center">
                         <img 
                           className="h-8 w-8 rounded-full mr-3" 
-                          src={exchange.logo || '/images/exchanges/default-exchange.svg'} 
+                          src={exchange.logo || exchange.logo_url || generateExchangeLogo(exchange.name)} 
                           alt={exchange.name}
                           onError={(e) => {
-                            e.target.src = '/images/exchanges/default-exchange.svg';
+                            e.target.src = generateExchangeLogo(exchange.name);
                           }}
                         />
                         <div>

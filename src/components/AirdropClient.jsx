@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { FiSearch, FiFilter, FiGlobe, FiCalendar, FiMapPin, FiGift, FiDollarSign, FiUsers, FiClock, FiRefreshCw } from 'react-icons/fi';
-import { airdropsAPI } from '@/utils/apiClient';
+import { getDatabaseData } from '@/utils/databaseServiceAPI';
 
 export default function AirdropClient() {
   const [activeStatus, setActiveStatus] = useState('All');
@@ -15,127 +15,43 @@ export default function AirdropClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [apiAirdrops, setApiAirdrops] = useState([]);
-  const [persistentAirdrops, setPersistentAirdrops] = useState([]);
+  const [adminAirdrops, setAdminAirdrops] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [isClient, setIsClient] = useState(false);
   const itemsPerPage = 10;
 
-  // Load persistent data from API
+  // Set client flag after hydration
   useEffect(() => {
-    const loadPersistentData = async () => {
-      try {
-        const data = await airdropsAPI.getAll();
-        setPersistentAirdrops(data || []);
-      } catch (error) {
-        console.error('Error loading persistent airdrops:', error);
-        setPersistentAirdrops([]);
-      }
-    };
-
-    loadPersistentData();
+    setIsClient(true);
+    fetchAdminAirdrops();
   }, []);
 
-  // Fetch airdrop data from API
-  const fetchAirdrops = async () => {
+  // Fetch airdrop data from admin panel database
+  const fetchAdminAirdrops = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/airdrops');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      if (data.success) {
-        setApiAirdrops(data.data);
-        setLastUpdated(new Date());
-      } else {
-        throw new Error(data.error || 'Failed to fetch airdrops');
-      }
-    } catch (err) {
-      console.error('Error fetching airdrops:', err);
-      setError(err.message);
-      // Fallback to sample data if API fails
-      setApiAirdrops(getSampleData());
+      const data = await getDatabaseData('airdrop');
+      setAdminAirdrops(data || []);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error loading admin airdrops:', error);
+      setError('Failed to load airdrop data from admin panel');
+      setAdminAirdrops([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Sample data as fallback
-  const getSampleData = () => [
-    {
-      id: 1,
-      project: 'Jupiter',
-      token: 'JUP',
-      network: 'Solana',
-      status: 'Active',
-      startDate: '2024-01-15',
-      endDate: '2024-02-15',
-      totalAllocation: '100,000,000',
-      minAllocation: '100',
-      maxAllocation: '10,000',
-      requirements: 'Hold SOL, Use Jupiter DEX',
-      estimatedValue: '$50 - $500',
-      participants: '50,000+',
-      website: 'https://jup.ag',
-      type: 'DeFi',
-      category: 'DEX',
-      logo: 'https://assets.coingecko.com/coins/images/34184/large/jupiter.png'
-    },
-    {
-      id: 2,
-      project: 'Pyth Network',
-      token: 'PYTH',
-      network: 'Multi-chain',
-      status: 'Completed',
-      startDate: '2023-11-20',
-      endDate: '2023-12-20',
-      totalAllocation: '50,000,000',
-      minAllocation: '50',
-      maxAllocation: '5,000',
-      requirements: 'Use Pyth Oracle, Deploy contracts',
-      estimatedValue: '$25 - $250',
-      participants: '30,000+',
-      website: 'https://pyth.network',
-      type: 'Infrastructure',
-      category: 'Oracle',
-      logo: 'https://assets.coingecko.com/coins/images/31924/large/pyth.png'
-    }
-  ];
 
-  // Initial fetch
-  useEffect(() => {
-    fetchAirdrops();
-  }, []);
-
-  // Combine API data and persistent data
+  // Use only admin data
   const allAirdrops = useMemo(() => {
-    if (!isClient) return apiAirdrops;
+    if (!isClient) return adminAirdrops;
     
-    // Combine API data with persistent data
-    const combined = [...apiAirdrops];
-    
-    // Add persistent airdrops that are not already in API data
-    persistentAirdrops.forEach(persistentAirdrop => {
-      const exists = combined.some(apiAirdrop => 
-        apiAirdrop.project === persistentAirdrop.project && 
-        apiAirdrop.token === persistentAirdrop.token
-      );
-      
-      if (!exists) {
-        // Add a flag to identify admin-added airdrops
-        combined.push({
-          ...persistentAirdrop,
-          source: 'admin',
-          isAdminAdded: true
-        });
-      }
-    });
-    
-    return combined;
-  }, [apiAirdrops, persistentAirdrops, isClient]);
+    // Return only admin data
+    return adminAirdrops;
+  }, [adminAirdrops, isClient]);
 
   // Filter dan sort airdrops
   const filteredAndSortedAirdrops = useMemo(() => {
@@ -283,7 +199,7 @@ export default function AirdropClient() {
 
           {/* Refresh Button */}
           <button
-            onClick={fetchAirdrops}
+            onClick={fetchAdminAirdrops}
             disabled={loading}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 border border-blue-500 rounded-lg text-white hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
           >
