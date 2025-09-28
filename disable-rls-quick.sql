@@ -18,3 +18,5 @@ WHERE tablename IN ('crypto_exchanges', 'crypto_airdrop', 'crypto_ico_ido', 'cry
 ORDER BY tablename;
 
 
+
+

@@ -184,6 +184,68 @@ export async function getFeaturedArticles(): Promise<SanityArticle[]> {
   return client.fetch(query)
 }
 
+// Fetch academy articles by coin symbol from Dunia Crypto
+export async function getAcademyArticlesByCoin(coinSymbol: string): Promise<SanityArticle[]> {
+  const queries = [
+    // Try exact symbol match
+    `*[_type == "article" && category == "academy" && source == "Dunia Crypto" &&
+      count(coinTags[]->) > 0 &&
+      count(coinTags[]->[symbol == $coinSymbol]) > 0] | order(publishedAt desc)`,
+    // Try uppercase symbol match
+    `*[_type == "article" && category == "academy" && source == "Dunia Crypto" &&
+      count(coinTags[]->) > 0 &&
+      count(coinTags[]->[symbol == $coinSymbolUpper]) > 0] | order(publishedAt desc)`,
+    // Try lowercase symbol match
+    `*[_type == "article" && category == "academy" && source == "Dunia Crypto" &&
+      count(coinTags[]->) > 0 &&
+      count(coinTags[]->[symbol == $coinSymbolLower]) > 0] | order(publishedAt desc)`,
+  ]
+
+  const fieldQuery = `{
+    _id, title, slug, excerpt, content, image, category, source, publishedAt, featured, showInSlider, level, topics, networks,
+    coinTags[]->{ _id, name, symbol, logo, category, isActive, link }
+  }`
+
+  try {
+    // Try exact symbol match first
+    let result = await client.fetch(`${queries[0]} ${fieldQuery}`, { coinSymbol: coinSymbol })
+    if (result && result.length > 0) return result
+
+    // Try uppercase match
+    result = await client.fetch(`${queries[1]} ${fieldQuery}`, { coinSymbolUpper: coinSymbol.toUpperCase() })
+    if (result && result.length > 0) return result
+
+    // Try lowercase match
+    result = await client.fetch(`${queries[2]} ${fieldQuery}`, { coinSymbolLower: coinSymbol.toLowerCase() })
+    return result || []
+  } catch (error) {
+    console.error('Error fetching academy articles by coin:', error)
+    return []
+  }
+}
+
+// Fetch academy articles with fallback to general academy articles
+export async function getAcademyArticlesWithFallback(coinSymbol: string): Promise<SanityArticle[]> {
+  try {
+    // First try to get coin-specific articles
+    const coinSpecificArticles = await getAcademyArticlesByCoin(coinSymbol)
+    if (coinSpecificArticles && coinSpecificArticles.length > 0) {
+      return coinSpecificArticles
+    }
+
+    // Fallback to general academy articles from Dunia Crypto
+    const generalQuery = `*[_type == "article" && category == "academy" && source == "Dunia Crypto"] | order(publishedAt desc) [0...4] {
+      _id, title, slug, excerpt, content, image, category, source, publishedAt, featured, showInSlider, level, topics, networks,
+      coinTags[]->{ _id, name, symbol, logo, category, isActive, link }
+    }`
+    
+    return await client.fetch(generalQuery)
+  } catch (error) {
+    console.error('Error fetching academy articles with fallback:', error)
+    return []
+  }
+}
+
 // Add image URLs to articles
 export function addImageUrls(articles: SanityArticle[]): SanityArticleWithImage[] {
   // Ensure articles is an array

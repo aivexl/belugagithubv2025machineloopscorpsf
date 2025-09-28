@@ -47,3 +47,5 @@ ALTER TABLE crypto_glossary
 ADD COLUMN IF NOT EXISTS examples TEXT;
 
 
+
+

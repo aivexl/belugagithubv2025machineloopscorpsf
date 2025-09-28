@@ -32,3 +32,5 @@ CREATE POLICY "Allow anon CRUD" ON crypto_glossary FOR ALL USING (true) WITH CHE
 SELECT 'RLS Policy Test' as test_name, count(*) as exchange_count FROM crypto_exchanges;
 
 
+
+

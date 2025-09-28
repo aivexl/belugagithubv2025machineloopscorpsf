@@ -19,3 +19,5 @@ AND column_name IN ('founded', 'founded_year', 'region', 'trading_volume', 'feat
 ORDER BY column_name;
 
 
+
+

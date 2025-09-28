@@ -22,3 +22,5 @@ WHERE table_name = 'crypto_exchanges'
 ORDER BY column_name;
 
 
+
+

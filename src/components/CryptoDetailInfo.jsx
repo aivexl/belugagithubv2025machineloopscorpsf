@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { getAllArticles } from '../utils/sanity';
+import { getAllArticles, getAcademyArticlesWithFallback } from '../utils/sanity';
 import { CoinLogosOnly } from './CoinTags';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -108,7 +108,7 @@ export default function CryptoDetailInfo({
   const [academyArticles, setAcademyArticles] = useState([]);
   const [loadingAcademy, setLoadingAcademy] = useState(false);
 
-  // Fetch articles related to this coin
+  // Fetch articles related to this coin from Dunia Crypto only
   useEffect(() => {
     const fetchRelatedArticles = async () => {
       if (!coinData?.symbol) return;
@@ -116,8 +116,9 @@ export default function CryptoDetailInfo({
       setLoadingArticles(true);
       try {
         const articles = await getAllArticles();
-        // Filter articles that have coin tags matching this coin's symbol
+        // Filter articles that have coin tags matching this coin's symbol and are from Dunia Crypto
         const filtered = articles.filter(article => 
+          article.source === 'Dunia Crypto' &&
           article.coinTags?.some(coinTag => 
             coinTag.symbol?.toLowerCase() === coinData.symbol?.toLowerCase()
           )
@@ -138,26 +139,18 @@ export default function CryptoDetailInfo({
     fetchRelatedArticles();
   }, [coinData?.symbol]);
 
-  // Fetch academy articles related to this coin
+  // Fetch academy articles related to this coin from Dunia Crypto only
   useEffect(() => {
     const fetchAcademyArticles = async () => {
       if (!coinData?.symbol) return;
       
       setLoadingAcademy(true);
       try {
-        const articles = await getAllArticles();
-        // Filter academy articles that have coin tags matching this coin's symbol
-        const filtered = articles.filter(article => 
-          article.category === 'academy' &&
-          article.coinTags?.some(coinTag => 
-            coinTag.symbol?.toLowerCase() === coinData.symbol?.toLowerCase()
-          )
-        );
-        // Sort by publishedAt and take first 4
-        const sorted = filtered
-          .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
-          .slice(0, 4);
-        setAcademyArticles(sorted);
+        // Use the new function that only fetches from Dunia Crypto
+        const articles = await getAcademyArticlesWithFallback(coinData.symbol);
+        // Take first 4 articles
+        const limitedArticles = articles.slice(0, 4);
+        setAcademyArticles(limitedArticles);
       } catch (error) {
         console.error('Error fetching academy articles:', error);
         setAcademyArticles([]);

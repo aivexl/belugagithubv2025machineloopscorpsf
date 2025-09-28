@@ -57,3 +57,5 @@ WHERE table_name IN ('crypto_exchanges', 'crypto_airdrop', 'crypto_ico_ido', 'cr
 ORDER BY table_name, ordinal_position;
 
 
+
+
