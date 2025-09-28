@@ -30,7 +30,7 @@ function AcademyPageLayoutInner({ children }: AcademyPageLayoutProps) {
           className="fixed bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md shadow-lg transition-colors xl:block hidden z-[55]"
           style={{
             left: '6rem', // Position it to the right of the sidebar (80px = 5rem, so 6rem puts it just outside)
-            top: 'calc(var(--nav-height, 64px) + 1rem + 0.25rem)' // Same as sidebar padding + small offset for alignment
+            top: 'calc(var(--nav-height, 64px) + 1rem)' // Same as sidebar padding + small offset for alignment
           }}
           title="Open Academy Menu"
         >
