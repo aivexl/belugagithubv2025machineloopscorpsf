@@ -51,10 +51,9 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
                   <div className="mb-2">
                     <CoinLogosOnly
                       coinTags={article.coinTags}
-                      size="xs"
+                      size="sm"
                       maxDisplay={8}
                       className="justify-start"
-                      disableLinks={true}
                     />
                   </div>
                 )}
