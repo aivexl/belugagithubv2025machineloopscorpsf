@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Always render dynamically so homepage content stays in sync with Sanity
+export const dynamic = 'force-dynamic';
+
 // Enterprise-level fallback data to prevent server crashes
 const FALLBACK_ARTICLES: SanityArticleWithImage[] = [
   {

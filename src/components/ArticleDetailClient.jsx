@@ -46,18 +46,6 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
               </div>
               {/* Title Overlay */}
               <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4 md:p-6">
-                {/* Coin Logos Above Title */}
-                {article.coinTags && article.coinTags.length > 0 && (
-                  <div className="mb-2">
-                    <CoinLogosOnly 
-                      coinTags={article.coinTags} 
-                      size="md"
-                      maxDisplay={5}
-                      className="justify-start"
-                    />
-                  </div>
-                )}
-                
                 <h1 className="text-lg md:text-2xl font-bold text-white line-clamp-2 drop-shadow-lg mb-8">
                   {article.title}
                 </h1>
@@ -130,6 +118,18 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
           <div className="mb-2">
             <div className="text-4xl md:text-5xl font-extrabold text-blue-400 mb-2">Belajar lagi yuk!</div>
             <div className="text-2xl md:text-3xl font-bold font-mono text-blue-500 mb-6">#allaboutcrypto</div>
+
+            {/* Coin Tags Section 1 */}
+            {article.coinTags && article.coinTags.length > 0 && (
+              <div className="mb-6">
+                <CoinLogosOnly
+                  coinTags={article.coinTags}
+                  size="md"
+                  maxDisplay={8}
+                  className="justify-start"
+                />
+              </div>
+            )}
           </div>
           <section className="mb-12 mt-8">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Pilih Level Pembelajaranmu</h2>
@@ -168,6 +168,17 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
 
           {/* SECTION 2 - Kategori Topik Crypto */}
           <section className="mb-12">
+            {/* Coin Tags Section 2 */}
+            {article.coinTags && article.coinTags.length > 0 && (
+              <div className="mb-6">
+                <CoinLogosOnly
+                  coinTags={article.coinTags}
+                  size="sm"
+                  maxDisplay={6}
+                  className="justify-start"
+                />
+              </div>
+            )}
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Topik Crypto</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
               {['DeFi', 'NFT', 'Wallet', 'Blockchain', 'Trading', 'Airdrop', 'Security', 'Tokenomics', 'Stablecoin', 'GameFi', 'Web3', 'DAO', 'Mining', 'Metaverse'].map((topic) => (
@@ -184,6 +195,17 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
 
           {/* SECTION 3 - Kategori Jaringan Blockchain */}
           <section className="mb-12">
+            {/* Coin Tags Section 3 */}
+            {article.coinTags && article.coinTags.length > 0 && (
+              <div className="mb-6">
+                <CoinLogosOnly
+                  coinTags={article.coinTags}
+                  size="xs"
+                  maxDisplay={4}
+                  className="justify-start"
+                />
+              </div>
+            )}
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Jaringan Blockchain</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {['Bitcoin Network', 'Ethereum Network', 'Binance Smart Chain (BSC)', 'Solana Network', 'Polygon Network', 'Avalanche Network', 'Arbitrum Network', 'Cardano Network'].map((network) => (

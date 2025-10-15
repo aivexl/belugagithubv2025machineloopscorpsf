@@ -3,6 +3,45 @@
  * Reusable across CEX and DEX applications
  */
 
+// Mapping of CoinGecko symbols to database coin tag symbols
+export const coinSymbolMapping = {
+  'bitcoin': 'BTC',
+  'ethereum': 'ETH',
+  'tether': 'USDT',
+  'binancecoin': 'BNB',
+  'usd-coin': 'USDC',
+  'ripple': 'XRP',
+  'cardano': 'ADA',
+  'solana': 'SOL',
+  'avalanche-2': 'AVAX',
+  'polkadot': 'DOT',
+  'matic-network': 'MATIC',
+  'chainlink': 'LINK',
+  'litecoin': 'LTC',
+  'polygon': 'MATIC',
+  'uniswap': 'UNI',
+  'wrapped-bitcoin': 'WBTC'
+};
+
+// Convert CoinGecko symbol to database coin tag symbol
+export const getDatabaseCoinSymbol = (coingeckoSymbol) => {
+  if (!coingeckoSymbol) return null;
+
+  const lowerSymbol = coingeckoSymbol.toLowerCase();
+
+  // Direct mapping
+  if (coinSymbolMapping[lowerSymbol]) {
+    return coinSymbolMapping[lowerSymbol];
+  }
+
+  // Special cases
+  if (lowerSymbol === 'btc') return 'BTC';
+  if (lowerSymbol === 'eth') return 'ETH';
+
+  // For unmapped symbols, try uppercase
+  return coingeckoSymbol.toUpperCase();
+};
+
 // Fetch detailed coin data from CoinGecko API
 export const fetchDetailedCoinData = async (coinId) => {
   try {

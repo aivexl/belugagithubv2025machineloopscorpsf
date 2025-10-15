@@ -47,7 +47,7 @@ export default function AcademyClient() {
   const [error, setError] = useState(null);
   const [displayCount, setDisplayCount] = useState(9);
   const [showDebugPanel, setShowDebugPanel] = useState(false);
-  const { activeLevel, activeTopic, activeNetwork } = useAcademyFilters();
+  const { activeLevel, activeTopic, activeNetwork, activeCoinTag } = useAcademyFilters();
   
   useEffect(() => {
     const fetchArticles = async () => {
@@ -107,6 +107,12 @@ export default function AcademyClient() {
     if (activeTopic && activeTopic !== 'all') {
       filtered = filtered.filter(article => {
         return article.topics === activeTopic;
+      });
+    }
+
+    if (activeNetwork && activeNetwork !== 'all') {
+      filtered = filtered.filter(article => {
+        return article.networks === activeNetwork;
       });
     }
 

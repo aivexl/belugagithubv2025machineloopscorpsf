@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { getAllArticles, getAcademyArticlesWithFallback } from '../utils/sanity';
+import Image from 'next/image';
+import { getAllArticles, getAcademyArticlesWithFallback, getArticlesByCoinTags } from '../utils/sanity';
+import { urlFor } from '../utils/sanityImageUtils';
 import { CoinLogosOnly } from './CoinTags';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -10,6 +12,59 @@ import 'dayjs/locale/id';
 // Configure dayjs
 dayjs.extend(relativeTime);
 dayjs.locale('id');
+
+// Coin symbol mapping from CoinGecko to database
+const coinSymbolMap = {
+  'bitcoin': 'BTC',
+  'ethereum': 'ETH',
+  'binancecoin': 'BNB',
+  'cardano': 'ADA',
+  'solana': 'SOL',
+  'polygon': 'MATIC',
+  'avalanche-2': 'AVAX',
+  'polkadot': 'DOT',
+  'litecoin': 'LTC',
+  'chainlink': 'LINK',
+  'uniswap': 'UNI',
+  'wrapped-bitcoin': 'WBTC'
+};
+
+// Get database coin symbol from CoinGecko symbol
+const getDatabaseCoinSymbol = (coingeckoSymbol) => {
+  if (!coingeckoSymbol) return null;
+  return coinSymbolMap[coingeckoSymbol.toLowerCase()] || coingeckoSymbol.toUpperCase();
+};
+
+// Get all articles with coin tags for the current coin
+const getArticlesForCoin = async (coinSymbol, category) => {
+  try {
+    console.log(`🎯 getArticlesForCoin called with: ${coinSymbol}, ${category}`);
+
+    const articles = await getArticlesByCoinTags(category);
+    console.log(`📋 getArticlesByCoinTags returned ${articles.length} articles for category ${category}`);
+
+    // Map CoinGecko symbol to database symbol
+    const databaseSymbol = getDatabaseCoinSymbol(coinSymbol);
+    console.log(`🔍 Mapping: ${coinSymbol} (CoinGecko) -> ${databaseSymbol} (Database)`);
+
+    // Filter articles that have coin tags matching the database symbol
+    const filteredArticles = articles.filter(article =>
+      article.coinTags && article.coinTags.some(tag =>
+        tag.symbol === databaseSymbol
+      )
+    );
+
+    console.log(`✅ Filtered ${filteredArticles.length} articles for ${databaseSymbol}`);
+    filteredArticles.forEach(article => {
+      console.log(`   - ${article.title} (${article.category}): ${article.coinTags.map(t => t.symbol).join(', ')}`);
+    });
+
+    return filteredArticles;
+  } catch (error) {
+    console.error('❌ Error fetching articles for coin:', error);
+    return [];
+  }
+};
 
 // Utility functions
 const formatPrice = (price) => {
@@ -94,78 +149,207 @@ const calculateAge = (dateString) => {
   return `${years}y ${months}m ${days}d`;
 };
 
-export default function CryptoDetailInfo({ 
-  coinData, 
-  detailedData, 
+export default function CryptoDetailInfo({
+  coinData,
+  detailedData,
   showOverview = true,
   showPerformance = true,
   showSupplyInfo = true,
   showAbout = true,
   className = ""
 }) {
-  const [relatedArticles, setRelatedArticles] = useState([]);
-  const [loadingArticles, setLoadingArticles] = useState(false);
+  // CTO Implementation: Bulletproof state management
   const [academyArticles, setAcademyArticles] = useState([]);
-  const [loadingAcademy, setLoadingAcademy] = useState(false);
+  const [newsArticles, setNewsArticles] = useState([]);
+  const [loadingAcademy, setLoadingAcademy] = useState(true);
+  const [loadingNews, setLoadingNews] = useState(true);
+  const [error, setError] = useState(null);
+  const [debugInfo, setDebugInfo] = useState({});
 
-  // Fetch articles related to this coin from Dunia Crypto only
-  useEffect(() => {
-    const fetchRelatedArticles = async () => {
-      if (!coinData?.symbol) return;
-      
-      setLoadingArticles(true);
-      try {
-        const articles = await getAllArticles();
-        // Filter articles that have coin tags matching this coin's symbol and are from Dunia Crypto
-        const filtered = articles.filter(article => 
-          article.source === 'Dunia Crypto' &&
-          article.coinTags?.some(coinTag => 
-            coinTag.symbol?.toLowerCase() === coinData.symbol?.toLowerCase()
-          )
-        );
-        // Sort by publishedAt and take first 4
-        const sorted = filtered
-          .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
-          .slice(0, 4);
-        setRelatedArticles(sorted);
-      } catch (error) {
-        console.error('Error fetching related articles:', error);
-        setRelatedArticles([]);
-      } finally {
-        setLoadingArticles(false);
-      }
-    };
+  // CTO Debug: Log component initialization
+  console.log('🔧 CryptoDetailInfo: Component initialized');
+  console.log('📊 CoinData received:', coinData ? {
+    symbol: coinData.symbol,
+    name: coinData.name,
+    id: coinData.id
+  } : 'No coinData');
 
-    fetchRelatedArticles();
-  }, [coinData?.symbol]);
 
-  // Fetch academy articles related to this coin from Dunia Crypto only
+  // CTO Implementation: Bulletproof academy articles fetching
   useEffect(() => {
     const fetchAcademyArticles = async () => {
-      if (!coinData?.symbol) return;
-      
+      // CTO Debug: Validate input
+      if (!coinData?.symbol) {
+        console.warn('⚠️ CryptoDetailInfo: No coin symbol provided, skipping academy fetch');
+        setLoadingAcademy(false);
+        setDebugInfo(prev => ({ ...prev, academySkipped: 'No coin symbol' }));
+        return;
+      }
+
+      console.log('🎓 CTO: Starting academy articles fetch for:', coinData.symbol);
       setLoadingAcademy(true);
+      setError(null);
+
       try {
-        // Use the new function that only fetches from Dunia Crypto
-        const articles = await getAcademyArticlesWithFallback(coinData.symbol);
+        // CTO Debug: Log function call
+        console.log('🔍 CTO: Calling getArticlesForCoin with:', coinData.symbol, 'academy');
+
+        // Get all academy articles with coin tags and filter by current coin
+        const articles = await getArticlesForCoin(coinData.symbol, 'academy');
+
+        // CTO Debug: Log results
+        console.log('✅ CTO: Academy articles fetched successfully:', articles.length, 'articles');
+
         // Take first 4 articles
         const limitedArticles = articles.slice(0, 4);
         setAcademyArticles(limitedArticles);
+
+        // CTO Debug: Update debug info
+        setDebugInfo(prev => ({
+          ...prev,
+          academyArticlesCount: limitedArticles.length,
+          academyLastFetch: new Date().toISOString(),
+          academyError: null
+        }));
+
+        console.log('🎯 CTO: Academy articles state updated:', limitedArticles.length, 'articles');
+
       } catch (error) {
-        console.error('Error fetching academy articles:', error);
+        console.error('❌ CTO: Academy articles fetch failed:', error);
+        setError(`Academy fetch failed: ${error.message}`);
         setAcademyArticles([]);
+
+        // CTO Debug: Update debug info with error
+        setDebugInfo(prev => ({
+          ...prev,
+          academyError: error.message,
+          academyLastError: new Date().toISOString()
+        }));
       } finally {
         setLoadingAcademy(false);
+        console.log('🏁 CTO: Academy articles fetch completed');
       }
     };
 
     fetchAcademyArticles();
   }, [coinData?.symbol]);
 
-  if (!coinData) return null;
+  // CTO Implementation: Bulletproof news articles fetching
+  useEffect(() => {
+    const fetchNewsArticles = async () => {
+      // CTO Debug: Validate input
+      if (!coinData?.symbol) {
+        console.warn('⚠️ CryptoDetailInfo: No coin symbol provided, skipping news fetch');
+        setLoadingNews(false);
+        setDebugInfo(prev => ({ ...prev, newsSkipped: 'No coin symbol' }));
+        return;
+      }
+
+      console.log('📰 CTO: Starting news articles fetch for:', coinData.symbol);
+      setLoadingNews(true);
+      setError(null);
+
+      try {
+        // CTO Debug: Log function call
+        console.log('🔍 CTO: Calling getArticlesForCoin with:', coinData.symbol, 'newsroom');
+
+        // Get all news articles with coin tags and filter by current coin
+        const articles = await getArticlesForCoin(coinData.symbol, 'newsroom');
+
+        // CTO Debug: Log results
+        console.log('✅ CTO: News articles fetched successfully:', articles.length, 'articles');
+
+        // Take first 4 articles
+        const limitedArticles = articles.slice(0, 4);
+        setNewsArticles(limitedArticles);
+
+        // CTO Debug: Update debug info
+        setDebugInfo(prev => ({
+          ...prev,
+          newsArticlesCount: limitedArticles.length,
+          newsLastFetch: new Date().toISOString(),
+          newsError: null
+        }));
+
+        console.log('🎯 CTO: News articles state updated:', limitedArticles.length, 'articles');
+
+      } catch (error) {
+        console.error('❌ CTO: News articles fetch failed:', error);
+        setError(`News fetch failed: ${error.message}`);
+        setNewsArticles([]);
+
+        // CTO Debug: Update debug info with error
+        setDebugInfo(prev => ({
+          ...prev,
+          newsError: error.message,
+          newsLastError: new Date().toISOString()
+        }));
+      } finally {
+        setLoadingNews(false);
+        console.log('🏁 CTO: News articles fetch completed');
+      }
+    };
+
+    fetchNewsArticles();
+  }, [coinData?.symbol]);
+
+  // CTO Debug: Early return if no coin data
+  if (!coinData) {
+    console.warn('⚠️ CryptoDetailInfo: No coinData provided');
+    return (
+      <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+        <p className="text-red-400 text-sm">No coin data available</p>
+        <p className="text-gray-500 text-xs mt-1">Debug: coinData is null or undefined</p>
+      </div>
+    );
+  }
+
+  // CTO Debug: Log render state
+  console.log('🎨 CryptoDetailInfo: Rendering with state:', {
+    academyArticles: academyArticles.length,
+    newsArticles: newsArticles.length,
+    loadingAcademy,
+    loadingNews,
+    error,
+    coinSymbol: coinData.symbol
+  });
 
   return (
     <div className={`space-y-4 pb-8 ${className}`}>
+      {/* CTO Debug Panel - Remove in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 text-xs">
+          <details>
+            <summary className="text-blue-400 cursor-pointer font-medium">🔧 CTO Debug Panel</summary>
+            <div className="mt-2 space-y-1 text-gray-300">
+              <div>Coin Symbol: <span className="text-white">{coinData.symbol}</span></div>
+              <div>Academy Articles: <span className="text-white">{academyArticles.length}</span></div>
+              <div>News Articles: <span className="text-white">{newsArticles.length}</span></div>
+              <div>Loading Academy: <span className="text-white">{loadingAcademy ? 'Yes' : 'No'}</span></div>
+              <div>Loading News: <span className="text-white">{loadingNews ? 'Yes' : 'No'}</span></div>
+              <div>Error: <span className="text-white">{error || 'None'}</span></div>
+              <div>Debug Info: <span className="text-white">{JSON.stringify(debugInfo, null, 2)}</span></div>
+            </div>
+          </details>
+        </div>
+      )}
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <span className="text-red-400">⚠️</span>
+            <p className="text-red-400 text-sm font-medium">Error Loading Articles</p>
+          </div>
+          <p className="text-red-300 text-xs mt-1">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
       {/* Overview Section */}
       {showOverview && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
@@ -408,153 +592,274 @@ export default function CryptoDetailInfo({
         </div>
       </div>
 
-      {/* News Section */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
-        <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">{coinData.symbol?.toUpperCase()} News</h3>
-        
-        {loadingArticles ? (
-          <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
-            <div className="text-gray-500 text-sm mb-2">Loading...</div>
-            <div className="text-gray-600 text-xs">Fetching latest news</div>
+
+      {/* Academy & News Section - Combined Horizontal Grid */}
+      <div className="space-y-6">
+      {/* Academy Section */}
+        <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm rounded-xl border border-gray-600/30 p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">DC</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-200 tracking-wide">
+                {coinData.symbol?.toUpperCase()} Academy
+              </h3>
+            </div>
+            <div className="text-xs text-gray-400 bg-gray-700/50 px-3 py-1 rounded-full">
+              Research Articles
+            </div>
           </div>
-        ) : relatedArticles.length > 0 ? (
-          <div className="space-y-3">
-            {relatedArticles.map((article) => (
-              <div key={article._id} className="bg-gray-700/30 rounded-lg p-3 hover:bg-gray-700/50 transition-colors">
-                <div className="flex items-start gap-3">
-                  {/* Article Image */}
-                  <div className="w-16 h-12 bg-gray-600 rounded flex-shrink-0 overflow-hidden">
-                    {article.image?.asset ? (
-                      <img 
-                        src={`https://cdn.sanity.io/images/qaofdbqx/production/${article.image.asset._ref.replace('image-', '').replace('-jpg', '.jpg').replace('-png', '.png').replace('-webp', '.webp')}`}
-                        alt={article.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-600 flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">No Image</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Article Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`px-2 py-1 text-xs font-medium rounded text-white ${
-                        article.category === 'newsroom' ? 'bg-blue-600' : 'bg-blue-500'
-                      }`}>
-                        {article.category === 'newsroom' ? 'News' : 'Academy'}
-                      </span>
-                      {/* Coin Logos */}
-                      {article.coinTags && article.coinTags.length > 0 && (
-                        <CoinLogosOnly 
-                          coinTags={article.coinTags} 
-                          size="xs"
-                          maxDisplay={3}
-                        />
-                      )}
-                    </div>
-                    
-                    <h4 className="text-white font-medium text-sm line-clamp-2 mb-1">
-                      {article.title}
-                    </h4>
-                    
-                    <div className="flex items-center justify-between text-xs text-gray-400">
-                      <span>{article.source || 'Dunia Crypto'}</span>
-                      <span>{dayjs(article.publishedAt).fromNow()}</span>
-                    </div>
-                  </div>
+        
+        {(() => {
+          // CTO Debug: Log conditional rendering decision
+          console.log('🎭 ACADEMY: Conditional rendering check:', {
+            loadingAcademy,
+            academyArticlesLength: academyArticles.length,
+            shouldShowLoading: loadingAcademy,
+            shouldShowArticles: !loadingAcademy && academyArticles.length > 0,
+            shouldShowComingSoon: !loadingAcademy && academyArticles.length === 0
+          });
+
+          if (loadingAcademy) {
+            return (
+              <div className="flex items-center justify-center py-12">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="text-gray-400 text-sm">Loading academy content...</div>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
-            <div className="text-gray-500 text-sm mb-2">Coming Soon</div>
-            <div className="text-gray-600 text-xs">News articles will be available here</div>
-          </div>
-        )}
-      </div>
+            );
+          }
 
-      {/* Academy Section */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
-        <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">{coinData.symbol?.toUpperCase()} Academy</h3>
-        
-        {loadingAcademy ? (
-          <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
-            <div className="text-gray-500 text-sm mb-2">Loading...</div>
-            <div className="text-gray-600 text-xs">Fetching academy content</div>
-          </div>
-        ) : academyArticles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          if (academyArticles.length > 0) {
+            return (
+            <div className="relative">
+              {/* Horizontal Scroll Container */}
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-track-gray-700 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400">
             {academyArticles.map((article) => (
-              <div key={article._id} className="bg-gray-700/30 rounded-lg overflow-hidden hover:bg-gray-700/50 transition-colors group">
-                {/* Article Header with Pattern Background */}
-                <div className="relative h-20 bg-gradient-to-br from-gray-700 to-gray-800 overflow-hidden">
-                  {/* Abstract Pattern */}
-                  <div className="absolute inset-0 opacity-20">
-                    <div className="absolute top-2 left-2 w-1 h-1 bg-white rounded-full"></div>
-                    <div className="absolute top-4 left-6 w-1 h-1 bg-white rounded-full"></div>
-                    <div className="absolute top-6 left-3 w-1 h-1 bg-white rounded-full"></div>
-                    <div className="absolute top-8 left-8 w-1 h-1 bg-white rounded-full"></div>
-                    <div className="absolute top-10 left-2 w-1 h-1 bg-white rounded-full"></div>
-                    <div className="absolute top-12 left-5 w-1 h-1 bg-white rounded-full"></div>
+                  <div
+                    key={article._id}
+                    className="flex-shrink-0 w-72 bg-gray-700/40 rounded-lg overflow-hidden hover:bg-gray-700/60 transition-all duration-300 group cursor-pointer border border-gray-600/30 hover:border-gray-500/50 hover:shadow-lg hover:shadow-blue-500/10"
+                  >
+                    {/* Article Image */}
+                    <div className="relative h-32 bg-gradient-to-br from-blue-900/30 to-blue-800/30 overflow-hidden">
+                      {article.image?.asset ? (
+                        <Image
+                          src={urlFor(article.image).width(400).height(200).url()}
+                          alt={article.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="text-2xl text-blue-400 opacity-30">📚</div>
+                        </div>
+                      )}
+
+                      {/* Overlay Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+
+                      {/* Coin Tags */}
+                      <div className="absolute top-2 right-2">
+                        {article.coinTags && article.coinTags.length > 0 && (
+                          <CoinLogosOnly
+                            coinTags={article.coinTags}
+                            size="xs"
+                            maxDisplay={3}
+                          />
+                        )}
+                      </div>
+
+                      {/* Category Badge */}
+                      <div className="absolute bottom-2 left-2">
+                        <span className="px-2 py-1 text-xs font-medium rounded-md text-white bg-blue-500/80 backdrop-blur-sm">
+                          Academy
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Article Content */}
+                    <div className="p-4">
+                      <div className="text-xs text-gray-400 mb-1 flex items-center gap-2">
+                        <span>📅</span>
+                        {dayjs(article.publishedAt).format('MMM D, YYYY')}
                   </div>
                   
-                  {/* Brand Logo */}
-                  <div className="absolute top-3 left-3">
-                    <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">DC</span>
+                      <h4 className="text-white font-medium text-sm line-clamp-2 mb-3 group-hover:text-blue-400 transition-colors leading-relaxed">
+                        {article.title}
+                      </h4>
+
+                      <div className="flex items-center justify-between text-xs text-gray-400">
+                        <span>Dunia Crypto Team</span>
+                        <div className="flex -space-x-1">
+                          <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
+                          <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  
-                  {/* Coin Logos */}
-                  <div className="absolute top-3 right-3">
-                    {article.coinTags && article.coinTags.length > 0 && (
-                      <CoinLogosOnly 
-                        coinTags={article.coinTags} 
-                        size="xs"
-                        maxDisplay={3}
-                      />
-                    )}
+                ))}
                   </div>
                   
+              {/* Scroll Indicator */}
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gray-700/50 rounded-full flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
+                <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+            );
+            }
+
+            // CTO Debug: Should show "Coming Soon" for academy
+            return (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 9.246 19 7.5 19c-1.746 0-3.332-.477-4.5-1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 19 16.5 19c-1.746 0-3.332-.477-4.5-1.253" />
+                  </svg>
+                </div>
+                <div className="text-gray-400 text-sm mb-2">Academy Content Coming Soon</div>
+                <div className="text-gray-500 text-xs">Research articles will be available here</div>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* News Section */}
+        <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm rounded-xl border border-gray-600/30 p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">DC</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-200 tracking-wide">
+                {coinData.symbol?.toUpperCase()} News
+              </h3>
+            </div>
+            <div className="text-xs text-gray-400 bg-gray-700/50 px-3 py-1 rounded-full">
+              Latest Updates
+            </div>
+          </div>
+
+          {(() => {
+            // CTO Debug: Log conditional rendering decision for news
+            console.log('📰 NEWS: Conditional rendering check:', {
+              loadingNews,
+              newsArticlesLength: newsArticles.length,
+              shouldShowLoading: loadingNews,
+              shouldShowArticles: !loadingNews && newsArticles.length > 0,
+              shouldShowComingSoon: !loadingNews && newsArticles.length === 0
+            });
+
+            if (loadingNews) {
+              return (
+                <div className="flex items-center justify-center py-12">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="text-gray-400 text-sm">Loading news content...</div>
+                  </div>
+                </div>
+              );
+            }
+
+            if (newsArticles.length > 0) {
+              return (
+            <div className="relative">
+              {/* Horizontal Scroll Container */}
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-track-gray-700 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400">
+                {newsArticles.map((article) => (
+                  <div
+                    key={article._id}
+                    className="flex-shrink-0 w-72 bg-gray-700/40 rounded-lg overflow-hidden hover:bg-gray-700/60 transition-all duration-300 group cursor-pointer border border-gray-600/30 hover:border-gray-500/50 hover:shadow-lg hover:shadow-green-500/10"
+                  >
+                    {/* Article Image */}
+                    <div className="relative h-32 bg-gradient-to-br from-green-900/30 to-green-800/30 overflow-hidden">
+                      {article.image?.asset ? (
+                        <Image
+                          src={urlFor(article.image).width(400).height(200).url()}
+                          alt={article.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="text-2xl text-green-400 opacity-30">📰</div>
+                        </div>
+                      )}
+
+                      {/* Overlay Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+
+                      {/* Coin Tags */}
+                      <div className="absolute top-2 right-2">
+                        {article.coinTags && article.coinTags.length > 0 && (
+                          <CoinLogosOnly
+                            coinTags={article.coinTags}
+                            size="xs"
+                            maxDisplay={3}
+                          />
+                        )}
+                      </div>
+                  
                   {/* Category Badge */}
-                  <div className="absolute bottom-2 right-2">
-                    <span className="px-2 py-1 text-xs font-medium rounded text-white bg-blue-500">
-                      Academy
+                      <div className="absolute bottom-2 left-2">
+                        <span className="px-2 py-1 text-xs font-medium rounded-md text-white bg-green-500/80 backdrop-blur-sm">
+                          News
                     </span>
                   </div>
                 </div>
                 
                 {/* Article Content */}
-                <div className="p-3">
-                  <div className="text-xs text-gray-400 mb-1">Research</div>
-                  <div className="text-xs text-gray-400 text-right mb-2">
+                    <div className="p-4">
+                      <div className="text-xs text-gray-400 mb-1 flex items-center gap-2">
+                        <span>📅</span>
                     {dayjs(article.publishedAt).format('MMM D, YYYY')}
                   </div>
                   
-                  <h4 className="text-white font-medium text-sm line-clamp-2 mb-2 group-hover:text-blue-400 transition-colors">
+                      <h4 className="text-white font-medium text-sm line-clamp-2 mb-3 group-hover:text-green-400 transition-colors leading-relaxed">
                     {article.title}
                   </h4>
                   
-                  {/* Author Info */}
-                  <div className="flex items-center gap-2 text-xs text-gray-400">
-                    <div className="w-4 h-4 bg-gray-600 rounded-full"></div>
-                    <div className="w-4 h-4 bg-gray-600 rounded-full"></div>
+                      <div className="flex items-center justify-between text-xs text-gray-400">
                     <span>Dunia Crypto Team</span>
+                        <div className="flex -space-x-1">
+                          <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
+                          <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
+                        </div>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-        ) : (
-          <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
-            <div className="text-gray-500 text-sm mb-2">Coming Soon</div>
-            <div className="text-gray-600 text-xs">Academy content will be available here</div>
-          </div>
-        )}
+              </div>
+
+              {/* Scroll Indicator */}
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gray-700/50 rounded-full flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
+                <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+            );
+            }
+
+            // CTO Debug: Should show "Coming Soon" for news
+            return (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                  </svg>
+                </div>
+                <div className="text-gray-400 text-sm mb-2">News Content Coming Soon</div>
+                <div className="text-gray-500 text-xs">Latest updates will be available here</div>
+              </div>
+            );
+          })()}
       </div>
+      </div>
+
     </div>
   );
 } 

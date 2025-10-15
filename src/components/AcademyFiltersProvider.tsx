@@ -6,13 +6,16 @@ interface AcademyFiltersContextType {
   activeLevel: string;
   activeTopic: string;
   activeNetwork: string;
+  activeCoinTag: string;
   setActiveLevel: (level: string) => void;
   setActiveTopic: (topic: string) => void;
   setActiveNetwork: (network: string) => void;
+  setActiveCoinTag: (coinTag: string) => void;
   clearAllFilters: () => void;
   handleLevelClick: (levelId: string) => void;
   handleTopicClick: (topic: string) => void;
   handleNetworkClick: (network: string) => void;
+  handleCoinTagClick: (coinTag: string) => void;
 }
 
 const AcademyFiltersContext = createContext<AcademyFiltersContextType | undefined>(undefined);
@@ -54,6 +57,7 @@ export function AcademyFiltersProvider({ children }: AcademyFiltersProviderProps
   const [activeLevel, setActiveLevel] = useState('');
   const [activeTopic, setActiveTopic] = useState('');
   const [activeNetwork, setActiveNetwork] = useState('');
+  const [activeCoinTag, setActiveCoinTag] = useState('');
 
   // Initialize from URL params like AcademyClient does
   useEffect(() => {
@@ -62,9 +66,11 @@ export function AcademyFiltersProvider({ children }: AcademyFiltersProviderProps
       const level = params.get('level');
       const topic = params.get('topic');
       const network = params.get('network');
+      const coinTag = params.get('coinTag');
       if (level && LEVEL_CATEGORIES.some(l => l.id === level)) setActiveLevel(level);
       if (topic && TOPIC_CATEGORIES.includes(topic)) setActiveTopic(topic);
       if (network && NETWORK_CATEGORIES.includes(network)) setActiveNetwork(network);
+      if (coinTag) setActiveCoinTag(coinTag);
     }
   }, []);
 
@@ -88,26 +94,39 @@ export function AcademyFiltersProvider({ children }: AcademyFiltersProviderProps
     setActiveNetwork(newNetwork);
     setActiveLevel('');
     setActiveTopic('');
+    setActiveCoinTag('');
+  };
+
+  const handleCoinTagClick = (coinTag: string) => {
+    const newCoinTag = activeCoinTag === coinTag ? '' : coinTag;
+    setActiveCoinTag(newCoinTag);
+    setActiveLevel('');
+    setActiveTopic('');
+    setActiveNetwork('');
   };
 
   const clearAllFilters = () => {
     setActiveLevel('');
     setActiveTopic('');
     setActiveNetwork('');
+    setActiveCoinTag('');
   };
 
   return (
-    <AcademyFiltersContext.Provider value={{ 
-      activeLevel, 
-      activeTopic, 
-      activeNetwork, 
-      setActiveLevel, 
-      setActiveTopic, 
-      setActiveNetwork, 
+    <AcademyFiltersContext.Provider value={{
+      activeLevel,
+      activeTopic,
+      activeNetwork,
+      activeCoinTag,
+      setActiveLevel,
+      setActiveTopic,
+      setActiveNetwork,
+      setActiveCoinTag,
       clearAllFilters,
       handleLevelClick,
       handleTopicClick,
-      handleNetworkClick
+      handleNetworkClick,
+      handleCoinTagClick
     }}>
       {children}
     </AcademyFiltersContext.Provider>

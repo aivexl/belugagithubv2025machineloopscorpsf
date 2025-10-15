@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiChevronLeft } from 'react-icons/fi';
 import { useAcademyFilters } from './AcademyFiltersProvider';
 
@@ -43,24 +43,51 @@ const TOPIC_CATEGORIES = [
 
 // Blockchain network categories - EXACT copy from AcademyClient
 const NETWORK_CATEGORIES = [
-  'Bitcoin Network', 'Ethereum Network', 'Binance Smart Chain (BSC)', 
-  'Solana Network', 'Polygon Network', 'Avalanche Network', 
+  'Bitcoin Network', 'Ethereum Network', 'Binance Smart Chain (BSC)',
+  'Solana Network', 'Polygon Network', 'Avalanche Network',
   'Arbitrum Network', 'Cardano Network'
 ];
 
+// Coin tag categories will be fetched dynamically
+const COIN_TAG_CATEGORIES: string[] = [];
+
 export default function AcademySubmenu({ isOpen, onClose }: AcademySubmenuProps) {
-  const { 
-    activeLevel, 
-    activeTopic, 
-    activeNetwork, 
-    handleLevelClick, 
-    handleTopicClick, 
-    handleNetworkClick, 
-    clearAllFilters 
+  const {
+    activeLevel,
+    activeTopic,
+    activeNetwork,
+    activeCoinTag,
+    handleLevelClick,
+    handleTopicClick,
+    handleNetworkClick,
+    handleCoinTagClick,
+    clearAllFilters
   } = useAcademyFilters();
   
   const [showTopics, setShowTopics] = useState(true);
   const [showNetworks, setShowNetworks] = useState(true);
+  const [showCoinTags, setShowCoinTags] = useState(true);
+  const [availableCoinTags, setAvailableCoinTags] = useState([]);
+
+  // Fetch available coin tags
+  useEffect(() => {
+    const fetchCoinTags = async () => {
+      try {
+        const { getAllCoinTags } = await import('../utils/sanity');
+        const coinTags = await getAllCoinTags();
+        const symbols = coinTags.map(tag => tag.symbol);
+        setAvailableCoinTags(symbols);
+      } catch (error) {
+        console.error('Error fetching coin tags:', error);
+        // Fallback to hardcoded list if API fails
+        setAvailableCoinTags(['BTC', 'ETH', 'USDT', 'BNB', 'USDC', 'XRP', 'ADA', 'SOL', 'AVAX', 'DOT']);
+      }
+    };
+
+    if (isOpen && availableCoinTags.length === 0) {
+      fetchCoinTags();
+    }
+  }, [isOpen, availableCoinTags.length]);
 
   if (!isOpen) return null;
 
@@ -88,7 +115,7 @@ export default function AcademySubmenu({ isOpen, onClose }: AcademySubmenuProps)
         </div>
 
         {/* Filter Status - Like AcademyClient */}
-        {(activeLevel || activeTopic || activeNetwork) && (
+        {(activeLevel || activeTopic || activeNetwork || activeCoinTag) && (
           <div className="mb-6 p-3 bg-gray-800 rounded-lg border border-gray-700">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-gray-300 text-sm">Filter aktif:</span>
@@ -105,6 +132,11 @@ export default function AcademySubmenu({ isOpen, onClose }: AcademySubmenuProps)
               {activeNetwork && (
                 <span className="px-2 py-1 bg-purple-600 text-white rounded-full text-xs">
                   {activeNetwork}
+                </span>
+              )}
+              {activeCoinTag && (
+                <span className="px-2 py-1 bg-orange-600 text-white rounded-full text-xs">
+                  {activeCoinTag}
                 </span>
               )}
               <button
@@ -376,6 +408,40 @@ export default function AcademySubmenu({ isOpen, onClose }: AcademySubmenuProps)
                       }`}
                     >
                       {network}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* SECTION 4 - Coin Tags */}
+            <section className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white">
+                  Filter by Coin
+                </h3>
+                <button
+                  onClick={() => setShowCoinTags(!showCoinTags)}
+                  className="text-gray-400 hover:text-white transition-colors p-1"
+                >
+                  <svg className={`w-5 h-5 transition-transform ${showCoinTags ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+              {showCoinTags && (
+                <div className="grid grid-cols-2 gap-2">
+                  {availableCoinTags.map((coinSymbol) => (
+                    <button
+                      key={coinSymbol}
+                      onClick={() => handleCoinTagClick(coinSymbol)}
+                      className={`p-2 rounded-lg border transition-all duration-200 text-xs font-medium ${
+                        activeCoinTag === coinSymbol
+                          ? 'bg-orange-600 border-transparent text-white shadow-lg'
+                          : 'bg-gray-800 border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-700'
+                      }`}
+                    >
+                      {coinSymbol}
                     </button>
                   ))}
                 </div>

@@ -60,7 +60,7 @@ export interface SanityArticleWithImage extends SanityArticle {
 // Fetch all articles
 export async function getAllArticles(): Promise<SanityArticle[]> {
   const query = `
-    *[_type == "article"] | order(publishedAt desc) {
+    *[_type == "article" && defined(publishedAt)] | order(publishedAt desc) {
       _id,
       title,
       slug,
@@ -86,13 +86,14 @@ export async function getAllArticles(): Promise<SanityArticle[]> {
       }
     }
   `
-  return client.fetch(query)
+  // Avoid stale cache by disabling Next.js caching for this fetch
+  return client.fetch(query, {}, { cache: 'no-store', next: { revalidate: 0 } })
 }
 
 // Fetch articles by category
 export async function getArticlesByCategory(category: 'newsroom' | 'academy'): Promise<SanityArticle[]> {
 const query = `
-  *[_type == "article" && category == $category] | order(publishedAt desc) {
+  *[_type == "article" && category == $category && defined(publishedAt)] | order(publishedAt desc) {
     _id,
     title,
     slug,
@@ -117,7 +118,7 @@ const query = `
     }
   }
 `
-  return client.fetch(query, { category })
+  return client.fetch(query, { category }, { cache: 'no-store', next: { revalidate: 0 } })
 }
 
 // Fetch a single article by slug
@@ -149,13 +150,13 @@ export async function getArticleBySlug(slug: string): Promise<SanityArticle | nu
       }
     }
   `
-  return client.fetch(query, { slug })
+  return client.fetch(query, { slug }, { cache: 'no-store', next: { revalidate: 0 } })
 }
 
 // Fetch featured articles
 export async function getFeaturedArticles(): Promise<SanityArticle[]> {
   const query = `
-    *[_type == "article" && featured == true] | order(publishedAt desc) {
+    *[_type == "article" && featured == true && defined(publishedAt)] | order(publishedAt desc) {
       _id,
       title,
       slug,
@@ -181,7 +182,26 @@ export async function getFeaturedArticles(): Promise<SanityArticle[]> {
       }
     }
   `
-  return client.fetch(query)
+  return client.fetch(query, {}, { cache: 'no-store', next: { revalidate: 0 } })
+}
+
+// Fetch articles filtered by network and optional category
+export async function getArticlesByNetwork(network: string, category: 'academy' | 'newsroom' | 'both' = 'both'): Promise<SanityArticle[]> {
+  const categoryFilter = category === 'both' ? '' : ` && category == "${category}"`;
+  const query = `*[_type == "article"${categoryFilter} && defined(publishedAt) &&
+    defined(networks) && count(networks) > 0 &&
+    "${network}" in networks] | order(publishedAt desc) {
+      _id, title, slug, excerpt, content, image, category, source, publishedAt, featured, showInSlider, level, topics, networks,
+      coinTags[]->{ _id, name, symbol, logo, category, isActive, link }
+    }`;
+
+  try {
+    const result = await client.fetch(query, {}, { cache: 'no-store', next: { revalidate: 0 } });
+    return result || [];
+  } catch (error) {
+    console.error('Error fetching articles by network:', { network, category }, error);
+    return [];
+  }
 }
 
 // Fetch academy articles by coin symbol from Dunia Crypto
@@ -208,15 +228,15 @@ export async function getAcademyArticlesByCoin(coinSymbol: string): Promise<Sani
 
   try {
     // Try exact symbol match first
-    let result = await client.fetch(`${queries[0]} ${fieldQuery}`, { coinSymbol: coinSymbol })
+    let result = await client.fetch(`${queries[0]} ${fieldQuery}`, { coinSymbol: coinSymbol }, { cache: 'no-store', next: { revalidate: 0 } })
     if (result && result.length > 0) return result
 
     // Try uppercase match
-    result = await client.fetch(`${queries[1]} ${fieldQuery}`, { coinSymbolUpper: coinSymbol.toUpperCase() })
+    result = await client.fetch(`${queries[1]} ${fieldQuery}`, { coinSymbolUpper: coinSymbol.toUpperCase() }, { cache: 'no-store', next: { revalidate: 0 } })
     if (result && result.length > 0) return result
 
     // Try lowercase match
-    result = await client.fetch(`${queries[2]} ${fieldQuery}`, { coinSymbolLower: coinSymbol.toLowerCase() })
+    result = await client.fetch(`${queries[2]} ${fieldQuery}`, { coinSymbolLower: coinSymbol.toLowerCase() }, { cache: 'no-store', next: { revalidate: 0 } })
     return result || []
   } catch (error) {
     console.error('Error fetching academy articles by coin:', error)
@@ -224,21 +244,44 @@ export async function getAcademyArticlesByCoin(coinSymbol: string): Promise<Sani
   }
 }
 
-// Fetch academy articles with fallback to general academy articles
-export async function getAcademyArticlesWithFallback(coinSymbol: string): Promise<SanityArticle[]> {
+// Enhanced function to fetch articles by coin tags supporting both categories
+export async function getArticlesByCoinTags(category?: 'academy' | 'newsroom' | 'both'): Promise<SanityArticle[]> {
+  // Add category filter if specified
+  let categoryFilter = ''
+  if (category && category !== 'both') {
+    categoryFilter = ` && category == "${category}"`
+  }
+
+  const query = `*[_type == "article" && source == "Dunia Crypto"${categoryFilter} && defined(publishedAt) &&
+    count(coinTags[]->) > 0] | order(publishedAt desc) {
+    _id, title, slug, excerpt, content, image, category, source, publishedAt, featured, showInSlider, level, topics, networks,
+    coinTags[]->{ _id, name, symbol, logo, category, isActive, link }
+  }`
+
   try {
-    // First try to get coin-specific articles
-    const coinSpecificArticles = await getAcademyArticlesByCoin(coinSymbol)
-    if (coinSpecificArticles && coinSpecificArticles.length > 0) {
-      return coinSpecificArticles
+    const result = await client.fetch(query, {}, { cache: 'no-store', next: { revalidate: 0 } })
+    console.log(`📊 getArticlesByCoinTags(${category}) returned ${result?.length || 0} articles`)
+    return result || []
+  } catch (error) {
+    console.error('Error fetching articles by coin tags:', error)
+    return []
+  }
+}
+
+// Fetch academy articles with fallback to general academy articles
+export async function getAcademyArticlesWithFallback(network: string): Promise<SanityArticle[]> {
+  try {
+    // First try to get network-specific articles
+    const networkSpecificArticles = await getArticlesByNetwork(network, 'academy')
+    if (networkSpecificArticles && networkSpecificArticles.length > 0) {
+      return networkSpecificArticles
     }
 
     // Fallback to general academy articles from Dunia Crypto
     const generalQuery = `*[_type == "article" && category == "academy" && source == "Dunia Crypto"] | order(publishedAt desc) [0...4] {
-      _id, title, slug, excerpt, content, image, category, source, publishedAt, featured, showInSlider, level, topics, networks,
-      coinTags[]->{ _id, name, symbol, logo, category, isActive, link }
+      _id, title, slug, excerpt, content, image, category, source, publishedAt, featured, showInSlider, level, topics, networks
     }`
-    
+
     return await client.fetch(generalQuery)
   } catch (error) {
     console.error('Error fetching academy articles with fallback:', error)
@@ -277,4 +320,23 @@ export function addImageUrls(articles: SanityArticle[]): SanityArticleWithImage[
       };
     }
   });
+}
+
+// Get all available coin tags for filtering
+export async function getAllCoinTags(): Promise<Array<{ _id: string; name: string; symbol: string; category: string; isActive: boolean }>> {
+  try {
+    const query = `*[_type == "coinTag" && isActive == true] | order(marketCapRank asc, name asc) {
+      _id,
+      name,
+      symbol,
+      category,
+      isActive
+    }`
+
+    const coinTags = await client.fetch(query)
+    return coinTags || []
+  } catch (error) {
+    console.error('Error fetching all coin tags:', error)
+    return []
+  }
 } 

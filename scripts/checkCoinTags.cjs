@@ -10,44 +10,63 @@ const client = createClient({
 
 async function checkCoinTags() {
   try {
-    console.log('Checking coin tags data...');
-    
+    console.log('🔍 Checking coin tags data...');
+
     // Check coin tags
-    const coinTagsQuery = `
-      *[_type == "coinTag"] {
-        _id,
-        name,
-        symbol,
-        isActive,
-        isTop10,
-        createdAt
-      }
-    `;
-    
+    const coinTagsQuery = `*[_type == "coinTag"] { _id, name, symbol, isActive, category, marketCapRank }`;
     const coinTags = await client.fetch(coinTagsQuery);
-    console.log('Coin Tags found:', coinTags.length);
-    console.log('Coin Tags:', coinTags);
-    
-    // Check articles with coin tags
-    const articlesQuery = `
-      *[_type == "article" && defined(coinTags)] {
-        _id,
-        title,
-        coinTags[]->{
-          _id,
-          name,
-          symbol,
-          isActive
-        }
+    console.log('📊 Coin tags found:', coinTags.length);
+    console.log('✅ Active coin tags:', coinTags.filter(tag => tag.isActive).length);
+    console.log('📋 Sample coin tags:', coinTags.slice(0, 5));
+
+    // Check articles with coin tags by category
+    const academyQuery = `
+      *[_type == "article" && category == "academy" && count(coinTags[]->) > 0] {
+        _id, title, category,
+        coinTags[]->{ _id, name, symbol, isActive }
       }
     `;
-    
-    const articlesWithCoinTags = await client.fetch(articlesQuery);
-    console.log('Articles with coin tags:', articlesWithCoinTags.length);
-    console.log('Articles:', articlesWithCoinTags);
-    
+
+    const newsQuery = `
+      *[_type == "article" && category == "newsroom" && count(coinTags[]->) > 0] {
+        _id, title, category,
+        coinTags[]->{ _id, name, symbol, isActive }
+      }
+    `;
+
+    const academyArticles = await client.fetch(academyQuery);
+    const newsArticles = await client.fetch(newsQuery);
+
+    console.log('🎓 Academy articles with coin tags:', academyArticles.length);
+    console.log('📰 News articles with coin tags:', newsArticles.length);
+
+    // Test filtering by specific coin
+    const testCoin = 'BTC';
+    const btcArticlesQuery = `
+      *[_type == "article" && count(coinTags[]->) > 0 &&
+        count(coinTags[]->[symbol == "${testCoin}"]) > 0] {
+        _id, title, category, source,
+        coinTags[]->{ name, symbol }
+      }
+    `;
+
+    const btcArticles = await client.fetch(btcArticlesQuery);
+    console.log(`🔍 Articles with ${testCoin} coin tag:`, btcArticles.length);
+    console.log('Sample BTC articles:', btcArticles.slice(0, 3));
+
+    // Check coin tag categories
+    const categoryStats = {};
+    coinTags.forEach(tag => {
+      if (!categoryStats[tag.category]) {
+        categoryStats[tag.category] = 0;
+      }
+      categoryStats[tag.category]++;
+    });
+
+    console.log('📈 Coin tag categories:', categoryStats);
+
   } catch (error) {
-    console.error('Error checking coin tags:', error);
+    console.error('❌ Error checking coin tags:', error);
   }
 }
 

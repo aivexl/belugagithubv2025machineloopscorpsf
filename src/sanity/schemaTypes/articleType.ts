@@ -95,15 +95,15 @@ export const articleType = defineType({
     defineField({
       name: 'networks',
       type: 'string',
-      title: 'Jaringan Blockchain (Section 3)',
+      title: 'Jaringan Blockchain',
+      description: 'Pilih jaringan blockchain yang terkait dengan artikel ini',
       options: {
         list: [
           'Bitcoin Network', 'Ethereum Network', 'Binance Smart Chain (BSC)',
           'Solana Network', 'Polygon Network', 'Avalanche Network',
-          'Arbitrum Network', 'Cardano Network'
+          'Arbitrum Network', 'Cardano Network', 'Other'
         ],
       },
-      hidden: ({ parent }) => (parent?.category as string) !== 'academy',
       validation: (Rule) => Rule.custom(() => true),
     }),
     defineField({

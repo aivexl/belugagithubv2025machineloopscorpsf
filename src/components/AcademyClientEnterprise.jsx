@@ -120,7 +120,7 @@ export default function AcademyClientEnterprise() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [displayCount, setDisplayCount] = useState(9);
-  const { activeLevel, activeTopic, activeNetwork } = useAcademyFilters();
+  const { activeLevel, activeTopic, activeNetwork, activeCoinTag } = useAcademyFilters();
 
   // ENTERPRISE-LEVEL DATA FETCHING FROM REAL SANITY CMS
   useEffect(() => {
