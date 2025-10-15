@@ -46,18 +46,16 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
               </div>
               {/* Title Overlay */}
               <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-transparent p-4 md:p-6">
-                {/* Coin tags above title (smaller than article title) */}
+                {/* Coin tag logos above title (smaller than article title) */}
                 {article.coinTags && article.coinTags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {article.coinTags.slice(0, 8).map((tag) => (
-                      <span
-                        key={tag._id}
-                        className="px-2 py-0.5 rounded bg-white/15 text-gray-100 text-[10px] sm:text-xs font-medium"
-                        title={tag.name || tag.symbol}
-                      >
-                        {tag.symbol || tag.name}
-                      </span>
-                    ))}
+                  <div className="mb-2">
+                    <CoinLogosOnly
+                      coinTags={article.coinTags}
+                      size="xs"
+                      maxDisplay={8}
+                      className="justify-start"
+                      disableLinks={true}
+                    />
                   </div>
                 )}
                 <h1 className="text-lg md:text-2xl font-bold text-white line-clamp-2 drop-shadow-lg mb-8">
