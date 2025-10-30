@@ -281,12 +281,7 @@ export default function LoginModal({
           </p>
         </div>
 
-        {/* Security Notice */}
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-500">
-            🔒 Your data is protected with enterprise-grade security
-          </p>
-        </div>
+        
       </div>
     </div>
   );

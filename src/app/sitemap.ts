@@ -64,15 +64,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
   const lastModified = now.toISOString()
 
-  // Fetch trending coins and combine with top crypto IDs
+  // Prepare crypto IDs (only for chart-txns pages)
   let allCryptoIds = TOP_CRYPTO_IDS
   try {
     const trendingIds = await getTrendingCoinIds()
-    // Combine and deduplicate
     allCryptoIds = [...new Set([...trendingIds, ...TOP_CRYPTO_IDS])].slice(0, 100)
   } catch (error) {
     console.error('Error fetching trending coins for sitemap:', error)
-    // Fallback to TOP_CRYPTO_IDS
   }
 
   // Define static pages with high priority
@@ -175,37 +173,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // Add crypto detail pages
-  const cryptoPages = allCryptoIds.map(id => ({
-    url: `${baseUrl}/crypto/${id}`,
-    lastModified,
-    changeFrequency: 'hourly' as const,
-    priority: 0.9,
-  }))
-
-  // Add crypto chart pages
-  const cryptoChartPages = allCryptoIds.map(id => ({
-    url: `${baseUrl}/crypto/${id}/chart`,
-    lastModified,
-    changeFrequency: 'hourly' as const,
-    priority: 0.8,
-  }))
-
-  // Add crypto transactions pages
-  const cryptoTxPages = allCryptoIds.map(id => ({
-    url: `${baseUrl}/crypto/${id}/txns`,
-    lastModified,
-    changeFrequency: 'hourly' as const,
-    priority: 0.8,
-  }))
-
-  // Add crypto chart transactions pages
-  const cryptoChartTxPages = allCryptoIds.map(id => ({
-    url: `${baseUrl}/crypto/${id}/chart-txns`,
-    lastModified,
-    changeFrequency: 'hourly' as const,
-    priority: 0.7,
-  }))
 
   // Fetch dynamic article pages
   const [academyArticles, newsroomArticles, newsArticles] = await Promise.all([
@@ -238,16 +205,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
+  // Add crypto chart transactions pages (allowed to be indexed)
+  const cryptoChartTxPages = allCryptoIds.map(id => ({
+    url: `${baseUrl}/crypto/${id}/chart-txns`,
+    lastModified,
+    changeFrequency: 'hourly' as const,
+    priority: 0.7,
+  }))
+
   // Combine all pages
   return [
     ...staticPages,
-    ...cryptoPages,
-    ...cryptoChartPages,
-    ...cryptoTxPages,
-    ...cryptoChartTxPages,
     ...academyPages,
     ...newsroomPages,
     ...newsPages,
+    ...cryptoChartTxPages,
   ]
 }
 

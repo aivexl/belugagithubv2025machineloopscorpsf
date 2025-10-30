@@ -115,6 +115,44 @@ export default function RootLayout({
         <meta name="msapplication-config" content="/browserconfig.xml?v=4" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         {/* Remove dynamic processing: using built assets */}
+        {/* Structured Data: WebSite with Sitelinks Search Box */}
+        <script
+          type="application/ld+json"
+          // JSON-LD for WebSite schema enabling Sitelinks Search Box in Google
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'Beluga',
+              url: process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000',
+              potentialAction: {
+                '@type': 'SearchAction',
+                target:
+                  (process.env.NODE_ENV === 'production'
+                    ? 'https://beluga.id'
+                    : 'http://localhost:3000') + '/search?q={search_term_string}',
+                'query-input': 'required name=search_term_string',
+              },
+            }),
+          }}
+        />
+        {/* Structured Data: Organization */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Beluga',
+              url: process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000',
+              logo:
+                (process.env.NODE_ENV === 'production'
+                  ? 'https://beluga.id'
+                  : 'http://localhost:3000') + '/Asset/beluganewlogov2.png',
+            }),
+          }}
+        />
+        {/* Error hardening for noisy browser extensions and SW handling */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
