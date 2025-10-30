@@ -27,7 +27,7 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: 'Bingbot', allow, disallow },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
-    host: baseUrl,
+    host: baseUrl.replace(/^https?:\/\//, ''),
   }
 }
 

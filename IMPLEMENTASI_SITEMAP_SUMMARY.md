@@ -132,3 +132,5 @@ Build sudah di-test dan berhasil! ✅
 
 **Selesai! Website Beluga.id sekarang memiliki sitemap yang comprehensive untuk SEO!** 🎉
 
+
+
