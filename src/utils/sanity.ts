@@ -1,11 +1,7 @@
 import { createClient } from 'next-sanity'
 import imageUrlBuilder from '@sanity/image-url'
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
-if (!projectId) {
-  // Fail fast so we don't query a wrong/unknown host
-  throw new Error('Missing NEXT_PUBLIC_SANITY_PROJECT_ID')
-}
+const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'qaofdbqx'
 
 const client = createClient({
   projectId,

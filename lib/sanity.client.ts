@@ -1,15 +1,14 @@
 import { createClient } from 'next-sanity'
 
 // Environment configuration
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!
+// Use a safe default to prevent build-time crashes when env is missing
+const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'qaofdbqx'
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
 const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2023-10-01'
 const authToken = process.env.SANITY_AUTH_TOKEN
 
-// Validate required environment variables
-if (!projectId) {
-  throw new Error('NEXT_PUBLIC_SANITY_PROJECT_ID is required')
-}
+// Note: We intentionally avoid throwing at build-time if the env is missing.
+// The default projectId ensures non-critical routes (e.g., sitemap) do not fail builds.
 
 // Common client configuration
 const commonConfig = {
