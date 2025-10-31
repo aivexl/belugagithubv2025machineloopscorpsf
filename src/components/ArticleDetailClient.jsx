@@ -110,11 +110,11 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
       }
 
       if (block._type === 'image' && block.asset) {
-        const src = (() => { try { return urlFor(block).url(); } catch { return '/Asset/duniacrypto.png'; } })();
+        const src = (() => { try { return urlFor(block).url(); } catch { return '/Asset/beluganewlogov2.png'; } })();
         const captionText = block.caption || '';
         blocks.push(
           <figure key={block._key || idx} className="my-6">
-            <img src={src} alt={block.alt || ''} className="w-full rounded" onError={(e) => { e.target.src = '/Asset/duniacrypto.png'; }} />
+            <img src={src} alt={block.alt || ''} className="w-full rounded" onError={(e) => { e.target.src = '/Asset/beluganewlogov2.png'; }} />
             {captionText ? (
               <figcaption className="text-sm text-gray-400 mt-2 text-center">{captionText}</figcaption>
             ) : null}
@@ -226,11 +226,11 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
             {/* Featured Image - Same height as slider (400px) */}
             <div className="relative h-96 md:h-[400px]">
               <img
-                src={article.imageUrl || '/Asset/duniacrypto.png'}
+                src={article.imageUrl || '/Asset/beluganewlogov2.png'}
                 alt={article.title}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.target.src = '/Asset/duniacrypto.png';
+                  e.target.src = '/Asset/beluganewlogov2.png';
                 }}
               />
               {/* Category Badge */}
@@ -293,11 +293,11 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
                   >
                     <div className="flex gap-3 md:gap-4">
                       <img
-                        src={relatedArticle.imageUrl || '/Asset/duniacrypto.png'}
+                        src={relatedArticle.imageUrl || '/Asset/beluganewlogov2.png'}
                         alt={relatedArticle.title}
                         className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-lg flex-shrink-0"
                         onError={(e) => {
-                          e.target.src = '/Asset/duniacrypto.png';
+                          e.target.src = '/Asset/beluganewlogov2.png';
                         }}
                       />
                       <div className="flex-1 min-w-0">
@@ -331,9 +331,9 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Pilih Level Pembelajaranmu</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {[
-                { id: 'newbie', title: 'Newbie', color: 'bg-green-600', description: 'Mulai dari dasar cryptocurrency', image: '/Asset/duniacrypto.png' },
-                { id: 'intermediate', title: 'Intermediate', color: 'bg-yellow-600', description: 'Tingkatkan pengetahuan blockchain', image: '/Asset/duniacrypto.png' },
-                { id: 'expert', title: 'Expert', color: 'bg-red-600', description: 'Mahir dalam teknologi crypto', image: '/Asset/duniacrypto.png' }
+                { id: 'newbie', title: 'Newbie', color: 'bg-green-600', description: 'Mulai dari dasar cryptocurrency', image: '/Asset/beluganewlogov2.png' },
+                { id: 'intermediate', title: 'Intermediate', color: 'bg-yellow-600', description: 'Tingkatkan pengetahuan blockchain', image: '/Asset/beluganewlogov2.png' },
+                { id: 'expert', title: 'Expert', color: 'bg-red-600', description: 'Mahir dalam teknologi crypto', image: '/Asset/beluganewlogov2.png' }
               ].map((level) => (
                 <div
                   key={level.id}
@@ -348,7 +348,7 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
                         alt={level.title}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.src = '/Asset/duniacrypto.png';
+                          e.target.src = '/Asset/beluganewlogov2.png';
                         }}
                       />
                     </div>

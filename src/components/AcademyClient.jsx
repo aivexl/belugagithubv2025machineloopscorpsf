@@ -66,7 +66,7 @@ export default function AcademyClient() {
         
         // Transform articles to include proper image URLs using enterprise-level utility function
         const articlesWithImages = data.map(article => {
-          const imageUrl = validateAndGetImageUrl(article.image, '/Asset/duniacrypto.png');
+          const imageUrl = validateAndGetImageUrl(article.image, '/Asset/beluganewlogov2.png');
           
           // ENTERPRISE-LEVEL DEBUGGING: Log each article's image transformation
           console.log('AcademyClient: Article image transformation:', {
@@ -164,7 +164,7 @@ export default function AcademyClient() {
         <div className="text-left">
           <h1 className="text-2xl font-bold text-white mb-2">Academy Articles</h1>
           <p className="text-gray-400 text-sm">
-            Total: {articles.length} • With Images: {articles.filter(a => a.mainImage && a.mainImage !== '/Asset/duniacrypto.png').length}
+            Total: {articles.length} • With Images: {articles.filter(a => a.mainImage && a.mainImage !== '/Asset/beluganewlogov2.png').length}
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -197,7 +197,7 @@ export default function AcademyClient() {
                     {/* Article Image - Enterprise-Level Component */}
                     <div className="aspect-video bg-gray-800 overflow-hidden">
                                              {/* ENTERPRISE-LEVEL IMAGE HANDLING: Bulletproof fallback system */}
-                       {article.mainImage && article.mainImage !== '/Asset/duniacrypto.png' ? (
+                       {article.mainImage && article.mainImage !== '/Asset/beluganewlogov2.png' ? (
                          <ArticleThumbnail
                            src={article.mainImage}
                            alt={article.title || 'Academy Article'}
