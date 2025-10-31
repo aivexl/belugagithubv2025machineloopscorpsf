@@ -1,10 +1,17 @@
 import { createClient } from 'next-sanity'
 import imageUrlBuilder from '@sanity/image-url'
 
+const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
+if (!projectId) {
+  // Fail fast so we don't query a wrong/unknown host
+  throw new Error('Missing NEXT_PUBLIC_SANITY_PROJECT_ID')
+}
+
 const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'qaofdbqx',
+  projectId,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
   apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2025-07-22',
+  // Disable CDN to use api.sanity.io (avoids apicdn DNS issues in some envs)
   useCdn: false,
 })
 
@@ -19,7 +26,8 @@ export interface SanityArticle {
   title: string
   slug: { current: string } // Fix: slug is an object with current property
   excerpt?: string
-  content: string
+  // Portable Text content (array of blocks) or legacy string
+  content: any
   image?: {
     asset: {
       _ref: string

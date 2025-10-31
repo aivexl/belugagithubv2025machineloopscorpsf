@@ -32,10 +32,24 @@ export const articleType = defineType({
     }),
     defineField({
       name: 'content',
-      type: 'text',
+      type: 'blockContent',
       title: 'Content',
       description: 'Full article content',
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'metaTitle',
+      type: 'string',
+      title: 'Meta Title',
+      description: 'SEO title (recommended up to 60 characters)',
+      validation: (Rule) => Rule.max(60),
+    }),
+    defineField({
+      name: 'metaDescription',
+      type: 'text',
+      title: 'Meta Description',
+      description: 'SEO description (recommended up to 160 characters)',
+      validation: (Rule) => Rule.max(160),
     }),
     defineField({
       name: 'image',

@@ -4,6 +4,13 @@ import { useEffect } from 'react';
 
 const GlobalErrorHandler = () => {
   useEffect(() => {
+    // Do not hook console in Sanity Studio to avoid interfering with its rendering
+    if (typeof window !== 'undefined') {
+      const path = window.location?.pathname || '';
+      if (path.startsWith('/studio')) {
+        return; // no-op inside Studio
+      }
+    }
     // Handle global errors
     const handleError = (event) => {
       // Ignore browser extension errors
@@ -80,8 +87,12 @@ const GlobalErrorHandler = () => {
         return; // Don't log these errors
       }
       
-      // Log other errors
-      originalConsoleError.apply(console, args);
+      // Log other errors, but defer to avoid setState during render warnings
+      if (typeof queueMicrotask === 'function') {
+        queueMicrotask(() => originalConsoleError.apply(console, args));
+      } else {
+        setTimeout(() => originalConsoleError.apply(console, args), 0);
+      }
     };
 
     console.warn = (...args) => {
@@ -96,8 +107,12 @@ const GlobalErrorHandler = () => {
         return; // Don't log these warnings
       }
       
-      // Log other warnings
-      originalConsoleWarn.apply(console, args);
+      // Log other warnings (defer to avoid render-time updates)
+      if (typeof queueMicrotask === 'function') {
+        queueMicrotask(() => originalConsoleWarn.apply(console, args));
+      } else {
+        setTimeout(() => originalConsoleWarn.apply(console, args), 0);
+      }
     };
 
     // Add event listeners

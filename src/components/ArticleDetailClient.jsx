@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/id';
 import { CoinGeckoProvider } from './CoinGeckoContext';
+import { urlFor } from '../utils/sanity';
 import SubscribeContainer from './SubscribeContainer';
 import { CoinLogosOnly } from './CoinTags';
 
@@ -18,6 +19,202 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const renderPortableText = (content) => {
+    if (!Array.isArray(content)) {
+      return <div className="whitespace-pre-line">{content || ''}</div>;
+    }
+
+      const renderChildren = (children = [], markDefs = []) => {
+      const getAnnotationByKey = (key) => markDefs.find((def) => def._key === key);
+      return children.map((child) => {
+        if (!child || typeof child.text !== 'string') return null;
+        let element = child.text;
+
+        const wrap = (wrapped) => (element = wrapped);
+
+        if (child.marks && child.marks.length > 0) {
+          child.marks.forEach((mark) => {
+            // String decorators
+            if (mark === 'strong') wrap(<strong key={child._key}>{element}</strong>);
+            else if (mark === 'em') wrap(<em key={child._key}>{element}</em>);
+            else if (mark === 'underline') wrap(<u key={child._key}>{element}</u>);
+            else if (mark === 'strike-through') wrap(<s key={child._key}>{element}</s>);
+            else if (mark === 'code') wrap(
+              <code key={child._key} className="bg-gray-800 px-1 py-0.5 rounded" style={{fontFamily:'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'}}>{element}</code>
+            );
+              else {
+                // Annotation objects (e.g., textStyle, link, internalLink)
+              const def = getAnnotationByKey(mark);
+              if (def) {
+                  if (def._type === 'textStyle') {
+                    const style = def.px ? { fontSize: `${def.px}px` } : undefined;
+                    const presetClass = !def.px && def.preset ? (
+                      def.preset === 'sm' ? 'text-sm' :
+                      def.preset === 'base' ? 'text-base' :
+                      def.preset === 'lg' ? 'text-lg' :
+                      def.preset === 'xl' ? 'text-xl' : ''
+                    ) : '';
+                    wrap(<span key={child._key} className={presetClass} style={style}>{element}</span>);
+                } else if (def._type === 'link' && def.href) {
+                  wrap(<a key={child._key} href={def.href} className="text-blue-400 underline" target="_blank" rel="noreferrer noopener">{element}</a>);
+                } else if (def._type === 'internalLink' && def.reference?._ref) {
+                  wrap(<span key={child._key} className="text-blue-400 underline">{element}</span>);
+                }
+              }
+            }
+          });
+        }
+
+        return <React.Fragment key={child._key}>{element}</React.Fragment>;
+      });
+    };
+
+    const blocks = [];
+    content.forEach((block, idx) => {
+      if (!block || typeof block !== 'object') return;
+        if (block._type === 'block') {
+          // Determine paragraph alignment from textStyle annotations used in children
+          const markDefs = block.markDefs || [];
+          const findAlign = () => {
+            for (const ch of block.children || []) {
+              for (const m of ch.marks || []) {
+                const def = markDefs.find((d) => d._key === m && d._type === 'textStyle');
+                if (def?.align) return def.align;
+              }
+            }
+            return undefined;
+          };
+          const align = findAlign();
+          const alignClass = align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : align === 'justify' ? 'text-justify' : '';
+
+          const childrenEls = renderChildren(block.children, markDefs);
+        const base = 'text-gray-200 leading-relaxed';
+        switch (block.style) {
+          case 'h1':
+            blocks.push(<h1 key={block._key || idx} className={`text-3xl font-bold mb-4 ${base} ${alignClass}`}>{childrenEls}</h1>);
+            break;
+          case 'h2':
+            blocks.push(<h2 key={block._key || idx} className={`text-2xl font-bold mb-3 ${base} ${alignClass}`}>{childrenEls}</h2>);
+            break;
+          case 'h3':
+            blocks.push(<h3 key={block._key || idx} className={`text-xl font-bold mb-2 ${base} ${alignClass}`}>{childrenEls}</h3>);
+            break;
+          case 'blockquote':
+            blocks.push(<blockquote key={block._key || idx} className={`border-l-4 border-blue-500 pl-4 italic text-gray-300 my-4 ${alignClass}`}>{childrenEls}</blockquote>);
+            break;
+          default:
+            blocks.push(<p key={block._key || idx} className={`mb-4 ${base} ${alignClass}`}>{childrenEls}</p>);
+        }
+        return;
+      }
+
+      if (block._type === 'image' && block.asset) {
+        const src = (() => { try { return urlFor(block).url(); } catch { return '/Asset/duniacrypto.png'; } })();
+        const captionText = block.caption || '';
+        blocks.push(
+          <figure key={block._key || idx} className="my-6">
+            <img src={src} alt={block.alt || ''} className="w-full rounded" onError={(e) => { e.target.src = '/Asset/duniacrypto.png'; }} />
+            {captionText ? (
+              <figcaption className="text-sm text-gray-400 mt-2 text-center">{captionText}</figcaption>
+            ) : null}
+          </figure>
+        );
+        return;
+      }
+
+      if (block._type === 'divider') {
+        blocks.push(<hr key={block._key || idx} className="my-6 border-gray-700" />);
+        return;
+      }
+
+      if (block._type === 'codeBlock') {
+        blocks.push(
+          <pre key={block._key || idx} className="my-4 p-4 rounded bg-gray-900 overflow-auto">
+            <code>{block.code || ''}</code>
+          </pre>
+        );
+        return;
+      }
+
+      if (block._type === 'youtube' && block.url) {
+        try {
+          const url = new URL(block.url);
+          const v = url.searchParams.get('v');
+          const embedSrc = v ? `https://www.youtube.com/embed/${v}` : block.url;
+          blocks.push(
+            <div key={block._key || idx} className="aspect-video my-6">
+              <iframe className="w-full h-full" src={embedSrc} title={block.title || 'YouTube video'} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+            </div>
+          );
+        } catch {}
+        return;
+      }
+
+      if (block._type === 'tweet' && block.url) {
+        blocks.push(
+          <div key={block._key || idx} className="my-6">
+            <a href={block.url} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">View Tweet</a>
+          </div>
+        );
+        return;
+      }
+
+      if (block._type === 'callout') {
+        const variants = {
+          info: 'bg-blue-900/40 border-blue-700',
+          success: 'bg-green-900/30 border-green-700',
+          warning: 'bg-yellow-900/30 border-yellow-700',
+          danger: 'bg-red-900/30 border-red-700',
+        };
+        const cls = variants[block.variant] || variants.info;
+        blocks.push(
+          <div key={block._key || idx} className={`my-4 p-4 rounded border ${cls}`}>
+            {block.title && <div className="font-semibold mb-1 text-white">{block.title}</div>}
+            {block.body && <div className="text-gray-200">{block.body}</div>}
+          </div>
+        );
+        return;
+      }
+
+      if (block._type === 'cta') {
+        blocks.push(
+          <div key={block._key || idx} className="my-6 p-6 rounded-lg bg-blue-900/30 border border-blue-700">
+            {block.headline && <div className="text-xl font-bold text-white mb-2">{block.headline}</div>}
+            {block.subcopy && <div className="text-gray-200 mb-4">{block.subcopy}</div>}
+            {block.buttonLabel && block.buttonUrl && (
+              <a href={block.buttonUrl} className="inline-block px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-500">{block.buttonLabel}</a>
+            )}
+          </div>
+        );
+        return;
+      }
+
+      if (block._type === 'table' && Array.isArray(block.rows)) {
+        blocks.push(
+          <div key={block._key || idx} className="overflow-x-auto my-6">
+            <table className="min-w-full border border-gray-700">
+              <tbody>
+                {block.rows.map((row, rIdx) => (
+                  <tr key={row._key || rIdx} className="border-t border-gray-700">
+                    {(row.cells || []).map((cell, cIdx) => (
+                      <td key={cIdx} className={`p-2 ${block.hasHeader && rIdx === 0 ? 'font-semibold text-white' : 'text-gray-200'}`}>{cell}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+        return;
+      }
+
+      // Fallback for unknown blocks
+      blocks.push(<pre key={block._key || idx} className="text-xs text-gray-400 bg-gray-900/40 p-2 rounded overflow-auto">{JSON.stringify(block, null, 2)}</pre>);
+    });
+
+    return <>{blocks}</>;
+  };
 
   return (
     <CoinGeckoProvider>
@@ -78,8 +275,8 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
           
           {/* Article Content */}
           <div className="bg-duniacrypto-panel rounded-lg shadow p-4 md:p-6">
-            <div className="text-gray-200 whitespace-pre-line leading-relaxed text-sm md:text-base">
-              {article.content}
+            <div className="leading-relaxed text-sm md:text-base">
+              {renderPortableText(article.content)}
             </div>
           </div>
 
