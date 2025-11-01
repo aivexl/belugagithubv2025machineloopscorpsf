@@ -8,6 +8,7 @@ import { CoinGeckoProvider } from './CoinGeckoContext';
 import { urlFor } from '../utils/sanity';
 import SubscribeContainer from './SubscribeContainer';
 import { CoinLogosOnly } from './CoinTags';
+import ArticleShareButtons from './ArticleShareButtons';
 
 // Configure dayjs
 dayjs.extend(relativeTime);
@@ -367,6 +368,9 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
               {renderPortableText(article.content)}
             </div>
           </div>
+
+          {/* Share Buttons */}
+          <ArticleShareButtons article={article} className="mt-6" />
 
           {/* Related Articles */}
           {relatedArticles.length > 0 && (
