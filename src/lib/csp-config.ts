@@ -34,7 +34,10 @@ const baseCSPConfig: CSPConfig = {
     "https://cdn.sanity.io",
     "https://www.googletagmanager.com",
     "https://pagead2.googlesyndication.com",
-    "https://*.googlesyndication.com"
+    "https://*.googlesyndication.com",
+    "https://*.adtrafficquality.google",
+    "https://ep1.adtrafficquality.google",
+    "https://ep2.adtrafficquality.google"
   ],
   styleSrc: [
     "'self'",
@@ -72,6 +75,7 @@ const baseCSPConfig: CSPConfig = {
     "https://*.doubleclick.net",
     "https://*.adtrafficquality.google",
     "https://ep1.adtrafficquality.google",
+    "https://ep2.adtrafficquality.google",
     "wss://*.supabase.co"
   ],
   frameSrc: [
@@ -109,7 +113,10 @@ const studioCSPConfig: CSPConfig = {
     "https://qaofdbqx.api.sanity.io",
     "https://www.googletagmanager.com",
     "https://pagead2.googlesyndication.com",
-    "https://*.googlesyndication.com"
+    "https://*.googlesyndication.com",
+    "https://*.adtrafficquality.google",
+    "https://ep1.adtrafficquality.google",
+    "https://ep2.adtrafficquality.google"
   ],
   styleSrc: [
     "'self'",
@@ -160,6 +167,7 @@ const studioCSPConfig: CSPConfig = {
     "https://*.doubleclick.net",
     "https://*.adtrafficquality.google",
     "https://ep1.adtrafficquality.google",
+    "https://ep2.adtrafficquality.google",
     "wss://*.supabase.co",
     "wss://*.sanity.io"
   ],
