@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import ErrorBoundary from "../components/ErrorBoundary";
 import GlobalErrorHandler from "../components/GlobalErrorHandler";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "../components/auth/AuthProvider";
 import { AuthGuard } from "../components/auth/AuthGuard";
 
@@ -262,6 +263,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </AuthProvider>
         </ErrorBoundary>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

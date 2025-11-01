@@ -47,3 +47,4 @@ SELECT 'RLS Policy Test' as test_name, count(*) as exchange_count FROM crypto_ex
 
 
 
+
