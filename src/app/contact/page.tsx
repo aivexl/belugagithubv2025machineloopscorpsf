@@ -22,9 +22,8 @@ export default function ContactPage() {
     <div className="max-w-xl mx-auto py-12 px-4">
       <h1 className="text-3xl font-bold mb-6">Contact Us</h1>
       <div className="mb-8 bg-duniacrypto-panel p-6 rounded-lg shadow">
-        <p className="mb-2">Email: <a href="mailto:info@duniacrypto.com" className="text-blue-400">info@duniacrypto.com</a></p>
-        <p className="mb-2">Phone: <a href="tel:+6281234567890" className="text-blue-400">+62 812-3456-7890</a></p>
-        <p>Address: Jl. Dummy No. 123, Jakarta, Indonesia</p>
+        <p className="mb-2">Email: <a href="mailto:info@beluga.id" className="text-blue-400">info@beluga.id</a></p>
+        <p>Address: Jakarta, Indonesia</p>
       </div>
       <h2 className="text-xl font-semibold mb-4">Send us a message</h2>
       {sent ? (

@@ -10,7 +10,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-duniacrypto-bg-darker">
       <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">About Dunia Crypto</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">About Beluga</h1>
           <p className="text-xl text-gray-300">Platform edukasi dan informasi cryptocurrency terdepan di Indonesia</p>
         </div>
         
@@ -72,7 +72,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-semibold text-white mb-6">Tentang Kami</h2>
           <div className="text-gray-300 space-y-4 leading-relaxed">
             <p>
-              Dunia Crypto adalah platform edukasi dan informasi seputar dunia cryptocurrency, blockchain, dan web3 
+              Beluga adalah platform edukasi dan informasi seputar dunia cryptocurrency, blockchain, dan web3 
               yang didedikasikan untuk masyarakat Indonesia. Kami memahami bahwa teknologi blockchain dan cryptocurrency 
               masih relatif baru di Indonesia, sehingga kami berkomitmen untuk menyediakan informasi yang akurat, 
               mudah dipahami, dan selalu up-to-date.
