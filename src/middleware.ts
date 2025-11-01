@@ -28,22 +28,23 @@ export function middleware(request: NextRequest) {
     // Enhanced CSP for Sanity Studio
     cspPolicy = 
       "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com https://vitals.vercel-insights.com https://cdn.sanity.io https://core.sanity-cdn.com https://*.sanity.io https://qaofdbqx.sanity.studio https://qaofdbqx.api.sanity.io; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com https://vitals.vercel-insights.com https://cdn.sanity.io https://core.sanity-cdn.com https://*.sanity.io https://qaofdbqx.sanity.studio https://qaofdbqx.api.sanity.io https://www.googletagmanager.com https://pagead2.googlesyndication.com; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.sanity.io https://*.sanity.io https://qaofdbqx.sanity.studio; " +
       "font-src 'self' https://fonts.gstatic.com https://cdn.sanity.io https://*.sanity.io https://qaofdbqx.sanity.studio; " +
       "img-src 'self' data: https: http: blob: https://cdn.sanity.io https://*.sanity.io https://qaofdbqx.sanity.studio; " +
-      "connect-src 'self' https://sqjqirkrcfczypxygdtm.supabase.co https://*.supabase.co https://api.coingecko.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://cdn.sanity.io https://qaofdbqx.api.sanity.io https://*.sanity.io https://*.sanity-cdn.com https://core.sanity-cdn.com wss://*.supabase.co wss://*.sanity.io; " +
-      "frame-src 'self' https://*.sanity.io https://qaofdbqx.sanity.studio https://core.sanity-cdn.com; " +
+      "connect-src 'self' https://sqjqirkrcfczypxygdtm.supabase.co https://*.supabase.co https://api.coingecko.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://cdn.sanity.io https://qaofdbqx.api.sanity.io https://*.sanity.io https://*.sanity-cdn.com https://core.sanity-cdn.com https://www.googletagmanager.com https://*.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com wss://*.supabase.co wss://*.sanity.io; " +
+      "frame-src 'self' https://*.sanity.io https://qaofdbqx.sanity.studio https://core.sanity-cdn.com https://www.googletagmanager.com https://tpc.googlesyndication.com; " +
       "frame-ancestors 'none';"
   } else {
     // Standard CSP for main application
     cspPolicy = 
       "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com https://vitals.vercel-insights.com https://cdn.sanity.io; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel.app https://va.vercel-scripts.com https://vitals.vercel-insights.com https://cdn.sanity.io https://www.googletagmanager.com https://pagead2.googlesyndication.com; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
       "font-src 'self' https://fonts.gstatic.com; " +
       "img-src 'self' data: https: http:; " +
-      "connect-src 'self' https://sqjqirkrcfczypxygdtm.supabase.co https://*.supabase.co https://api.coingecko.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://cdn.sanity.io wss://*.supabase.co; " +
+      "connect-src 'self' https://sqjqirkrcfczypxygdtm.supabase.co https://*.supabase.co https://api.coingecko.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://cdn.sanity.io https://www.googletagmanager.com https://*.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com wss://*.supabase.co; " +
+      "frame-src 'self' https://www.googletagmanager.com https://tpc.googlesyndication.com; " +
       "frame-ancestors 'none';"
   }
   

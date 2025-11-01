@@ -177,26 +177,62 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              // Handle browser extension errors
+              // Handle browser extension errors - suppress noisy extension errors
               window.addEventListener('error', function(e) {
-                if (e.message.includes('runtime.lastError') || 
-                    e.message.includes('message port closed') ||
-                    e.filename.includes('chrome-extension') ||
-                    e.filename.includes('moz-extension')) {
+                const errorMessage = e.message || '';
+                const errorFilename = e.filename || '';
+                
+                // Suppress common browser extension errors
+                if (errorMessage.includes('runtime.lastError') || 
+                    errorMessage.includes('message port closed') ||
+                    errorMessage.includes('asynchronous response') ||
+                    errorMessage.includes('message channel closed') ||
+                    errorFilename.includes('chrome-extension') ||
+                    errorFilename.includes('moz-extension') ||
+                    errorFilename.includes('safari-extension') ||
+                    errorFilename.includes('extension://')) {
                   e.preventDefault();
+                  e.stopPropagation();
                   return false;
                 }
-              });
+              }, true); // Use capture phase to catch early
               
-              // Handle unhandled promise rejections
+              // Handle unhandled promise rejections from browser extensions
               window.addEventListener('unhandledrejection', function(e) {
-                if (e.reason && e.reason.message && 
-                    (e.reason.message.includes('runtime.lastError') || 
-                     e.reason.message.includes('message port closed'))) {
+                const errorMessage = (e.reason && e.reason.message) ? e.reason.message : '';
+                const errorString = String(e.reason || '');
+                
+                // Suppress common browser extension promise rejections
+                if (errorMessage.includes('runtime.lastError') || 
+                    errorMessage.includes('message port closed') ||
+                    errorMessage.includes('asynchronous response') ||
+                    errorMessage.includes('message channel closed') ||
+                    errorString.includes('runtime.lastError') ||
+                    errorString.includes('message port closed')) {
                   e.preventDefault();
+                  e.stopPropagation();
                   return false;
                 }
-              });
+              }, true); // Use capture phase
+              
+              // Additional: Handle Chrome extension console errors silently
+              if (typeof console !== 'undefined') {
+                const originalError = console.error;
+                console.error = function() {
+                  const args = Array.from(arguments);
+                  const errorString = args.map(arg => String(arg)).join(' ');
+                  
+                  // Only suppress if it's a known extension error
+                  if (errorString.includes('runtime.lastError') ||
+                      errorString.includes('message port closed') ||
+                      errorString.includes('asynchronous response')) {
+                    return; // Suppress this error
+                  }
+                  
+                  // Otherwise, log normally
+                  originalError.apply(console, args);
+                };
+              }
 
               // Service Worker: enable only in production, disable/unregister in development
               if ('serviceWorker' in navigator) {

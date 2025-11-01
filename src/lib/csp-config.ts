@@ -31,7 +31,9 @@ const baseCSPConfig: CSPConfig = {
     "https://*.vercel.app",
     "https://va.vercel-scripts.com",
     "https://vitals.vercel-insights.com",
-    "https://cdn.sanity.io"
+    "https://cdn.sanity.io",
+    "https://www.googletagmanager.com",
+    "https://pagead2.googlesyndication.com"
   ],
   styleSrc: [
     "'self'",
@@ -56,9 +58,17 @@ const baseCSPConfig: CSPConfig = {
     "https://va.vercel-scripts.com",
     "https://vitals.vercel-insights.com",
     "https://cdn.sanity.io",
+    "https://www.googletagmanager.com",
+    "https://*.googletagmanager.com",
+    "https://pagead2.googlesyndication.com",
+    "https://*.googlesyndication.com",
     "wss://*.supabase.co"
   ],
-  frameSrc: ["'self'"],
+  frameSrc: [
+    "'self'",
+    "https://www.googletagmanager.com",
+    "https://tpc.googlesyndication.com"
+  ],
   objectSrc: ["'none'"],
   baseUri: ["'self'"],
   formAction: ["'self'"],
@@ -80,7 +90,9 @@ const studioCSPConfig: CSPConfig = {
     "https://core.sanity-cdn.com",
     "https://*.sanity.io",
     "https://qaofdbqx.sanity.studio",
-    "https://qaofdbqx.api.sanity.io"
+    "https://qaofdbqx.api.sanity.io",
+    "https://www.googletagmanager.com",
+    "https://pagead2.googlesyndication.com"
   ],
   styleSrc: [
     "'self'",
@@ -118,6 +130,10 @@ const studioCSPConfig: CSPConfig = {
     "https://*.sanity.io",
     "https://*.sanity-cdn.com",
     "https://core.sanity-cdn.com",
+    "https://www.googletagmanager.com",
+    "https://*.googletagmanager.com",
+    "https://pagead2.googlesyndication.com",
+    "https://*.googlesyndication.com",
     "wss://*.supabase.co",
     "wss://*.sanity.io"
   ],
@@ -125,7 +141,9 @@ const studioCSPConfig: CSPConfig = {
     "'self'",
     "https://*.sanity.io",
     "https://qaofdbqx.sanity.studio",
-    "https://core.sanity-cdn.com"
+    "https://core.sanity-cdn.com",
+    "https://www.googletagmanager.com",
+    "https://tpc.googlesyndication.com"
   ],
   objectSrc: ["'none'"],
   baseUri: ["'self'"],
