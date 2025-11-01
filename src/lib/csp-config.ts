@@ -87,7 +87,12 @@ const baseCSPConfig: CSPConfig = {
     "https://*.doubleclick.net",
     "https://*.googleadservices.com",
     "https://pagead2.googlesyndication.com",
-    "https://*.googlesyndication.com"
+    "https://*.googlesyndication.com",
+    "https://*.adtrafficquality.google",
+    "https://ep1.adtrafficquality.google",
+    "https://ep2.adtrafficquality.google",
+    "https://www.google.com",
+    "https://*.google.com"
   ],
   objectSrc: ["'none'"],
   baseUri: ["'self'"],
@@ -183,7 +188,12 @@ const studioCSPConfig: CSPConfig = {
     "https://*.doubleclick.net",
     "https://*.googleadservices.com",
     "https://pagead2.googlesyndication.com",
-    "https://*.googlesyndication.com"
+    "https://*.googlesyndication.com",
+    "https://*.adtrafficquality.google",
+    "https://ep1.adtrafficquality.google",
+    "https://ep2.adtrafficquality.google",
+    "https://www.google.com",
+    "https://*.google.com"
   ],
   objectSrc: ["'none'"],
   baseUri: ["'self'"],
