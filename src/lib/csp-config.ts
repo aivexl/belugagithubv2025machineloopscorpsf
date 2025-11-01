@@ -33,7 +33,8 @@ const baseCSPConfig: CSPConfig = {
     "https://vitals.vercel-insights.com",
     "https://cdn.sanity.io",
     "https://www.googletagmanager.com",
-    "https://pagead2.googlesyndication.com"
+    "https://pagead2.googlesyndication.com",
+    "https://*.googlesyndication.com"
   ],
   styleSrc: [
     "'self'",
@@ -48,7 +49,10 @@ const baseCSPConfig: CSPConfig = {
     "'self'",
     "data:",
     "https:",
-    "http:"
+    "http:",
+    "https://*.google.com",
+    "https://*.googleadservices.com",
+    "https://*.g.doubleclick.net"
   ],
   connectSrc: [
     "'self'",
@@ -62,12 +66,24 @@ const baseCSPConfig: CSPConfig = {
     "https://*.googletagmanager.com",
     "https://pagead2.googlesyndication.com",
     "https://*.googlesyndication.com",
+    "https://*.google.com",
+    "https://*.googleadservices.com",
+    "https://*.g.doubleclick.net",
+    "https://*.doubleclick.net",
+    "https://*.adtrafficquality.google",
+    "https://ep1.adtrafficquality.google",
     "wss://*.supabase.co"
   ],
   frameSrc: [
     "'self'",
     "https://www.googletagmanager.com",
-    "https://tpc.googlesyndication.com"
+    "https://tpc.googlesyndication.com",
+    "https://googleads.g.doubleclick.net",
+    "https://*.g.doubleclick.net",
+    "https://*.doubleclick.net",
+    "https://*.googleadservices.com",
+    "https://pagead2.googlesyndication.com",
+    "https://*.googlesyndication.com"
   ],
   objectSrc: ["'none'"],
   baseUri: ["'self'"],
@@ -92,7 +108,8 @@ const studioCSPConfig: CSPConfig = {
     "https://qaofdbqx.sanity.studio",
     "https://qaofdbqx.api.sanity.io",
     "https://www.googletagmanager.com",
-    "https://pagead2.googlesyndication.com"
+    "https://pagead2.googlesyndication.com",
+    "https://*.googlesyndication.com"
   ],
   styleSrc: [
     "'self'",
@@ -116,7 +133,10 @@ const studioCSPConfig: CSPConfig = {
     "blob:",
     "https://cdn.sanity.io",
     "https://*.sanity.io",
-    "https://qaofdbqx.sanity.studio"
+    "https://qaofdbqx.sanity.studio",
+    "https://*.google.com",
+    "https://*.googleadservices.com",
+    "https://*.g.doubleclick.net"
   ],
   connectSrc: [
     "'self'",
@@ -134,6 +154,12 @@ const studioCSPConfig: CSPConfig = {
     "https://*.googletagmanager.com",
     "https://pagead2.googlesyndication.com",
     "https://*.googlesyndication.com",
+    "https://*.google.com",
+    "https://*.googleadservices.com",
+    "https://*.g.doubleclick.net",
+    "https://*.doubleclick.net",
+    "https://*.adtrafficquality.google",
+    "https://ep1.adtrafficquality.google",
     "wss://*.supabase.co",
     "wss://*.sanity.io"
   ],
@@ -143,7 +169,13 @@ const studioCSPConfig: CSPConfig = {
     "https://qaofdbqx.sanity.studio",
     "https://core.sanity-cdn.com",
     "https://www.googletagmanager.com",
-    "https://tpc.googlesyndication.com"
+    "https://tpc.googlesyndication.com",
+    "https://googleads.g.doubleclick.net",
+    "https://*.g.doubleclick.net",
+    "https://*.doubleclick.net",
+    "https://*.googleadservices.com",
+    "https://pagead2.googlesyndication.com",
+    "https://*.googlesyndication.com"
   ],
   objectSrc: ["'none'"],
   baseUri: ["'self'"],
