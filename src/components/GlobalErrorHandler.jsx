@@ -23,14 +23,17 @@ const GlobalErrorHandler = () => {
         return false;
       }
 
-      // Ignore common harmless errors
+      // Ignore common harmless errors from browser extensions
       if (event.message && (
         event.message.includes('ResizeObserver loop limit exceeded') ||
         event.message.includes('Script error') ||
         event.message.includes('runtime.lastError') ||
-        event.message.includes('message port closed')
+        event.message.includes('message port closed') ||
+        event.message.includes('message channel closed') ||
+        event.message.includes('asynchronous response')
       )) {
         event.preventDefault();
+        event.stopPropagation();
         return false;
       }
 
@@ -46,13 +49,24 @@ const GlobalErrorHandler = () => {
 
     // Handle unhandled promise rejections
     const handleUnhandledRejection = (event) => {
-      // Ignore common harmless rejections
-      if (event.reason && event.reason.message && (
-        event.reason.message.includes('runtime.lastError') ||
-        event.reason.message.includes('message port closed') ||
-        event.reason.message.includes('Script error')
-      )) {
+      const reason = event.reason;
+      const reasonMessage = reason?.message || '';
+      const reasonString = String(reason || '');
+      
+      // Ignore common harmless rejections from browser extensions
+      if (
+        reasonMessage.includes('runtime.lastError') ||
+        reasonMessage.includes('message port closed') ||
+        reasonMessage.includes('message channel closed') ||
+        reasonMessage.includes('asynchronous response') ||
+        reasonString.includes('runtime.lastError') ||
+        reasonString.includes('message port closed') ||
+        reasonString.includes('message channel closed') ||
+        reasonString.includes('asynchronous response') ||
+        reasonMessage.includes('Script error')
+      ) {
         event.preventDefault();
+        event.stopPropagation();
         return false;
       }
 
@@ -75,6 +89,10 @@ const GlobalErrorHandler = () => {
         message.includes('Script error') ||
         message.includes('runtime.lastError') ||
         message.includes('message port closed') ||
+        message.includes('message channel closed') ||
+        message.includes('asynchronous response') ||
+        message.includes('Unchecked runtime.lastError') ||
+        (message.includes('Uncaught (in promise)') && message.includes('asynchronous response')) ||
         message.includes('Failed to load resource') ||
         message.includes('404') ||
         message.includes('source map') ||
