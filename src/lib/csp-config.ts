@@ -76,6 +76,8 @@ const baseCSPConfig: CSPConfig = {
     "https://*.adtrafficquality.google",
     "https://ep1.adtrafficquality.google",
     "https://ep2.adtrafficquality.google",
+    "https://csi.gstatic.com",
+    "https://*.gstatic.com",
     "wss://*.supabase.co"
   ],
   frameSrc: [
@@ -173,6 +175,8 @@ const studioCSPConfig: CSPConfig = {
     "https://*.adtrafficquality.google",
     "https://ep1.adtrafficquality.google",
     "https://ep2.adtrafficquality.google",
+    "https://csi.gstatic.com",
+    "https://*.gstatic.com",
     "wss://*.supabase.co",
     "wss://*.sanity.io"
   ],
