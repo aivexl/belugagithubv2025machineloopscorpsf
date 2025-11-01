@@ -71,43 +71,125 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
     };
 
     const blocks = [];
+    
+    // First, process blocks and group consecutive list items
+    const processedBlocks = [];
+    let currentList = null; // { type: 'bullet'|'number', level: number, items: [] }
+    
+    const flushList = () => {
+      if (currentList && currentList.items.length > 0) {
+        const ListTag = currentList.type === 'bullet' ? 'ul' : 'ol';
+        processedBlocks.push({
+          type: 'list',
+          listType: currentList.type,
+          level: currentList.level,
+          items: currentList.items,
+          ListTag
+        });
+        currentList = null;
+      }
+    };
+    
+    const convertProcessedBlocksToJSX = () => {
+      if (processedBlocks.length === 0) return;
+      
+      processedBlocks.forEach((procBlock) => {
+        if (procBlock.type === 'list') {
+          const ListTag = procBlock.ListTag;
+          const listStyle = procBlock.listType === 'bullet' 
+            ? 'list-disc list-outside pl-6 space-y-2 my-4 text-gray-200' 
+            : 'list-decimal list-outside pl-6 space-y-2 my-4 text-gray-200';
+          blocks.push(
+            <ListTag key={procBlock.items[0]?.key || `list-${blocks.length}`} className={listStyle}>
+              {procBlock.items.map((item) => (
+                <li key={item.key} className="leading-relaxed">{item.content}</li>
+              ))}
+            </ListTag>
+          );
+        } else if (procBlock.type === 'block') {
+          const Tag = procBlock.blockType;
+          blocks.push(
+            <Tag key={procBlock.key} className={procBlock.className}>
+              {procBlock.content}
+            </Tag>
+          );
+        }
+      });
+      // Clear processedBlocks after converting
+      processedBlocks.length = 0;
+    };
+    
     content.forEach((block, idx) => {
       if (!block || typeof block !== 'object') return;
-        if (block._type === 'block') {
-          // Determine paragraph alignment from textStyle annotations used in children
-          const markDefs = block.markDefs || [];
-          const findAlign = () => {
-            for (const ch of block.children || []) {
-              for (const m of ch.marks || []) {
-                const def = markDefs.find((d) => d._key === m && d._type === 'textStyle');
-                if (def?.align) return def.align;
-              }
+      
+      if (block._type === 'block') {
+        // Check if this is a list item
+        if (block.listItem) {
+          const listLevel = block.level || 1;
+          const listType = block.listItem; // 'bullet' or 'number'
+          
+          // If we have a current list and it matches, add to it
+          if (currentList && currentList.type === listType && currentList.level === listLevel) {
+            const markDefs = block.markDefs || [];
+            const childrenEls = renderChildren(block.children, markDefs);
+            currentList.items.push({ key: block._key || idx, content: childrenEls });
+          } else {
+            // Flush current list and start a new one
+            flushList();
+            const markDefs = block.markDefs || [];
+            const childrenEls = renderChildren(block.children, markDefs);
+            currentList = {
+              type: listType,
+              level: listLevel,
+              items: [{ key: block._key || idx, content: childrenEls }]
+            };
+          }
+          return;
+        }
+        
+        // Not a list item, flush any current list first
+        flushList();
+        
+        // Determine paragraph alignment from textStyle annotations used in children
+        const markDefs = block.markDefs || [];
+        const findAlign = () => {
+          for (const ch of block.children || []) {
+            for (const m of ch.marks || []) {
+              const def = markDefs.find((d) => d._key === m && d._type === 'textStyle');
+              if (def?.align) return def.align;
             }
-            return undefined;
-          };
-          const align = findAlign();
-          const alignClass = align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : align === 'justify' ? 'text-justify' : '';
+          }
+          return undefined;
+        };
+        const align = findAlign();
+        const alignClass = align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : align === 'justify' ? 'text-justify' : '';
 
-          const childrenEls = renderChildren(block.children, markDefs);
+        const childrenEls = renderChildren(block.children, markDefs);
         const base = 'text-gray-200 leading-relaxed';
         switch (block.style) {
           case 'h1':
-            blocks.push(<h1 key={block._key || idx} className={`text-3xl font-bold mb-4 ${base} ${alignClass}`}>{childrenEls}</h1>);
+            processedBlocks.push({ type: 'block', blockType: 'h1', key: block._key || idx, content: childrenEls, className: `text-3xl font-bold mb-4 ${base} ${alignClass}` });
             break;
           case 'h2':
-            blocks.push(<h2 key={block._key || idx} className={`text-2xl font-bold mb-3 ${base} ${alignClass}`}>{childrenEls}</h2>);
+            processedBlocks.push({ type: 'block', blockType: 'h2', key: block._key || idx, content: childrenEls, className: `text-2xl font-bold mb-3 ${base} ${alignClass}` });
             break;
           case 'h3':
-            blocks.push(<h3 key={block._key || idx} className={`text-xl font-bold mb-2 ${base} ${alignClass}`}>{childrenEls}</h3>);
+            processedBlocks.push({ type: 'block', blockType: 'h3', key: block._key || idx, content: childrenEls, className: `text-xl font-bold mb-2 ${base} ${alignClass}` });
             break;
           case 'blockquote':
-            blocks.push(<blockquote key={block._key || idx} className={`border-l-4 border-blue-500 pl-4 italic text-gray-300 my-4 ${alignClass}`}>{childrenEls}</blockquote>);
+            processedBlocks.push({ type: 'block', blockType: 'blockquote', key: block._key || idx, content: childrenEls, className: `border-l-4 border-blue-500 pl-4 italic text-gray-300 my-4 ${alignClass}` });
             break;
           default:
-            blocks.push(<p key={block._key || idx} className={`mb-4 ${base} ${alignClass}`}>{childrenEls}</p>);
+            processedBlocks.push({ type: 'block', blockType: 'p', key: block._key || idx, content: childrenEls, className: `mb-4 ${base} ${alignClass}` });
         }
         return;
       }
+      
+      // Flush list before non-block content
+      flushList();
+      
+      // Convert processedBlocks to JSX and add to blocks array in order
+      convertProcessedBlocksToJSX();
 
       if (block._type === 'image' && block.asset) {
         const src = (() => { try { return urlFor(block).url(); } catch { return '/Asset/beluganewlogov2.png'; } })();
@@ -212,6 +294,12 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
       // Fallback for unknown blocks
       blocks.push(<pre key={block._key || idx} className="text-xs text-gray-400 bg-gray-900/40 p-2 rounded overflow-auto">{JSON.stringify(block, null, 2)}</pre>);
     });
+
+    // Flush any remaining list after processing all content
+    flushList();
+    
+    // Convert any remaining processedBlocks to JSX (blocks that came after the last non-block)
+    convertProcessedBlocksToJSX();
 
     return <>{blocks}</>;
   };
