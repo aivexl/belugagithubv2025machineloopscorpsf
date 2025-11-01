@@ -15,9 +15,15 @@ export default function ArticleShareButtons({ article, className = "" }) {
   }, []);
 
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const shareText = `${article.title} - ${article.excerpt || 'Baca artikel menarik tentang crypto!'}`;
+  const ctaText = '\n\nPenasaran? Baca selengkapnya di Beluga!';
+  const baseShareText = `${article.title}${article.excerpt ? ` - ${article.excerpt}` : ' - Baca artikel menarik tentang crypto!'}`;
+  const shareText = `${baseShareText}${ctaText}`;
   const encodedUrl = encodeURIComponent(currentUrl);
   const encodedText = encodeURIComponent(shareText);
+  
+  // For WhatsApp, combine text and URL in the message
+  const whatsappText = `${shareText} ${currentUrl}`;
+  const encodedWhatsAppText = encodeURIComponent(whatsappText);
 
   const shareOptions = [
     {
@@ -29,7 +35,7 @@ export default function ArticleShareButtons({ article, className = "" }) {
       ),
       color: 'bg-green-500 hover:bg-green-600',
       textColor: 'text-white',
-      href: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+      href: `https://wa.me/?text=${encodedWhatsAppText}`,
       label: 'Share ke WhatsApp'
     },
     {

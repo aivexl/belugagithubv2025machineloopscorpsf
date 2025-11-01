@@ -100,6 +100,14 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//cdn.sanity.io" />
         <link rel="dns-prefetch" href="//assets.coingecko.com" />
         <link rel="dns-prefetch" href="//api.coingecko.com" />
+        <link rel="dns-prefetch" href="//pagead2.googlesyndication.com" />
+        
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7124893522977923"
+          crossOrigin="anonymous"
+        />
         
         {/* Performance optimization */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
