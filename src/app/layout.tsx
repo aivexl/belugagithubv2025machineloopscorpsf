@@ -113,6 +113,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <link rel="dns-prefetch" href="//assets.coingecko.com" />
         <link rel="dns-prefetch" href="//api.coingecko.com" />
         <link rel="dns-prefetch" href="//pagead2.googlesyndication.com" />
+        <link rel="dns-prefetch" href="//vitals.vercel-insights.com" />
         
         {/* Google AdSense */}
         <script
@@ -263,6 +264,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </AuthProvider>
         </ErrorBoundary>
         <Analytics />
+        {/* Vercel Speed Insights - Mengumpulkan metrik performa saat user navigasi antar halaman */}
+        {/* Catatan: Data dikirim saat window blur/unload, jadi perlu navigasi antar halaman untuk trigger */}
+        {/* Pastikan content blockers dinonaktifkan untuk Speed Insights dapat bekerja */}
         <SpeedInsights />
       </body>
     </html>

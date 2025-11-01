@@ -30,6 +30,7 @@ const baseCSPConfig: CSPConfig = {
     "https://vercel.live",
     "https://*.vercel.app",
     "https://va.vercel-scripts.com",
+    "https://vitals.vercel-insights.com",
     "https://cdn.sanity.io"
   ],
   styleSrc: [
@@ -53,6 +54,7 @@ const baseCSPConfig: CSPConfig = {
     "https://*.supabase.co",
     "https://api.coingecko.com",
     "https://va.vercel-scripts.com",
+    "https://vitals.vercel-insights.com",
     "https://cdn.sanity.io",
     "wss://*.supabase.co"
   ],
@@ -73,6 +75,7 @@ const studioCSPConfig: CSPConfig = {
     "https://vercel.live",
     "https://*.vercel.app",
     "https://va.vercel-scripts.com",
+    "https://vitals.vercel-insights.com",
     "https://cdn.sanity.io",
     "https://core.sanity-cdn.com",
     "https://*.sanity.io",
@@ -109,6 +112,7 @@ const studioCSPConfig: CSPConfig = {
     "https://*.supabase.co",
     "https://api.coingecko.com",
     "https://va.vercel-scripts.com",
+    "https://vitals.vercel-insights.com",
     "https://cdn.sanity.io",
     "https://qaofdbqx.api.sanity.io",
     "https://*.sanity.io",
