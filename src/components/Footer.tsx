@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center flex-wrap gap-4">
           <div className="text-sm">
-            &copy; {new Date().getFullYear()} Dunia Crypto. All rights reserved.
+            &copy; {new Date().getFullYear()} Beluga. All rights reserved.
           </div>
           <div className="flex items-center gap-4 text-sm">
             <Link 
