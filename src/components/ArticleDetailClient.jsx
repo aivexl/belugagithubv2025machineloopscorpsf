@@ -364,7 +364,7 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
           
           {/* Article Content */}
           <div className="bg-duniacrypto-panel rounded-lg shadow p-4 md:p-6">
-            <div className="leading-relaxed text-sm md:text-base">
+            <div className="leading-relaxed text-sm md:text-base" suppressHydrationWarning>
               {renderPortableText(article.content)}
             </div>
           </div>
@@ -402,8 +402,8 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
                           }`}>
                             {relatedArticle.category === 'newsroom' ? 'News' : 'Academy'}
                           </span>
-                          <span>
-                            {isClient ? dayjs(relatedArticle.publishedAt).fromNow() : 'Loading...'}
+                          <span suppressHydrationWarning>
+                            {isClient ? dayjs(relatedArticle.publishedAt).fromNow() : ''}
                           </span>
                         </div>
                       </div>
