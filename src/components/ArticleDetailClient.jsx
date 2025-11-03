@@ -349,7 +349,7 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
                 <div className="text-xs sm:text-sm text-gray-200 flex gap-2 items-center">
                   <span>{article.source || 'Dunia Crypto'}</span>
                   <span>•</span>
-                  <span>{article.publishedAt ? dayjs(article.publishedAt).format('DD MMM YYYY HH:mm') : 'Baru saja'}</span>
+                  <span suppressHydrationWarning>{article.publishedAt ? dayjs(article.publishedAt).format('DD MMM YYYY HH:mm') : ''}</span>
                 </div>
               </div>
             </div>
