@@ -25,8 +25,6 @@ const Top100Trending = dynamic(() => import("./Top100Trending"), {
   loading: () => <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-4 animate-pulse h-96" />,
 });
 
-// Import DailyRecap directly since it's used immediately
-import DailyRecap from "./DailyRecap";
 
 interface HomeClientProps {
   articles?: SanityArticleWithImage[];
@@ -57,7 +55,6 @@ export default function HomeClient({ articles = [] }: HomeClientProps) {
             sliderArticles = sliderArticles.slice(0, 8);
             return <NewsSlider articles={sliderArticles} />;
           })()}
-          <DailyRecap />
           <NewsFeedServer articles={articles} />
         </section>
         <aside className="col-span-1 space-y-4 md:gap-6">

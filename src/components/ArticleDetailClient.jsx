@@ -19,7 +19,121 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    
+    // Add Article structured data for SEO
+    const baseUrl = typeof window !== 'undefined' 
+      ? window.location.origin 
+      : (process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000');
+    
+    const articleUrl = `${baseUrl}/${article.category === 'newsroom' ? 'newsroom' : 'academy'}/${article.slug?.current || article.slug}`;
+    const imageUrl = article.imageUrl || `${baseUrl}/Asset/beluganewlogov2.png`;
+    
+    // Extract text content from article content for description
+    const getTextContent = (content) => {
+      if (!content) return '';
+      if (typeof content === 'string') return content;
+      if (Array.isArray(content)) {
+        return content
+          .map(block => {
+            if (block._type === 'block' && block.children) {
+              return block.children.map(child => child.text || '').join('');
+            }
+            return '';
+          })
+          .join(' ')
+          .substring(0, 300);
+      }
+      return '';
+    };
+    
+    const articleText = getTextContent(article.content);
+    const description = article.metaDescription || article.excerpt || articleText.substring(0, 160);
+    
+    const articleSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: article.title,
+      description: description,
+      image: imageUrl,
+      datePublished: article.publishedAt,
+      dateModified: article.publishedAt,
+      author: {
+        '@type': 'Organization',
+        name: article.source || 'Beluga Team',
+        url: baseUrl,
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Beluga',
+        logo: {
+          '@type': 'ImageObject',
+          url: `${baseUrl}/Asset/beluganewlogov2.png`,
+        },
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': articleUrl,
+      },
+      articleSection: article.category === 'newsroom' ? 'News' : 'Academy',
+    };
+    
+    // Add breadcrumb schema
+    const breadcrumbSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: baseUrl,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: article.category === 'newsroom' ? 'Newsroom' : 'Academy',
+          item: `${baseUrl}/${article.category === 'newsroom' ? 'newsroom' : 'academy'}`,
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: article.title,
+          item: articleUrl,
+        },
+      ],
+    };
+    
+    // Remove existing schemas if any
+    const existingSchemas = document.querySelectorAll('script[type="application/ld+json"]');
+    existingSchemas.forEach(schema => {
+      try {
+        const data = JSON.parse(schema.textContent || '{}');
+        if (data['@type'] === 'Article' || data['@type'] === 'BreadcrumbList') {
+          schema.remove();
+        }
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    });
+    
+    // Add Article schema
+    const articleScript = document.createElement('script');
+    articleScript.type = 'application/ld+json';
+    articleScript.textContent = JSON.stringify(articleSchema);
+    document.head.appendChild(articleScript);
+    
+    // Add Breadcrumb schema
+    const breadcrumbScript = document.createElement('script');
+    breadcrumbScript.type = 'application/ld+json';
+    breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema);
+    document.head.appendChild(breadcrumbScript);
+    
+    // Cleanup function
+    return () => {
+      articleScript.remove();
+      breadcrumbScript.remove();
+    };
+  }, [article]);
 
   const renderPortableText = (content) => {
     if (!Array.isArray(content)) {

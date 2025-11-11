@@ -3,7 +3,6 @@ import CryptoTicker from './CryptoTicker';
 import CryptoTable from './CryptoTable';
 import SubscribeContainer from './SubscribeContainer';
 import NewsFeed from './NewsFeed';
-import DailyRecap from './DailyRecap';
 import Mindshare from './Mindshare';
 import NewsSlider from './NewsSlider';
 import GradientText from './GradientText';
@@ -100,7 +99,6 @@ export default function App() {
         <main className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 flex-1 w-full">
           <section className="col-span-1 xl:col-span-2 space-y-4 md:space-y-6">
             <NewsSlider />
-            <DailyRecap />
             <NewsFeed perPage={30} initialCount={10} loadMoreCount={3} showThumbnails={true} noTitle={true} />
           </section>
           <aside className="col-span-1 space-y-4 md:gap-6">

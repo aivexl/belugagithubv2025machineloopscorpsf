@@ -92,6 +92,22 @@ export default function AboutPage() {
               telah melalui proses verifikasi dan review yang ketat untuk memastikan akurasi dan relevansi 
               dengan kondisi pasar dan regulasi yang berlaku di Indonesia.
             </p>
+            <p>
+              Beluga menyediakan berbagai fitur lengkap untuk membantu pengguna memahami dunia cryptocurrency dengan lebih baik. 
+              Kami menyediakan berita terkini seputar pasar crypto, analisis mendalam tentang berbagai aset digital, 
+              informasi tentang exchange dan platform trading, serta panduan edukasi yang komprehensif untuk pemula 
+              maupun investor berpengalaman.
+            </p>
+            <p>
+              Tim Beluga terdiri dari para ahli di bidang blockchain, cryptocurrency, dan teknologi finansial yang memiliki 
+              pengalaman bertahun-tahun. Kami terus mengikuti perkembangan terbaru di industri crypto untuk memastikan 
+              bahwa konten yang kami sajikan selalu relevan dan akurat sesuai dengan kondisi pasar terkini.
+            </p>
+            <p>
+              Komitmen kami adalah memberikan informasi yang dapat diandalkan dan membantu masyarakat Indonesia 
+              untuk memahami dan berpartisipasi dalam ekosistem cryptocurrency dengan cara yang aman dan bertanggung jawab. 
+              Kami percaya bahwa edukasi yang tepat adalah kunci untuk adopsi teknologi blockchain yang sukses di Indonesia.
+            </p>
           </div>
         </div>
       </div>

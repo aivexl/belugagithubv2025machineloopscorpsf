@@ -1,0 +1,38 @@
+# robots.txt for beluga.id
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /studio/
+Disallow: /api/
+Disallow: /profile/
+Disallow: /test/
+
+# Allow important pages
+Allow: /about
+Allow: /contact
+Allow: /privacy-policy
+Allow: /terms-of-use
+Allow: /disclaimer
+Allow: /newsroom
+Allow: /academy
+Allow: /exchanges
+Allow: /airdrop
+Allow: /fundraising
+Allow: /ico-ido
+Allow: /glossary
+Allow: /kamus
+Allow: /trending
+Allow: /asset
+Allow: /research
+Allow: /search
+
+# Sitemap location
+Sitemap: https://beluga.id/sitemap.xml
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1
+

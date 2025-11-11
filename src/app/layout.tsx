@@ -173,6 +173,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             }),
           }}
         />
+        {/* RSS Feed Links */}
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Beluga RSS Feed"
+          href={(process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000') + '/feed.xml'}
+        />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Beluga Newsroom RSS Feed"
+          href={(process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000') + '/feed/newsroom.xml'}
+        />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Beluga Academy RSS Feed"
+          href={(process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000') + '/feed/academy.xml'}
+        />
         {/* Error hardening for noisy browser extensions and SW handling */}
         <script
           dangerouslySetInnerHTML={{

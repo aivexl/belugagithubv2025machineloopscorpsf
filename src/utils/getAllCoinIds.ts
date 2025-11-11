@@ -80,3 +80,6 @@ export async function getTrendingCoinIds(): Promise<string[]> {
 
 
 
+
+
+

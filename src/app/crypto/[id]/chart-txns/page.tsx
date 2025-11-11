@@ -1,4 +1,5 @@
 import DexScreenerChartTxnsLayout from '@/components/DexScreenerChartTxnsLayout';
+import CryptoHeader from '@/components/CryptoHeader';
 
 interface ChartTxnsPageProps {
   params: Promise<{ id: string }>;
@@ -22,21 +23,50 @@ async function fetchCoinData(id: string) {
   }
 }
 
+async function fetchCoinMarkets(id: string) {
+  try {
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${id}&order=market_cap_desc&per_page=1&page=1&price_change_percentage=1h,24h,7d,30d,1y&x_cg_demo_api_key=CG-jrJUt1cGARECPAnb9TUeCdqE`,
+      { next: { revalidate: 60 } }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch coin markets: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data[0] || null;
+  } catch (error) {
+    console.error('Error fetching coin markets:', error);
+    return null;
+  }
+}
+
 export default async function ChartTxnsPage({ params }: ChartTxnsPageProps) {
   const { id } = await params;
-  const coinData = await fetchCoinData(id);
+  const [coinData, marketData] = await Promise.all([
+    fetchCoinData(id),
+    fetchCoinMarkets(id)
+  ]);
+  
+  // Merge market data (which has current_price and price_change_percentage_24h) with coin data
+  const mergedCoinData = {
+    ...coinData,
+    current_price: marketData?.current_price || coinData?.market_data?.current_price?.usd,
+    price_change_percentage_24h: marketData?.price_change_percentage_24h || coinData?.market_data?.price_change_percentage_24h_in_currency?.usd,
+  };
   
   return (
     <div className="min-h-screen bg-dex-bg-primary flex flex-col">
+      <CryptoHeader 
+        coinData={mergedCoinData}
+        detailedData={coinData}
+      />
       <div className="flex-1 p-4">
         <DexScreenerChartTxnsLayout
           coinData={coinData}
           symbol={coinData?.symbol || id}
         />
-        {/* Debug info */}
-        <div className="text-xs text-gray-500 mt-2">
-          Debug: ID={id}, Symbol={coinData?.symbol}, Name={coinData?.name}
-        </div>
       </div>
     </div>
   );

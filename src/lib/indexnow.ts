@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server';
 
 const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/indexnow';
 
-function getSiteOrigin(): string {
+export function getSiteOrigin(): string {
   const envUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || '';
   if (envUrl) {
     try {
@@ -64,6 +64,14 @@ export function extractUrlsFromRequest(req: NextRequest): string[] {
   } catch {
     return [];
   }
+}
+
+export function buildArticleUrl(category: string, slug: string): string {
+  const origin = getSiteOrigin();
+  const safeCategory = (category || '').toLowerCase();
+  const basePath = safeCategory === 'academy' ? 'academy' : safeCategory === 'newsroom' ? 'newsroom' : 'news';
+  const safeSlug = (slug || '').replace(/^\/+|\/+$/g, '');
+  return `${origin}/${basePath}/${safeSlug}`;
 }
 
 
