@@ -50,8 +50,27 @@ export default async function ChartTxnsPage({ params }: ChartTxnsPageProps) {
   ]);
   
   // Merge market data (which has current_price and price_change_percentage_24h) with coin data
+  // Ensure image is properly mapped from coinData
+  // CoinGecko API can return image as: string, or object with {large, small, thumb}
+  const getImageUrl = () => {
+    if (!coinData?.image) return marketData?.image || null;
+    
+    // If image is a string, use it directly
+    if (typeof coinData.image === 'string') {
+      return coinData.image;
+    }
+    
+    // If image is an object, try large, small, then thumb
+    if (typeof coinData.image === 'object') {
+      return coinData.image.large || coinData.image.small || coinData.image.thumb || null;
+    }
+    
+    return null;
+  };
+
   const mergedCoinData = {
     ...coinData,
+    image: getImageUrl(),
     current_price: marketData?.current_price || coinData?.market_data?.current_price?.usd,
     price_change_percentage_24h: marketData?.price_change_percentage_24h || coinData?.market_data?.price_change_percentage_24h_in_currency?.usd,
   };

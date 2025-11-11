@@ -50,7 +50,7 @@ export default function CryptoHeader({ coinData, detailedData }: CryptoHeaderPro
   return (
     <div className="bg-duniacrypto-panel border-b border-gray-700">
       <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
             <button
               onClick={handleBackClick}
@@ -62,13 +62,17 @@ export default function CryptoHeader({ coinData, detailedData }: CryptoHeaderPro
               Back
             </button>
             <div className="flex items-center space-x-2 sm:space-x-3">
-              {coinData.image && (
-                <img
-                  src={coinData.image}
-                  alt={coinData.name || 'Coin'}
-                  className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full"
-                />
-              )}
+              <img
+                src={coinData.image || `/images/token-default.svg`}
+                alt={coinData.name || 'Coin'}
+                className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full flex-shrink-0"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (target.src !== '/images/token-default.svg') {
+                    target.src = '/images/token-default.svg';
+                  }
+                }}
+              />
               <div>
                 <h1 className="text-white font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
                   {coinData.name || 'Unknown'}
@@ -82,16 +86,6 @@ export default function CryptoHeader({ coinData, detailedData }: CryptoHeaderPro
                     className="mt-1 sm:mt-2"
                   />
                 )}
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
-            <div className="text-right">
-              <div className="text-white font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl">
-                {formatPrice(coinData.current_price)}
-              </div>
-              <div className="text-xs sm:text-sm">
-                {formatPercentage(coinData.price_change_percentage_24h)}
               </div>
             </div>
           </div>
