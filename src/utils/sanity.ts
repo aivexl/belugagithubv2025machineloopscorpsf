@@ -308,19 +308,19 @@ export function addImageUrls(articles: SanityArticle[]): SanityArticleWithImage[
         const imageUrl = urlFor(article.image).url();
         return {
           ...article,
-          imageUrl: imageUrl || '/Asset/beluganewlogov2.png'
+          imageUrl: imageUrl || '/Asset/belugalogov3.png'
         };
       } else {
         return {
           ...article,
-          imageUrl: '/Asset/beluganewlogov2.png'
+          imageUrl: '/Asset/belugalogov3.png'
         };
       }
     } catch (error) {
       console.warn('Error generating image URL for article:', article._id, error);
       return {
         ...article,
-        imageUrl: '/Asset/beluganewlogov2.png'
+        imageUrl: '/Asset/belugalogov3.png'
       };
     }
   });

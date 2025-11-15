@@ -147,7 +147,7 @@ export default function ComingSoon({
               }}
             />
             <Image
-              src="/Asset/beluganewlogov2.png"
+              src="/Asset/belugalogov3.png"
               alt="Beluga Logo"
               width={120}
               height={120}

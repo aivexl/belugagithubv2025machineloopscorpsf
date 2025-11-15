@@ -20,7 +20,7 @@ export async function generateMetadata({
 
   const baseUrl = process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000';
   const articleUrl = `${baseUrl}/newsroom/${slug}`;
-  const imageUrl = article.imageUrl || `${baseUrl}/Asset/beluganewlogov2.png`;
+  const imageUrl = article.imageUrl || `${baseUrl}/Asset/belugalogov3.png`;
   const description = article.metaDescription || article.excerpt || 'Berita cryptocurrency terkini dari Beluga.';
 
   return {

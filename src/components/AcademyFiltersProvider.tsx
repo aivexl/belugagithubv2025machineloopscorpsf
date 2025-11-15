@@ -34,9 +34,9 @@ interface AcademyFiltersProviderProps {
 
 // Level categories - EXACT copy from AcademyClient
 const LEVEL_CATEGORIES = [
-  { id: 'newbie', title: 'Newbie', color: 'bg-green-600', description: 'Mulai dari dasar cryptocurrency', image: '/Asset/beluganewlogov2.png' },
-  { id: 'intermediate', title: 'Intermediate', color: 'bg-yellow-600', description: 'Tingkatkan pengetahuan blockchain', image: '/Asset/beluganewlogov2.png' },
-  { id: 'expert', title: 'Expert', color: 'bg-red-600', description: 'Mahir dalam teknologi crypto', image: '/Asset/beluganewlogov2.png' }
+  { id: 'newbie', title: 'Newbie', color: 'bg-green-600', description: 'Mulai dari dasar cryptocurrency', image: '/Asset/belugalogov3.png' },
+  { id: 'intermediate', title: 'Intermediate', color: 'bg-yellow-600', description: 'Tingkatkan pengetahuan blockchain', image: '/Asset/belugalogov3.png' },
+  { id: 'expert', title: 'Expert', color: 'bg-red-600', description: 'Mahir dalam teknologi crypto', image: '/Asset/belugalogov3.png' }
 ];
 
 // Topic categories - EXACT copy from AcademyClient

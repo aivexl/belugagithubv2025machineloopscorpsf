@@ -29,7 +29,7 @@ function ProcessedLogo() {
   const intrinsicHeight = 56;
   return (
     <Image
-      src="/Asset/beluganewlogov2.png"
+      src="/Asset/belugalogov3.png"
       alt="Beluga Logo"
       width={intrinsicWidth}
       height={intrinsicHeight}

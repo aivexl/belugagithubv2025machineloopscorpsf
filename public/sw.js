@@ -1,7 +1,7 @@
 const CACHE_NAME = 'beluga-v1';
 const urlsToCache = [
   '/',
-  '/Asset/beluganewlogov2-4k-cropped.png',
+  '/Asset/belugalogov3.png',
   '/Asset/favicon-32x32.png',
   '/Asset/favicon-16x16.png',
   '/favicon.ico',

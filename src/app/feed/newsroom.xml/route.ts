@@ -67,7 +67,7 @@ export async function GET() {
     // Build RSS XML
     const rssItems = sortedArticles.map((article) => {
       const articleUrl = `${baseUrl}/newsroom/${article.slug?.current || article.slug}`;
-      const imageUrl = article.imageUrl || `${baseUrl}/Asset/beluganewlogov2.png`;
+      const imageUrl = article.imageUrl || `${baseUrl}/Asset/belugalogov3.png`;
       const description = article.excerpt || extractTextFromContent(article.content);
       const pubDate = formatRSSDate(article.publishedAt);
       const guid = article._id;
@@ -95,7 +95,7 @@ export async function GET() {
     <pubDate>${formatRSSDate(new Date().toISOString())}</pubDate>
     <ttl>60</ttl>
     <image>
-      <url>${baseUrl}/Asset/beluganewlogov2.png</url>
+      <url>${baseUrl}/Asset/belugalogov3.png</url>
       <title>Beluga Newsroom</title>
       <link>${baseUrl}/newsroom</link>
     </image>
@@ -116,4 +116,6 @@ ${rssItems}
     return new NextResponse('Error generating RSS feed', { status: 500 });
   }
 }
+
+
 

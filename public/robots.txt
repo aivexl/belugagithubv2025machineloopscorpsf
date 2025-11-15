@@ -36,3 +36,5 @@ Sitemap: https://beluga.id/sitemap.xml
 # Crawl-delay (optional, helps prevent server overload)
 Crawl-delay: 1
 
+
+

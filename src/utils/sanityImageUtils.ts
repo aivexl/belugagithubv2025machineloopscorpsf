@@ -124,10 +124,10 @@ export function generateArticleThumbnailUrl(image: SanityImage | null | undefine
   });
     
     // Return the generated URL or fallback to default
-    return url || '/Asset/beluganewlogov2.png';
+    return url || '/Asset/belugalogov3.png';
   } catch (error) {
     console.warn('Failed to generate article thumbnail URL, using fallback:', error);
-    return '/Asset/beluganewlogov2.png';
+    return '/Asset/belugalogov3.png';
   }
 }
 
@@ -147,10 +147,10 @@ export function generateHeroImageUrl(image: SanityImage | null | undefined): str
     });
     
     // Return the generated URL or fallback to default
-    return url || '/Asset/beluganewlogov2.png';
+    return url || '/Asset/belugalogov3.png';
   } catch (error) {
     console.warn('Failed to generate hero image URL, using fallback:', error);
-    return '/Asset/beluganewlogov2.png';
+    return '/Asset/belugalogov3.png';
   }
 }
 
@@ -162,7 +162,7 @@ export function generateHeroImageUrl(image: SanityImage | null | undefined): str
  */
 export function validateAndGetImageUrl(
   image: SanityImage | null | undefined, 
-  fallbackUrl: string = '/Asset/beluganewlogov2.png'
+  fallbackUrl: string = '/Asset/belugalogov3.png'
 ): string {
   // ENTERPRISE-LEVEL VALIDATION: Comprehensive image structure checking
   if (!image) {
@@ -229,7 +229,7 @@ export function preloadImages(imageUrls: string[]): void {
   if (typeof window === 'undefined') return; // Server-side only
   
   imageUrls.forEach(url => {
-    if (url && url !== '/Asset/beluganewlogov2.png') {
+    if (url && url !== '/Asset/belugalogov3.png') {
       const img = new Image();
       img.src = url;
     }

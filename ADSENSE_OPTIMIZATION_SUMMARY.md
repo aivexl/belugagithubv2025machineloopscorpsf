@@ -150,3 +150,5 @@ Jika masih ditolak setelah optimasi ini, kemungkinan masalahnya adalah:
 
 Pastikan untuk membaca feedback dari Google dengan teliti dan perbaiki masalah yang disebutkan.
 
+
+
