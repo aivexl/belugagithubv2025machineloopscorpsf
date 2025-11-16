@@ -42,9 +42,9 @@ export default function CryptoTicker() {
     });
   }, [tickerCoins]);
 
-  // Show skeleton if loading, or if no data (either still loading or error/no internet)
-  // But only show skeleton if we don't have any coins data yet
-  if (homepageLoading || (tickerCoins.length === 0 && homepageCoins.length === 0)) {
+  // Show skeleton if loading, or if there's an error (no internet/API failure), or if no data
+  // Data will only show if: not loading AND no error AND we have data
+  if (homepageLoading || homepageError || tickerCoins.length === 0) {
     return (
       <div className="bg-duniacrypto-panel border-b border-gray-800 py-2 overflow-hidden">
         <div className="flex space-x-8 animate-pulse">

@@ -27,8 +27,9 @@ const formatPercentage = (num) => {
 export default function MarketOverviewSimple() {
   const { homepageGlobal, homepageLoading, homepageError } = useHomepageCrypto();
   
-  // Show skeleton if loading, or if no global data yet (either still loading or error/no internet)
-  if (homepageLoading || !homepageGlobal) {
+  // Show skeleton if loading, or if there's an error (no internet/API failure), or if no global data
+  // Data will only show if: not loading AND no error AND we have global data
+  if (homepageLoading || homepageError || !homepageGlobal) {
     return (
       <div className="grid grid-cols-3 gap-1 sm:gap-2 md:gap-3 lg:gap-4">
         {/* Market Cap Skeleton */}

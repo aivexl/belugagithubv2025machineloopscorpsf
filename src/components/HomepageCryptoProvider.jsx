@@ -95,14 +95,11 @@ export function HomepageCryptoProvider({ children }) {
       console.error('[HomepageCrypto] Error fetching homepage data:', error);
       setHomepageError('Failed to fetch homepage crypto data');
       
-      // ENTERPRISE-LEVEL: Keep loading state if no data exists (show skeleton)
-      // Only set loading to false if we have existing data to show
-      if (homepageCoins.length === 0 && !homepageGlobal) {
-        // Keep loading state to show skeleton
-        setHomepageLoading(true);
-      } else {
-        setHomepageLoading(false);
-      }
+      // ENTERPRISE-LEVEL: Clear data and show skeleton on error (no internet/API failure)
+      // Never show old/dummy data when there's an error
+      setHomepageCoins([]);
+      setHomepageGlobal(null);
+      setHomepageLoading(true); // Keep loading to show skeleton, not dummy data
     } finally {
       isFetchingRef.current = false;
     }

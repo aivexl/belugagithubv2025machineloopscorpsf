@@ -19,9 +19,9 @@ export default function Top10MarketCap() {
   // Get top 10 coins by market cap from isolated data source
   const marketCapCoins = getTop10ByMarketCap();
 
-  // Show skeleton if loading, or if no data (either still loading or error/no internet)
-  // But only show skeleton if we don't have any coins data yet
-  if (homepageLoading || (marketCapCoins.length === 0 && homepageCoins.length === 0)) {
+  // Show skeleton if loading, or if there's an error (no internet/API failure), or if no data
+  // Data will only show if: not loading AND no error AND we have data
+  if (homepageLoading || homepageError || marketCapCoins.length === 0) {
     return (
       <div className="bg-duniacrypto-panel rounded-lg shadow p-4 relative mb-8">
         <div className="mb-4 flex justify-center">

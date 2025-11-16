@@ -2,17 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
-// Enterprise-level fallback data
-const FALLBACK_MARKET_DATA = {
-  total_market_cap: { usd: 2500000000000 },
-  total_volume: { usd: 80000000000 },
-  market_cap_change_percentage_24h_usd: 2.5,
-  active_cryptocurrencies: 2500,
-  market_cap_percentage: {
-    btc: 48.5,
-    eth: 18.2
-  }
-};
+// Removed fallback data - show skeleton instead when API fails
 
 // Utility functions
 const formatNumber = (num) => {
@@ -38,10 +28,20 @@ export default function MarketOverviewOptimized() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const abortControllerRef = useRef(null);
+  const isFetchingRef = useRef(false);
 
-  // Robust fetch with multiple fallback endpoints
+  // Robust fetch - no fallback data
   const fetchMarketData = async () => {
+    // Prevent duplicate requests
+    if (isFetchingRef.current) {
+      return;
+    }
+
     try {
+      isFetchingRef.current = true;
+      setLoading(true);
+      setError(null);
+
       // Cancel previous request if exists
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -50,44 +50,34 @@ export default function MarketOverviewOptimized() {
       // Create new abort controller
       abortControllerRef.current = new AbortController();
 
-      // Try multiple API endpoints for redundancy
-      const endpoints = [
-        '/api/coingecko-proxy/global',
-        '/api/coingecko/global',
-        '/api/dummy-data?type=market'
-      ];
+      // Try API endpoint only (no dummy data fallback)
+      const response = await fetch('/api/coingecko-proxy/global', {
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(10000)
+      });
 
-      for (const endpoint of endpoints) {
-        try {
-          const response = await fetch(endpoint, {
-            headers: { 'Accept': 'application/json' },
-            signal: AbortSignal.timeout(10000)
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            
-            if (data && (data.data || data.total_market_cap)) {
-              setMarketData(data.data || data);
-              setError(null);
-              return;
-            }
-          }
-        } catch (endpointError) {
-          console.warn(`Endpoint ${endpoint} failed:`, endpointError.message);
-          continue;
-        }
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
       }
 
-      // All endpoints failed, use fallback data
-      throw new Error('All API endpoints failed');
+      const data = await response.json();
+      
+      if (data && (data.data || data.total_market_cap)) {
+        setMarketData(data.data || data);
+        setError(null);
+        setLoading(false); // Set loading to false after successful fetch
+      } else {
+        throw new Error('Invalid data structure received');
+      }
 
     } catch (error) {
       console.error('Market data fetch failed:', error);
       setError(error.message);
-      setMarketData(FALLBACK_MARKET_DATA);
+      // DO NOT use fallback data - show skeleton instead
+      setMarketData(null);
+      setLoading(true); // Keep loading to show skeleton, not dummy data
     } finally {
-      setLoading(false);
+      isFetchingRef.current = false;
     }
   };
 
@@ -101,8 +91,8 @@ export default function MarketOverviewOptimized() {
     };
   }, []);
 
-  // Loading skeleton
-  if (loading) {
+  // Show skeleton if loading or no data (error/no internet)
+  if (loading || !marketData) {
     return (
       <div className="grid grid-cols-3 gap-1 sm:gap-2 md:gap-4">
         {[1, 2, 3].map((i) => (
@@ -117,8 +107,8 @@ export default function MarketOverviewOptimized() {
     );
   }
 
-  // Use available data (market data or fallback)
-  const data = marketData || FALLBACK_MARKET_DATA;
+  // Use only real data from API (no fallback)
+  const data = marketData;
 
   return (
     <div className="grid grid-cols-3 gap-1 sm:gap-2 md:gap-3 lg:gap-4">

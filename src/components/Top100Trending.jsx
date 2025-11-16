@@ -13,9 +13,9 @@ export default function Top100Trending() {
     .sort((a, b) => (b.total_volume || 0) - (a.total_volume || 0))
     .slice(0, 10);
 
-  // Show skeleton if loading, or if no data (either still loading or error/no internet)
-  // But only show skeleton if we don't have any coins data yet
-  if (homepageLoading || (trendingCoins.length === 0 && homepageCoins.length === 0)) {
+  // Show skeleton if loading, or if there's an error (no internet/API failure), or if no data
+  // Data will only show if: not loading AND no error AND we have data
+  if (homepageLoading || homepageError || trendingCoins.length === 0) {
     return (
       <div className="bg-duniacrypto-panel rounded-lg shadow p-4 relative mb-8">
         <div className="mb-4 flex justify-center">

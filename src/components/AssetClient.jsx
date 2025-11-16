@@ -1198,8 +1198,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     });
   }
 
-  // Show loading skeleton if loading or no data from API
-  if (loading || (coins?.length === 0 && !error)) {
+  // Show loading skeleton if loading, or if there's an error (no internet/API failure), or if no data
+  // Data will only show if: not loading AND no error AND we have data
+  if (loading || error || (coins?.length === 0 && !error)) {
     return (
       <div className="overflow-x-auto">
         <div className="w-full max-w-6xl mx-auto">
@@ -1233,23 +1234,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     );
   }
 
-  // Show error if exists
-  if (error) {
-    return (
-      <div className="text-center py-6 sm:py-8">
-        <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 mb-4">
-          <p className="text-red-400 text-sm mb-2">Error loading crypto data:</p>
-          <p className="text-red-300 text-xs">{error}</p>
-        </div>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  // Error is handled by showing skeleton (no dummy data)
 
   // Show "no results" only if we have data but filter/search doesn't match
   if (filteredCoins.length === 0 && coins?.length > 0) {
