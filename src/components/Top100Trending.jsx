@@ -13,7 +13,9 @@ export default function Top100Trending() {
     .sort((a, b) => (b.total_volume || 0) - (a.total_volume || 0))
     .slice(0, 10);
 
-  if (homepageLoading && trendingCoins.length === 0) {
+  // Show skeleton if loading, or if no data (either still loading or error/no internet)
+  // But only show skeleton if we don't have any coins data yet
+  if (homepageLoading || (trendingCoins.length === 0 && homepageCoins.length === 0)) {
     return (
       <div className="bg-duniacrypto-panel rounded-lg shadow p-4 relative mb-8">
         <div className="mb-4 flex justify-center">
@@ -50,9 +52,7 @@ export default function Top100Trending() {
         </div>
       )}
       
-      {trendingCoins.length === 0 ? (
-        <div className="text-gray-400 text-center">No trending data available</div>
-      ) : (
+      {trendingCoins.length > 0 && (
         <div className="space-y-3">
           {trendingCoins.map((coin) => (
             <div key={coin.id} className="flex items-center space-x-3 p-2 rounded hover:bg-duniacrypto-card transition-colors">

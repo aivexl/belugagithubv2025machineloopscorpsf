@@ -83,6 +83,7 @@ export function HomepageCryptoProvider({ children }) {
       setHomepageCoins(coinsData);
       setHomepageGlobal(globalData);
       setHomepageError(null);
+      setHomepageLoading(false); // Set loading to false after successful data fetch
       lastFetchTimeRef.current = now;
 
     } catch (error) {
@@ -94,13 +95,16 @@ export function HomepageCryptoProvider({ children }) {
       console.error('[HomepageCrypto] Error fetching homepage data:', error);
       setHomepageError('Failed to fetch homepage crypto data');
       
-      // ENTERPRISE-LEVEL: Graceful degradation - keep existing data
-      if (homepageCoins.length === 0) {
+      // ENTERPRISE-LEVEL: Keep loading state if no data exists (show skeleton)
+      // Only set loading to false if we have existing data to show
+      if (homepageCoins.length === 0 && !homepageGlobal) {
+        // Keep loading state to show skeleton
+        setHomepageLoading(true);
+      } else {
         setHomepageLoading(false);
       }
     } finally {
       isFetchingRef.current = false;
-      setHomepageLoading(false);
     }
   };
 

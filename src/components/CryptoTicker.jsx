@@ -42,7 +42,9 @@ export default function CryptoTicker() {
     });
   }, [tickerCoins]);
 
-  if (homepageLoading && tickerCoins.length === 0) {
+  // Show skeleton if loading, or if no data (either still loading or error/no internet)
+  // But only show skeleton if we don't have any coins data yet
+  if (homepageLoading || (tickerCoins.length === 0 && homepageCoins.length === 0)) {
     return (
       <div className="bg-duniacrypto-panel border-b border-gray-800 py-2 overflow-hidden">
         <div className="flex space-x-8 animate-pulse">
@@ -54,14 +56,6 @@ export default function CryptoTicker() {
             </div>
           ))}
         </div>
-      </div>
-    );
-  }
-
-  if (tickerCoins.length === 0) {
-    return (
-      <div className="bg-duniacrypto-panel border-b border-gray-800 py-2 text-center text-gray-400">
-        No crypto data available
       </div>
     );
   }

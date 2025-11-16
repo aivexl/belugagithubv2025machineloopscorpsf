@@ -14,12 +14,14 @@ function formatPrice(price) {
 
 export default function Top10MarketCap() {
   // ENTERPRISE-LEVEL: Use isolated homepage crypto data
-  const { getTop10ByMarketCap, homepageLoading, homepageError } = useHomepageCrypto();
+  const { getTop10ByMarketCap, homepageLoading, homepageError, homepageCoins } = useHomepageCrypto();
   
   // Get top 10 coins by market cap from isolated data source
   const marketCapCoins = getTop10ByMarketCap();
 
-  if (homepageLoading && marketCapCoins.length === 0) {
+  // Show skeleton if loading, or if no data (either still loading or error/no internet)
+  // But only show skeleton if we don't have any coins data yet
+  if (homepageLoading || (marketCapCoins.length === 0 && homepageCoins.length === 0)) {
     return (
       <div className="bg-duniacrypto-panel rounded-lg shadow p-4 relative mb-8">
         <div className="mb-4 flex justify-center">
@@ -56,9 +58,7 @@ export default function Top10MarketCap() {
         </div>
       )}
       
-      {marketCapCoins.length === 0 ? (
-        <div className="text-gray-400 text-center">No data available</div>
-      ) : (
+      {marketCapCoins.length > 0 && (
         <div className="space-y-3">
           {marketCapCoins.map((coin) => (
             <div key={coin.id} className="flex items-center space-x-3 p-2 rounded hover:bg-duniacrypto-card transition-colors">

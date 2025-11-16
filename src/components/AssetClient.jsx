@@ -1198,12 +1198,36 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     });
   }
 
-  if (loading) {
+  // Show loading skeleton if loading or no data from API
+  if (loading || (coins?.length === 0 && !error)) {
     return (
-      <div className="flex justify-center items-center py-6 sm:py-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-          <p className="text-gray-400 text-sm">Loading crypto data...</p>
+      <div className="overflow-x-auto">
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="mb-3 px-2">
+            <div className="h-4 bg-gray-700 rounded w-48 animate-pulse"></div>
+          </div>
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-gray-700 h-10">
+                {Array.from({ length: 8 }, (_, i) => (
+                  <th key={i} className="py-1 px-2">
+                    <div className="h-4 bg-gray-700 rounded animate-pulse"></div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 10 }, (_, i) => (
+                <tr key={i} className="border-b border-gray-800 h-12">
+                  {Array.from({ length: 8 }, (_, j) => (
+                    <td key={j} className="py-1 px-2">
+                      <div className="h-4 bg-gray-700 rounded animate-pulse"></div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     );
@@ -1227,7 +1251,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     );
   }
 
-  if (filteredCoins.length === 0) {
+  // Show "no results" only if we have data but filter/search doesn't match
+  if (filteredCoins.length === 0 && coins?.length > 0) {
     return (
       <div className="text-center text-gray-400 py-6 sm:py-8 text-sm">
         {searchQuery 
