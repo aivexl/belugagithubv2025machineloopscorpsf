@@ -26,7 +26,7 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
       : (process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000');
     
     const articleUrl = `${baseUrl}/${article.category === 'newsroom' ? 'newsroom' : 'academy'}/${article.slug?.current || article.slug}`;
-    const imageUrl = article.imageUrl || `${baseUrl}/Asset/belugalogov3.png`;
+    const imageUrl = article.imageUrl || `${baseUrl}/Asset/belugalogov3white.png`;
     
     // Extract text content from article content for description
     const getTextContent = (content) => {
@@ -67,7 +67,7 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
         name: 'Beluga',
         logo: {
           '@type': 'ImageObject',
-          url: `${baseUrl}/Asset/belugalogov3.png`,
+          url: `${baseUrl}/Asset/belugalogov3white.png`,
         },
       },
       mainEntityOfPage: {
@@ -307,11 +307,11 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
       convertProcessedBlocksToJSX();
 
       if (block._type === 'image' && block.asset) {
-        const src = (() => { try { return urlFor(block).url(); } catch { return '/Asset/belugalogov3.png'; } })();
+        const src = (() => { try { return urlFor(block).url(); } catch { return '/Asset/belugalogov3white.png'; } })();
         const captionText = block.caption || '';
         blocks.push(
           <figure key={block._key || idx} className="my-6">
-            <img src={src} alt={block.alt || ''} className="w-full rounded" onError={(e) => { e.target.src = '/Asset/belugalogov3.png'; }} />
+            <img src={src} alt={block.alt || ''} className="w-full rounded" onError={(e) => { e.target.src = '/Asset/belugalogov3white.png'; }} />
             {captionText ? (
               <figcaption className="text-sm text-gray-400 mt-2 text-center">{captionText}</figcaption>
             ) : null}
@@ -429,11 +429,11 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
             {/* Featured Image - Same height as slider (400px) */}
             <div className="relative h-96 md:h-[400px]">
               <img
-                src={article.imageUrl || '/Asset/belugalogov3.png'}
+                src={article.imageUrl || '/Asset/belugalogov3white.png'}
                 alt={article.title}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.target.src = '/Asset/belugalogov3.png';
+                  e.target.src = '/Asset/belugalogov3white.png';
                 }}
               />
               {/* Category Badge */}
@@ -499,11 +499,11 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
                   >
                     <div className="flex gap-3 md:gap-4">
                       <img
-                        src={relatedArticle.imageUrl || '/Asset/belugalogov3.png'}
+                        src={relatedArticle.imageUrl || '/Asset/belugalogov3white.png'}
                         alt={relatedArticle.title}
                         className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-lg flex-shrink-0"
                         onError={(e) => {
-                          e.target.src = '/Asset/belugalogov3.png';
+                          e.target.src = '/Asset/belugalogov3white.png';
                         }}
                       />
                       <div className="flex-1 min-w-0">
@@ -537,9 +537,9 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Pilih Level Pembelajaranmu</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {[
-                { id: 'newbie', title: 'Newbie', color: 'bg-green-600', description: 'Mulai dari dasar cryptocurrency', image: '/Asset/belugalogov3.png' },
-                { id: 'intermediate', title: 'Intermediate', color: 'bg-yellow-600', description: 'Tingkatkan pengetahuan blockchain', image: '/Asset/belugalogov3.png' },
-                { id: 'expert', title: 'Expert', color: 'bg-red-600', description: 'Mahir dalam teknologi crypto', image: '/Asset/belugalogov3.png' }
+                { id: 'newbie', title: 'Newbie', color: 'bg-green-600', description: 'Mulai dari dasar cryptocurrency', image: '/Asset/belugalogov3white.png' },
+                { id: 'intermediate', title: 'Intermediate', color: 'bg-yellow-600', description: 'Tingkatkan pengetahuan blockchain', image: '/Asset/belugalogov3white.png' },
+                { id: 'expert', title: 'Expert', color: 'bg-red-600', description: 'Mahir dalam teknologi crypto', image: '/Asset/belugalogov3white.png' }
               ].map((level) => (
                 <div
                   key={level.id}
@@ -554,7 +554,7 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
                         alt={level.title}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.src = '/Asset/belugalogov3.png';
+                          e.target.src = '/Asset/belugalogov3white.png';
                         }}
                       />
                     </div>

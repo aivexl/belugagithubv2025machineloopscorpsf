@@ -16,21 +16,21 @@ const LEVEL_CATEGORIES = [
     title: 'Newbie', 
     color: 'bg-green-600',
     description: 'Mulai dari dasar cryptocurrency',
-    image: '/Asset/belugalogov3.png'
+    image: '/Asset/belugalogov3white.png'
   },
   { 
     id: 'intermediate', 
     title: 'Intermediate', 
     color: 'bg-yellow-600',
     description: 'Tingkatkan pengetahuan blockchain',
-    image: '/Asset/belugalogov3.png'
+    image: '/Asset/belugalogov3white.png'
   },
   { 
     id: 'expert', 
     title: 'Expert', 
     color: 'bg-red-600',
     description: 'Mahir dalam teknologi crypto',
-    image: '/Asset/belugalogov3.png'
+    image: '/Asset/belugalogov3white.png'
   }
 ];
 

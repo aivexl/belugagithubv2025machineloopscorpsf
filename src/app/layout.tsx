@@ -32,9 +32,14 @@ export const metadata: Metadata = {
       { url: "/favicon.ico", sizes: "any" },
       { url: "/Asset/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/Asset/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/Asset/belugalogov3white.png", sizes: "48x48", type: "image/png" },
+      { url: "/Asset/belugalogov3white.png", sizes: "64x64", type: "image/png" },
+      { url: "/Asset/belugalogov3white.png", sizes: "96x96", type: "image/png" },
+      { url: "/Asset/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/Asset/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [
-      { url: "/Asset/belugalogov3.png", sizes: "180x180", type: "image/png" },
+      { url: "/Asset/belugalogov3white.png", sizes: "180x180", type: "image/png" },
     ],
   },
   manifest: "/site.webmanifest",
@@ -47,7 +52,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/Asset/belugalogov3.png",
+        url: "/Asset/belugalogov3white.png",
         width: 669,
         height: 514,
         alt: "Beluga Logo",
@@ -58,7 +63,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Beluga - Platform Crypto Indonesia Terdepan",
     description: "Platform cryptocurrency Indonesia yang menyediakan berita, analisis, dan informasi terkini tentang dunia crypto dan blockchain.",
-    images: ["/Asset/belugalogov3.png"],
+    images: ["/Asset/belugalogov3white.png"],
   },
   robots: {
     index: true,
@@ -127,11 +132,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <meta name="theme-color" content="#141722" />
         <meta name="color-scheme" content="dark" />
         
-        {/* Favicon - match navbar logo using pre-generated 4K cropped PNG and ico (v2) */}
-        <link rel="icon" href="/favicon.ico?v=6" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/Asset/favicon-32x32.png?v=6" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/Asset/favicon-16x16.png?v=6" />
-        <link rel="apple-touch-icon" href="/Asset/belugalogov3.png?v=1" />
+        {/* Favicon - Using larger sizes for better visibility */}
+        <link rel="icon" href="/favicon.ico?v=7" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/Asset/favicon-16x16.png?v=7" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/Asset/favicon-32x32.png?v=7" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/Asset/belugalogov3white.png?v=7" />
+        <link rel="icon" type="image/png" sizes="64x64" href="/Asset/belugalogov3white.png?v=7" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/Asset/belugalogov3white.png?v=7" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/Asset/android-chrome-192x192.png?v=7" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/Asset/android-chrome-512x512.png?v=7" />
+        <link rel="apple-touch-icon" href="/Asset/belugalogov3white.png?v=2" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/Asset/belugalogov3white.png?v=2" />
         <link rel="manifest" href="/site.webmanifest?v=4" />
         <meta name="msapplication-config" content="/browserconfig.xml?v=4" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -169,7 +180,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               logo:
                 (process.env.NODE_ENV === 'production'
                   ? 'https://beluga.id'
-                  : 'http://localhost:3000') + '/Asset/belugalogov3.png',
+                  : 'http://localhost:3000') + '/Asset/belugalogov3white.png',
             }),
           }}
         />

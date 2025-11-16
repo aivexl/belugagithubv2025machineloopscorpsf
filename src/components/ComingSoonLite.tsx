@@ -54,7 +54,7 @@ export default function ComingSoonLite({
           <div className="relative group">
             <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl animate-pulse" />
             <Image
-              src="/Asset/belugalogov3.png"
+              src="/Asset/belugalogov3white.png"
               alt="Beluga Logo"
               width={120}
               height={120}

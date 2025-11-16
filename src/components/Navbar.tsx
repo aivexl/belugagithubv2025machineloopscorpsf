@@ -24,19 +24,19 @@ import { HiAcademicCap, HiOutlineCash } from "react-icons/hi";
 
 function ProcessedLogo() {
   // Mobile/Tablet: Keep larger size, Desktop: Smaller for proportion
-  // Mobile: 48px, Tablet: 56px, Desktop: 48px - preserving aspect ratio ~1.302 (669/514)
-  const intrinsicWidth = 73;  // 56 * 1.302 ≈ 73
-  const intrinsicHeight = 56;
+  // Mobile: 56px, Tablet: 64px, Desktop: 56px - preserving aspect ratio ~1.302 (669/514)
+  const intrinsicWidth = 83;  // 64 * 1.302 ≈ 83
+  const intrinsicHeight = 64;
   return (
     <Image
-      src="/Asset/belugalogov3.png"
+      src="/Asset/belugalogov3white.png"
       alt="Beluga Logo"
       width={intrinsicWidth}
       height={intrinsicHeight}
       // Do not mark as priority to avoid implicit preloading in dev which can trigger preload warnings
-      className="h-12 md:h-14 xl:h-12 w-auto object-contain group-hover:scale-105 transition-all duration-300 animate-logo-color-cycle hover:[animation-play-state:paused] hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+      className="h-14 md:h-16 xl:h-14 w-auto object-contain group-hover:scale-105 transition-all duration-300 animate-logo-color-cycle hover:[animation-play-state:paused] hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
       style={{ width: 'auto', height: 'auto' }}
-      sizes="(max-width: 768px) 48px, (max-width: 1280px) 56px, 48px"
+      sizes="(max-width: 768px) 56px, (max-width: 1280px) 64px, 56px"
     />
   );
 }

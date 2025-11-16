@@ -144,7 +144,7 @@ export default function AcademyClientEnterprise() {
         
         // Transform articles to include proper image URLs using enterprise-level utility
         const articlesWithImages = data.map(article => {
-          let imageUrl = '/Asset/belugalogov3.png'; // Default fallback
+          let imageUrl = '/Asset/belugalogov3white.png'; // Default fallback
           
           // ENTERPRISE-LEVEL IMAGE PROCESSING: Multiple fallback strategies
           if (article.mainImage && typeof article.mainImage === 'string' && article.mainImage.trim() !== '') {
@@ -153,8 +153,8 @@ export default function AcademyClientEnterprise() {
           } else if (article.imageAsset && article.imageAsset._ref) {
             // Generate URL using our utility function
             try {
-              const generatedUrl = validateAndGetImageUrl(article.imageAsset, '/Asset/belugalogov3.png');
-              if (generatedUrl && generatedUrl !== '/Asset/belugalogov3.png') {
+              const generatedUrl = validateAndGetImageUrl(article.imageAsset, '/Asset/belugalogov3white.png');
+              if (generatedUrl && generatedUrl !== '/Asset/belugalogov3white.png') {
                 imageUrl = generatedUrl;
               }
             } catch (error) {
