@@ -18,15 +18,74 @@ export default function robots(): MetadataRoute.Robots {
     '/crypto/*/txns',
   ]
 
-  const allow = ['/', '/crypto/*/chart-txns']
+  const allow = [
+    '/',
+    '/crypto/*/chart-txns',
+    '/newsroom',
+    '/academy',
+    '/about',
+    '/contact',
+    '/exchanges',
+    '/airdrop',
+    '/fundraising',
+    '/ico-ido',
+    '/glossary',
+    '/kamus',
+    '/trending',
+    '/asset',
+    '/research',
+    '/search',
+    '/beluga-ai',
+    '/logo',
+  ]
 
   return {
     rules: [
-      { userAgent: '*', allow, disallow },
-      { userAgent: 'Googlebot', allow, disallow },
-      { userAgent: 'Bingbot', allow, disallow },
+      { 
+        userAgent: '*', 
+        allow, 
+        disallow,
+        crawlDelay: 1,
+      },
+      { 
+        userAgent: 'Googlebot', 
+        allow, 
+        disallow,
+        crawlDelay: 0,
+      },
+      { 
+        userAgent: 'Bingbot', 
+        allow, 
+        disallow,
+        crawlDelay: 1,
+      },
+      {
+        userAgent: 'Slurp',
+        allow,
+        disallow,
+        crawlDelay: 2,
+      },
+      {
+        userAgent: 'DuckDuckBot',
+        allow,
+        disallow,
+        crawlDelay: 1,
+      },
+      {
+        userAgent: 'Baiduspider',
+        allow,
+        disallow,
+        crawlDelay: 2,
+      },
+      {
+        userAgent: 'Yandex',
+        allow,
+        disallow,
+        crawlDelay: 2,
+      },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   }
 }
 

@@ -15,13 +15,50 @@ import PerformanceMonitor from "../components/PerformanceMonitor";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Beluga - Platform Crypto Indonesia Terdepan",
-  description: "Beluga adalah platform cryptocurrency Indonesia yang menyediakan berita, analisis, dan informasi terkini tentang dunia crypto dan blockchain.",
-  keywords: "crypto, cryptocurrency, bitcoin, ethereum, blockchain, indonesia, berita crypto, analisis crypto",
-  authors: [{ name: "Beluga Team" }],
+  title: {
+    default: "Beluga - Platform Crypto Indonesia Terdepan | Berita & Analisis Cryptocurrency",
+    template: "%s | Beluga - Platform Crypto Indonesia",
+  },
+  description: "Beluga adalah platform cryptocurrency Indonesia terdepan yang menyediakan berita crypto terkini, analisis market, edukasi blockchain, dan informasi lengkap tentang Bitcoin, Ethereum, DeFi, NFT, dan teknologi blockchain. Dapatkan insight terbaru dari para ahli crypto Indonesia.",
+  keywords: [
+    "crypto indonesia",
+    "cryptocurrency indonesia",
+    "bitcoin indonesia",
+    "ethereum indonesia",
+    "blockchain indonesia",
+    "berita crypto",
+    "analisis crypto",
+    "trading crypto",
+    "investasi crypto",
+    "defi indonesia",
+    "nft indonesia",
+    "web3 indonesia",
+    "beluga crypto",
+    "platform crypto",
+    "edukasi cryptocurrency",
+    "market analysis crypto",
+    "crypto news",
+    "crypto price",
+    "crypto exchange",
+    "crypto wallet",
+    "altcoin",
+    "stablecoin",
+    "smart contract",
+    "crypto mining",
+    "crypto staking",
+  ],
+  authors: [{ name: "Beluga Team", url: "https://beluga.id/about" }],
   creator: "Beluga",
   publisher: "Beluga",
   metadataBase: new URL(process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000'),
+  alternates: {
+    canonical: process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000',
+    languages: {
+      'id-ID': 'https://beluga.id',
+    },
+  },
+  category: "Cryptocurrency",
+  classification: "Finance, Technology, News",
   formatDetection: {
     email: false,
     address: false,
@@ -44,26 +81,30 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   openGraph: {
-    title: "Beluga - Platform Crypto Indonesia Terdepan",
-    description: "Platform cryptocurrency Indonesia yang menyediakan berita, analisis, dan informasi terkini tentang dunia crypto dan blockchain.",
+    title: "Beluga - Platform Crypto Indonesia Terdepan | Berita & Analisis Cryptocurrency",
+    description: "Platform cryptocurrency Indonesia terdepan yang menyediakan berita crypto terkini, analisis market, edukasi blockchain, dan informasi lengkap tentang Bitcoin, Ethereum, DeFi, NFT, dan teknologi blockchain.",
     url: "https://beluga.id",
     siteName: "Beluga",
     locale: "id_ID",
+    alternateLocale: ["en_US"],
     type: "website",
     images: [
       {
         url: "/Asset/belugalogov3white.png",
-        width: 669,
-        height: 514,
-        alt: "Beluga Logo",
+        width: 1200,
+        height: 630,
+        alt: "Beluga - Platform Crypto Indonesia Terdepan",
+        type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Beluga - Platform Crypto Indonesia Terdepan",
-    description: "Platform cryptocurrency Indonesia yang menyediakan berita, analisis, dan informasi terkini tentang dunia crypto dan blockchain.",
+    description: "Platform cryptocurrency Indonesia terdepan yang menyediakan berita crypto terkini, analisis market, dan edukasi blockchain.",
     images: ["/Asset/belugalogov3white.png"],
+    creator: "@beluga_id",
+    site: "@beluga_id",
   },
   robots: {
     index: true,
@@ -168,19 +209,71 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             }),
           }}
         />
-        {/* Structured Data: Organization */}
+        {/* Structured Data: Organization - Enhanced */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'Organization',
+              '@id': (process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000') + '#organization',
+              name: 'Beluga',
+              alternateName: 'Beluga Crypto Indonesia',
+              url: process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000',
+              logo: {
+                '@type': 'ImageObject',
+                url: (process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000') + '/Asset/belugalogov3white.png',
+                width: 669,
+                height: 514,
+              },
+              image: (process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000') + '/Asset/belugalogov3white.png',
+              description: 'Platform cryptocurrency Indonesia terdepan yang menyediakan berita crypto terkini, analisis market, edukasi blockchain, dan informasi lengkap tentang Bitcoin, Ethereum, DeFi, NFT, dan teknologi blockchain.',
+              foundingDate: '2024',
+              sameAs: [
+                // Add your social media profiles here when available
+                // 'https://twitter.com/beluga_id',
+                // 'https://facebook.com/beluga.id',
+                // 'https://instagram.com/beluga.id',
+                // 'https://linkedin.com/company/beluga-id',
+              ],
+              contactPoint: {
+                '@type': 'ContactPoint',
+                contactType: 'Customer Service',
+                availableLanguage: ['Indonesian', 'English'],
+              },
+              areaServed: {
+                '@type': 'Country',
+                name: 'Indonesia',
+              },
+              knowsAbout: [
+                'Cryptocurrency',
+                'Blockchain Technology',
+                'Bitcoin',
+                'Ethereum',
+                'DeFi',
+                'NFT',
+                'Web3',
+                'Crypto Trading',
+                'Blockchain Education',
+              ],
+            }),
+          }}
+        />
+        {/* Structured Data: NewsMediaOrganization */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'NewsMediaOrganization',
               name: 'Beluga',
               url: process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000',
-              logo:
-                (process.env.NODE_ENV === 'production'
-                  ? 'https://beluga.id'
-                  : 'http://localhost:3000') + '/Asset/belugalogov3white.png',
+              logo: {
+                '@type': 'ImageObject',
+                url: (process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000') + '/Asset/belugalogov3white.png',
+              },
+              publishingPrinciples: (process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000') + '/about',
+              actionableFeedbackPolicy: (process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000') + '/contact',
             }),
           }}
         />

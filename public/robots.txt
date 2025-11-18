@@ -1,24 +1,13 @@
 # robots.txt for beluga.id
-# Allow all search engines to crawl the site
+# Optimized for global search engine indexing
 
+# Allow all search engines
 User-agent: *
 Allow: /
-
-# Disallow admin and private areas
-Disallow: /admin/
-Disallow: /studio/
-Disallow: /api/
-Disallow: /profile/
-Disallow: /test/
-
-# Allow important pages
-Allow: /about
-Allow: /contact
-Allow: /privacy-policy
-Allow: /terms-of-use
-Allow: /disclaimer
 Allow: /newsroom
 Allow: /academy
+Allow: /about
+Allow: /contact
 Allow: /exchanges
 Allow: /airdrop
 Allow: /fundraising
@@ -29,12 +18,67 @@ Allow: /trending
 Allow: /asset
 Allow: /research
 Allow: /search
+Allow: /logo
+Allow: /crypto/*/chart-txns
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /studio/
+Disallow: /api/
+Disallow: /profile/
+Disallow: /test/
+Disallow: /auth/
+Disallow: /crypto/
+Disallow: /crypto/*/chart
+Disallow: /crypto/*/txns
+
+# Googlebot - Fast crawling
+User-agent: Googlebot
+Allow: /
+Allow: /newsroom
+Allow: /academy
+Allow: /crypto/*/chart-txns
+Disallow: /admin/
+Disallow: /studio/
+Disallow: /api/
+Disallow: /profile/
+Disallow: /test/
+Crawl-delay: 0
+
+# Bingbot
+User-agent: Bingbot
+Allow: /
+Allow: /newsroom
+Allow: /academy
+Allow: /crypto/*/chart-txns
+Disallow: /admin/
+Disallow: /studio/
+Disallow: /api/
+Disallow: /profile/
+Disallow: /test/
+Crawl-delay: 1
+
+# Other search engines
+User-agent: Slurp
+Allow: /
+Crawl-delay: 2
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 2
+
+User-agent: Yandex
+Allow: /
+Crawl-delay: 2
 
 # Sitemap location
 Sitemap: https://beluga.id/sitemap.xml
 
-# Crawl-delay (optional, helps prevent server overload)
-Crawl-delay: 1
+
 
 
 

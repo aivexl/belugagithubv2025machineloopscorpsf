@@ -73,13 +73,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error fetching trending coins for sitemap:', error)
   }
 
-  // Define static pages with high priority
+  // Define static pages with high priority - SEO optimized
   const staticPages = [
     {
       url: baseUrl,
       lastModified,
       changeFrequency: 'hourly' as const,
       priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/logo`,
+      lastModified,
+      changeFrequency: 'monthly' as const,
+      priority: 0.5,
     },
     {
       url: `${baseUrl}/about`,

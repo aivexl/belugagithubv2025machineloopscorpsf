@@ -49,14 +49,21 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
     const articleText = getTextContent(article.content);
     const description = article.metaDescription || article.excerpt || articleText.substring(0, 160);
     
+    // Enhanced Article Schema for better SEO
     const articleSchema = {
       '@context': 'https://schema.org',
-      '@type': 'Article',
+      '@type': article.category === 'newsroom' ? 'NewsArticle' : 'Article',
+      '@id': articleUrl + '#article',
       headline: article.title,
       description: description,
-      image: imageUrl,
+      image: {
+        '@type': 'ImageObject',
+        url: imageUrl,
+        width: 1200,
+        height: 630,
+      },
       datePublished: article.publishedAt,
-      dateModified: article.publishedAt,
+      dateModified: article.publishedAt || article.publishedAt,
       author: {
         '@type': 'Organization',
         name: article.source || 'Beluga Team',
@@ -64,10 +71,13 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
       },
       publisher: {
         '@type': 'Organization',
+        '@id': baseUrl + '#organization',
         name: 'Beluga',
         logo: {
           '@type': 'ImageObject',
           url: `${baseUrl}/Asset/belugalogov3white.png`,
+          width: 669,
+          height: 514,
         },
       },
       mainEntityOfPage: {
@@ -75,6 +85,13 @@ export default function ArticleDetailClient({ article, relatedArticles = [] }) {
         '@id': articleUrl,
       },
       articleSection: article.category === 'newsroom' ? 'News' : 'Academy',
+      keywords: article.coinTags?.map(tag => tag.name).join(', ') || 'cryptocurrency, blockchain, crypto indonesia',
+      inLanguage: 'id-ID',
+      isAccessibleForFree: true,
+      ...(article.category === 'newsroom' && {
+        dateline: 'Indonesia',
+        articleBody: articleText,
+      }),
     };
     
     // Add breadcrumb schema

@@ -5,11 +5,48 @@ import HomeClient from "../components/HomeClient";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Beluga - Berita dan Analisis Crypto Indonesia Terkini",
-  description: "Platform terdepan untuk berita cryptocurrency, analisis market, dan edukasi blockchain di Indonesia. Dapatkan insight terbaru tentang Bitcoin, Ethereum, dan crypto lainnya.",
+  title: "Beluga - Berita dan Analisis Crypto Indonesia Terkini | Platform Cryptocurrency Terdepan",
+  description: "Platform terdepan untuk berita cryptocurrency, analisis market, dan edukasi blockchain di Indonesia. Dapatkan insight terbaru tentang Bitcoin, Ethereum, DeFi, NFT, dan crypto lainnya. Update harga crypto real-time, analisis teknikal, dan panduan investasi crypto untuk pemula hingga advanced.",
+  keywords: [
+    "berita crypto indonesia",
+    "analisis cryptocurrency",
+    "harga bitcoin hari ini",
+    "harga ethereum",
+    "crypto news indonesia",
+    "beluga crypto",
+    "platform crypto indonesia",
+    "edukasi blockchain",
+    "trading crypto",
+    "investasi cryptocurrency",
+    "defi indonesia",
+    "nft indonesia",
+    "market analysis crypto",
+    "crypto price indonesia",
+  ],
   openGraph: {
     title: "Beluga - Berita dan Analisis Crypto Indonesia Terkini",
+    description: "Platform terdepan untuk berita cryptocurrency, analisis market, dan edukasi blockchain di Indonesia. Dapatkan insight terbaru tentang Bitcoin, Ethereum, dan crypto lainnya.",
+    url: "https://beluga.id",
+    siteName: "Beluga",
+    images: [
+      {
+        url: "/Asset/belugalogov3white.png",
+        width: 1200,
+        height: 630,
+        alt: "Beluga - Platform Crypto Indonesia",
+      },
+    ],
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Beluga - Berita dan Analisis Crypto Indonesia Terkini",
     description: "Platform terdepan untuk berita cryptocurrency, analisis market, dan edukasi blockchain di Indonesia.",
+    images: ["/Asset/belugalogov3white.png"],
+  },
+  alternates: {
+    canonical: "https://beluga.id",
   },
 };
 
