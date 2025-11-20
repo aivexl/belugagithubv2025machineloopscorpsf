@@ -40,7 +40,7 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
   const sliderArticles = articles.slice(0, 5).map((article) => ({
     id: article._id,
     title: article.title,
-    url: `/${article.category === 'newsroom' ? 'newsroom' : 'academy'}/${article.slug.current}`,
+    url: `/${article.category === 'newsroom' ? 'newsroom' : 'crypto'}/${article.slug.current}`,
     image: article.imageUrl || PLACEHOLDER,
     category: article.category || 'academy',
     coinTags: article.coinTags || []
@@ -66,7 +66,7 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
 
   useEffect(() => {
     if (sliderArticles.length === 0) return;
-    
+
     if (!isPaused) {
       startInterval();
     } else {
@@ -91,14 +91,14 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
   const handlePrev = () => {
     setCurrent((prev) => (prev - 1 + sliderArticles.length) % sliderArticles.length);
   };
-  
+
   const handleNext = () => {
     setCurrent((prev) => (prev + 1) % sliderArticles.length);
   };
 
   if (sliderArticles.length === 0) {
     return (
-      <div className="bg-duniacrypto-panel rounded-lg shadow p-4 text-center text-gray-400" style={{height: '400px'}}>
+      <div className="bg-duniacrypto-panel rounded-lg shadow p-4 text-center text-gray-400" style={{ height: '400px' }}>
         <div className="flex items-center justify-center h-full">
           <div>
             <h3 className="text-xl font-semibold mb-2">Belum ada artikel</h3>
@@ -110,9 +110,9 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
   }
 
   return (
-    <div 
-      className="relative bg-duniacrypto-panel rounded-lg shadow p-0 overflow-hidden w-full max-w-full mb-6" 
-      style={{height: '400px'}}
+    <div
+      className="relative bg-duniacrypto-panel rounded-lg shadow p-0 overflow-hidden w-full max-w-full mb-6"
+      style={{ height: '400px' }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -146,15 +146,14 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
                 src={item.image}
                 alt={item.title}
                 className="w-full h-full object-cover rounded-t-lg bg-black/30 transition-transform group-hover:scale-105"
-                style={{margin: 0, padding: 0, width: '100%', height: '100%'}}
+                style={{ margin: 0, padding: 0, width: '100%', height: '100%' }}
                 onError={(event: React.SyntheticEvent<HTMLImageElement, Event>) => {
                   event.currentTarget.src = PLACEHOLDER;
                 }}
               />
               <div className="absolute top-4 left-4">
-                <span className={`inline-block px-3 py-1.5 rounded-full text-white font-bold text-sm tracking-wide shadow-lg ${
-                  item.category === 'newsroom' ? 'bg-blue-700' : 'bg-blue-500'
-                }`}>
+                <span className={`inline-block px-3 py-1.5 rounded-full text-white font-bold text-sm tracking-wide shadow-lg ${item.category === 'newsroom' ? 'bg-blue-700' : 'bg-blue-500'
+                  }`}>
                   {item.category === 'newsroom' ? 'News' : 'Academy'}
                 </span>
               </div>
@@ -162,8 +161,8 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
                 {/* Coin Logos Above Title */}
                 {item.coinTags && item.coinTags.length > 0 && (
                   <div className="mb-2">
-                    <CoinLogosOnly 
-                      coinTags={item.coinTags} 
+                    <CoinLogosOnly
+                      coinTags={item.coinTags}
                       size="sm"
                       maxDisplay={4}
                       className="justify-start"
@@ -171,7 +170,7 @@ const NewsSlider: React.FC<NewsSliderProps> = ({ articles = [] }) => {
                     />
                   </div>
                 )}
-                
+
                 <div className="text-lg md:text-2xl font-bold text-white line-clamp-2 drop-shadow-lg mb-8">
                   {item.title}
                 </div>

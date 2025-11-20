@@ -59,12 +59,12 @@ const NewsFeedServer = React.memo(({ articles = [], noTitle = false, initialCoun
       {!noTitle && (
         <h2 className="text-xl font-bold mb-6 text-white">Berita Terbaru</h2>
       )}
-      
+
       <div className="space-y-4">
         {sortedArticles.map((article) => (
           <a
             key={article._id}
-            href={`/${article.category === 'newsroom' ? 'newsroom' : 'academy'}/${article.slug.current}`}
+            href={`/${article.category === 'newsroom' ? 'newsroom' : 'crypto'}/${article.slug.current}`}
             className="block group hover:bg-white/10 rounded-lg p-4 transition cursor-pointer no-underline hover:no-underline focus:no-underline active:no-underline border border-gray-700 hover:border-gray-600"
           >
             <div className="flex gap-4">
@@ -84,15 +84,14 @@ const NewsFeedServer = React.memo(({ articles = [], noTitle = false, initialCoun
                 <div className="mb-2">
                   {/* Label and Coin Logos in same row */}
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className={`inline-block px-1.5 py-0.5 text-xs rounded text-white font-medium ${
-                      article.category === 'newsroom' ? 'bg-blue-700' : 'bg-blue-500'
-                    }`}>
+                    <span className={`inline-block px-1.5 py-0.5 text-xs rounded text-white font-medium ${article.category === 'newsroom' ? 'bg-blue-700' : 'bg-blue-500'
+                      }`}>
                       {article.category === 'newsroom' ? 'News' : 'Academy'}
                     </span>
                     {/* Coin Logos Beside Label */}
                     {article.coinTags && article.coinTags.length > 0 && (
-                      <CoinLogosOnly 
-                        coinTags={article.coinTags} 
+                      <CoinLogosOnly
+                        coinTags={article.coinTags}
                         size="xs"
                         maxDisplay={3}
                         disableLinks={true}

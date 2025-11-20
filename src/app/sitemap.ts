@@ -47,18 +47,7 @@ async function getAllNewsroomArticles() {
   }
 }
 
-// Fetch all news slugs
-async function getAllNewsSlugs() {
-  try {
-    const articles = await getAllArticles()
-    return articles.filter(article => article.category === 'newsroom')
-      .map(article => article.slug?.current || '')
-      .filter(Boolean)
-  } catch (error) {
-    console.error('Error fetching news slugs:', error)
-    return []
-  }
-}
+
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
@@ -205,10 +194,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 
   // Fetch dynamic article pages
-  const [academyArticles, newsroomArticles, newsArticles] = await Promise.all([
+  const [academyArticles, newsroomArticles] = await Promise.all([
     getAllAcademyArticles(),
     getAllNewsroomArticles(),
-    getAllNewsSlugs(),
   ])
 
   // Add crypto articles (formerly academy)
@@ -227,13 +215,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  // Add news articles
-  const newsPages = newsArticles.map(slug => ({
-    url: `${baseUrl}/news/${slug}`,
-    lastModified,
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }))
+  // Add cryptocurrency detail pages
 
   // Add cryptocurrency detail pages
   const cryptocurrencyPages = allCryptoIds.map(id => ({
@@ -248,7 +230,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticPages,
     ...cryptoArticlePages,
     ...newsroomPages,
-    ...newsPages,
     ...cryptocurrencyPages,
   ]
 }

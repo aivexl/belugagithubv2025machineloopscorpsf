@@ -13,7 +13,7 @@ export default function robots(): MetadataRoute.Robots {
     '/test-*',
     '/profile',
     '/auth/',
-    '/academy/',
+    '/auth/',
   ]
 
   const allow = [
@@ -79,6 +79,12 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: 'Yandex',
         allow,
         disallow,
+        crawlDelay: 2,
+      },
+      // Allow AI Bots for better indexing
+      {
+        userAgent: ['GPTBot', 'ClaudeBot', 'CCBot', 'Google-Extended'],
+        allow: ['/'],
         crawlDelay: 2,
       },
     ],
