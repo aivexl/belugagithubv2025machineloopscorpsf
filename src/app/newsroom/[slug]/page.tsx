@@ -3,14 +3,14 @@ import { notFound } from 'next/navigation';
 import ArticleDetailClient from '../../../components/ArticleDetailClient';
 import type { Metadata } from 'next';
 
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: Promise<{ slug: string }> 
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params;
   const article = await getArticleBySlug(slug);
-  
+
   if (!article) {
     return {
       title: 'Article Not Found - Beluga',
@@ -20,7 +20,11 @@ export async function generateMetadata({
 
   const baseUrl = process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000';
   const articleUrl = `${baseUrl}/newsroom/${slug}`;
-  const imageUrl = article.imageUrl || `${baseUrl}/Asset/belugalogov3white.png`;
+
+  // Fix: Generate image URL correctly using addImageUrls helper
+  const [articleWithImage] = addImageUrls([article]);
+  const imageUrl = articleWithImage.imageUrl || `${baseUrl}/Asset/belugalogov3white.png`;
+
   const description = article.metaDescription || article.excerpt || 'Berita cryptocurrency terkini dari Beluga.';
 
   return {
@@ -59,28 +63,28 @@ export async function generateMetadata({
   };
 }
 
-export default async function NewsroomDetailPage({ 
-  params 
-}: { 
-  params: Promise<{ slug: string }> 
+export default async function NewsroomDetailPage({
+  params
+}: {
+  params: Promise<{ slug: string }>
 }) {
   try {
     const { slug } = await params;
     const article = await getArticleBySlug(slug);
-    
+
     if (!article) {
       console.log('Article not found for slug:', slug);
       return notFound();
     }
-    
+
     const [articleWithImage] = addImageUrls([article]);
-    
+
     // Get related articles (same category, excluding current article)
     const allArticles = await getAllArticles();
     const relatedArticles = allArticles
       .filter(a => a._id !== article._id && a.category === 'newsroom')
       .slice(0, 6);
-    
+
     const relatedArticlesWithImages = addImageUrls(relatedArticles);
 
     // Ensure article exists before rendering
@@ -88,7 +92,45 @@ export default async function NewsroomDetailPage({
       return notFound();
     }
 
-    return <ArticleDetailClient article={articleWithImage} relatedArticles={relatedArticlesWithImages} />;
+    const baseUrl = process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000';
+    const articleUrl = `${baseUrl}/newsroom/${slug}`;
+    const imageUrl = articleWithImage.imageUrl || `${baseUrl}/Asset/belugalogov3white.png`;
+
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'NewsArticle',
+      headline: article.title,
+      description: article.metaDescription || article.excerpt,
+      image: [imageUrl],
+      datePublished: article.publishedAt,
+      dateModified: article.publishedAt,
+      author: {
+        '@type': 'Person',
+        name: article.source || 'Beluga Team',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Beluga',
+        logo: {
+          '@type': 'ImageObject',
+          url: `${baseUrl}/Asset/belugalogov3white.png`,
+        },
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': articleUrl,
+      },
+    };
+
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <ArticleDetailClient article={articleWithImage} relatedArticles={relatedArticlesWithImages} />
+      </>
+    );
   } catch (error) {
     console.error('Error in NewsroomDetailPage:', error);
     return notFound();

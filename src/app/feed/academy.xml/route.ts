@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getArticlesByCategory, addImageUrls } from '../../../utils/sanity';
 
-const baseUrl = process.env.NODE_ENV === 'production' 
-  ? 'https://beluga.id' 
+const baseUrl = process.env.NODE_ENV === 'production'
+  ? 'https://beluga.id'
   : 'http://localhost:3000';
 
 // Helper function to extract text from portable text content
@@ -28,14 +28,14 @@ function formatRSSDate(date: string): string {
   const d = new Date(date);
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  
+
   const day = days[d.getUTCDay()];
   const month = months[d.getUTCMonth()];
   const year = d.getUTCFullYear();
   const hours = String(d.getUTCHours()).padStart(2, '0');
   const minutes = String(d.getUTCMinutes()).padStart(2, '0');
   const seconds = String(d.getUTCSeconds()).padStart(2, '0');
-  
+
   return `${day}, ${String(d.getUTCDate()).padStart(2, '0')} ${month} ${year} ${hours}:${minutes}:${seconds} +0000`;
 }
 
@@ -54,7 +54,7 @@ export async function GET() {
   try {
     const articles = await getArticlesByCategory('academy');
     const articlesWithImages = addImageUrls(articles);
-    
+
     // Sort by published date (newest first) and limit to 50 most recent
     const sortedArticles = articlesWithImages
       .sort((a, b) => {
@@ -66,7 +66,7 @@ export async function GET() {
 
     // Build RSS XML
     const rssItems = sortedArticles.map((article) => {
-      const articleUrl = `${baseUrl}/academy/${article.slug?.current || article.slug}`;
+      const articleUrl = `${baseUrl}/crypto/${article.slug?.current || article.slug}`;
       const imageUrl = article.imageUrl || `${baseUrl}/Asset/belugalogov3white.png`;
       const description = article.excerpt || extractTextFromContent(article.content);
       const pubDate = formatRSSDate(article.publishedAt);

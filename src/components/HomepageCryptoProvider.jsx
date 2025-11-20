@@ -12,7 +12,7 @@ export function HomepageCryptoProvider({ children }) {
   const [homepageGlobal, setHomepageGlobal] = useState(null);
   const [homepageLoading, setHomepageLoading] = useState(true);
   const [homepageError, setHomepageError] = useState(null);
-  
+
   // ENTERPRISE-LEVEL: Request deduplication and cancellation
   const isFetchingRef = useRef(false);
   const abortControllerRef = useRef(null);
@@ -48,7 +48,7 @@ export function HomepageCryptoProvider({ children }) {
       abortControllerRef.current = new AbortController();
 
       console.log('[HomepageCrypto] Fetching homepage-specific crypto data...');
-      
+
       // ENTERPRISE-LEVEL: Parallel API calls with timeout
       const [coinsResponse, globalResponse] = await Promise.all([
         fetch('/api/coingecko-proxy/coins', {
@@ -80,8 +80,9 @@ export function HomepageCryptoProvider({ children }) {
       });
 
       // Update isolated homepage state
+      // Extract data from wrapper if it exists (API returns { data: {...} })
       setHomepageCoins(coinsData);
-      setHomepageGlobal(globalData);
+      setHomepageGlobal(globalData?.data || globalData);
       setHomepageError(null);
       setHomepageLoading(false); // Set loading to false after successful data fetch
       lastFetchTimeRef.current = now;
@@ -94,7 +95,7 @@ export function HomepageCryptoProvider({ children }) {
 
       console.error('[HomepageCrypto] Error fetching homepage data:', error);
       setHomepageError('Failed to fetch homepage crypto data');
-      
+
       // ENTERPRISE-LEVEL: Clear data and show skeleton on error (no internet/API failure)
       // Never show old/dummy data when there's an error
       setHomepageCoins([]);
@@ -108,7 +109,7 @@ export function HomepageCryptoProvider({ children }) {
   // ENTERPRISE-LEVEL: Cleanup and initialization
   useEffect(() => {
     console.log('[HomepageCrypto] Initializing homepage crypto provider...');
-    
+
     // Initial fetch
     fetchHomepageData();
 
@@ -121,11 +122,11 @@ export function HomepageCryptoProvider({ children }) {
     // Cleanup function
     return () => {
       console.log('[HomepageCrypto] Cleaning up homepage crypto provider...');
-      
+
       if (fetchIntervalRef.current) {
         clearInterval(fetchIntervalRef.current);
       }
-      
+
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -146,7 +147,7 @@ export function HomepageCryptoProvider({ children }) {
     homepageLoading,
     homepageError,
     refreshHomepageData,
-    
+
     // ENTERPRISE-LEVEL: Helper functions for homepage components
     getTop10ByMarketCap: () => homepageCoins.slice(0, 10),
     getTop10ByVolume: () => [...homepageCoins].sort((a, b) => (b.total_volume || 0) - (a.total_volume || 0)).slice(0, 10),

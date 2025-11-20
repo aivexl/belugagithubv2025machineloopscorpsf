@@ -18,7 +18,7 @@ dayjs.locale('id');
 async function getArticlesByCategory(category) {
   try {
     console.log('AcademyClientEnterprise: Fetching articles from Sanity for category:', category);
-    
+
     const query = `
       *[_type == "article" && category == $category] | order(publishedAt desc) {
         _id,
@@ -49,15 +49,15 @@ async function getArticlesByCategory(category) {
         }
       }
     `;
-    
+
     const data = await client.fetch(query, { category });
-    
+
     console.log('AcademyClientEnterprise: Raw Sanity response:', {
       totalArticles: data?.length || 0,
       sampleArticle: data?.[0] || null,
       imageData: data?.[0]?.mainImage || 'No image URL'
     });
-    
+
     return data;
   } catch (error) {
     console.error('AcademyClientEnterprise: Sanity query failed:', error);
@@ -131,21 +131,21 @@ export default function AcademyClientEnterprise() {
 
         // ENTERPRISE-LEVEL: Add performance monitoring
         const startTime = performance.now();
-        
+
         // Fetch real articles from Sanity
         const data = await getArticlesByCategory('academy');
-        
+
         const fetchTime = performance.now() - startTime;
-        
+
         // ENTERPRISE-LEVEL: Validate data structure
         if (!data || !Array.isArray(data)) {
           throw new Error(`Invalid data structure received: ${typeof data}`);
         }
-        
+
         // Transform articles to include proper image URLs using enterprise-level utility
         const articlesWithImages = data.map(article => {
           let imageUrl = '/Asset/belugalogov3white.png'; // Default fallback
-          
+
           // ENTERPRISE-LEVEL IMAGE PROCESSING: Multiple fallback strategies
           if (article.mainImage && typeof article.mainImage === 'string' && article.mainImage.trim() !== '') {
             // Use direct Sanity URL if available
@@ -161,23 +161,23 @@ export default function AcademyClientEnterprise() {
               console.warn('AcademyClientEnterprise: Image generation failed for article:', article.title, error);
             }
           }
-          
+
           return {
             ...article,
             mainImage: imageUrl
           };
         });
-        
+
         setArticles(articlesWithImages);
-        
+
         const totalTime = performance.now() - startTime;
-        
+
       } catch (error) {
         console.error('AcademyClientEnterprise: Error loading articles from Sanity:', error);
-        
+
         // ENTERPRISE-LEVEL: Provide user-friendly error messages
         let userMessage = 'Failed to load articles from CMS. Please try again later.';
-        
+
         if (error instanceof Error) {
           if (error.message.includes('timeout')) {
             userMessage = 'Request timed out. Please check your connection and try again.';
@@ -189,10 +189,10 @@ export default function AcademyClientEnterprise() {
             userMessage = 'Service configuration error. Please contact support.';
           }
         }
-        
+
         setError(userMessage);
         setArticles([]); // Empty array on error
-        
+
         // ENTERPRISE-LEVEL: Log detailed error for debugging
         console.error('AcademyClientEnterprise: Detailed error analysis:', {
           errorType: error?.constructor?.name,
@@ -249,8 +249,8 @@ export default function AcademyClientEnterprise() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center py-16">
           <div className="text-red-400 text-lg mb-4">{error}</div>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
           >
             Retry Loading
@@ -294,7 +294,7 @@ export default function AcademyClientEnterprise() {
           {filteredArticles.slice(0, displayCount).map((article) => (
             <Link
               key={article._id}
-              href={`/academy/${article.slug?.current || article.slug}`}
+              href={`/crypto/${article.slug?.current || article.slug}`}
               className="block group no-underline hover:no-underline focus:no-underline active:no-underline"
             >
               <div className="bg-duniacrypto-panel border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors group h-full flex flex-col">
@@ -312,21 +312,21 @@ export default function AcademyClientEnterprise() {
                 <div className="p-4 flex flex-col flex-1">
                   {/* Category Badge */}
                   <div className="mb-3">
-          {/* Label and Coin Logos in same row */}
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="px-1.5 py-0.5 text-xs font-medium rounded text-white bg-blue-500">
-                      Academy
-                    </span>
-            {/* Coin Logos Beside Label */}
-            {article.coinTags && article.coinTags.length > 0 && (
-              <CoinLogosOnly 
-                coinTags={article.coinTags} 
-                size="xs"
-                maxDisplay={2}
-                disableLinks={true}
-              />
-            )}
-          </div>
+                    {/* Label and Coin Logos in same row */}
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="px-1.5 py-0.5 text-xs font-medium rounded text-white bg-blue-500">
+                        Academy
+                      </span>
+                      {/* Coin Logos Beside Label */}
+                      {article.coinTags && article.coinTags.length > 0 && (
+                        <CoinLogosOnly
+                          coinTags={article.coinTags}
+                          size="xs"
+                          maxDisplay={2}
+                          disableLinks={true}
+                        />
+                      )}
+                    </div>
                   </div>
 
                   {/* Title */}
@@ -342,14 +342,14 @@ export default function AcademyClientEnterprise() {
                         {article.level}
                       </span>
                     )}
-                    
+
                     {/* Topics Tag */}
                     {article.topics && (
                       <span className="px-2 py-1 bg-blue-900/50 text-blue-300 text-xs rounded">
                         {article.topics}
                       </span>
                     )}
-                    
+
                     {/* Networks Tag */}
                     {article.networks && (
                       <span className="px-2 py-1 bg-purple-900/50 text-purple-300 text-xs rounded">
@@ -362,7 +362,7 @@ export default function AcademyClientEnterprise() {
             </Link>
           ))}
         </div>
-        
+
         {/* Load More Button - EXACT PIXEL-PERFECT DESIGN */}
         {displayCount < filteredArticles.length && (
           <div className="text-center">

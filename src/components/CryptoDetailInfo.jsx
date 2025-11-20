@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { getAllArticles, getAcademyArticlesWithFallback, getArticlesByCoinTags } from '../utils/sanity';
 import { urlFor } from '../utils/sanityImageUtils';
 import { CoinLogosOnly } from './CoinTags';
@@ -47,14 +48,21 @@ const getArticlesForCoin = async (coinSymbol, category) => {
     const databaseSymbol = getDatabaseCoinSymbol(coinSymbol);
     console.log(`🔍 Mapping: ${coinSymbol} (CoinGecko) -> ${databaseSymbol} (Database)`);
 
-    // Filter articles that have coin tags matching the database symbol
+    // Filter articles that have coin tags matching the database symbol OR the coin symbol directly
     const filteredArticles = articles.filter(article =>
-      article.coinTags && article.coinTags.some(tag =>
-        tag.symbol === databaseSymbol
-      )
+      article.coinTags && article.coinTags.some(tag => {
+        // Match by database symbol (e.g. BTC)
+        const matchDatabase = tag.symbol === databaseSymbol;
+        // Match by direct symbol (case-insensitive)
+        const matchSymbol = tag.symbol?.toLowerCase() === coinSymbol?.toLowerCase();
+        // Match by name (case-insensitive) - e.g. tag.name="Bitcoin" vs coinSymbol="bitcoin" (which is usually id, but let's try)
+        // We don't have coin name here easily, but we can try to match tag name with coinSymbol if coinSymbol looks like a name
+
+        return matchDatabase || matchSymbol;
+      })
     );
 
-    console.log(`✅ Filtered ${filteredArticles.length} articles for ${databaseSymbol}`);
+    console.log(`✅ Filtered ${filteredArticles.length} articles for ${databaseSymbol} / ${coinSymbol}`);
     filteredArticles.forEach(article => {
       console.log(`   - ${article.title} (${article.category}): ${article.coinTags.map(t => t.symbol).join(', ')}`);
     });
@@ -123,26 +131,26 @@ const calculateAge = (dateString) => {
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   const diffInHours = Math.floor(diffInMinutes / 60);
   const diffInDays = Math.floor(diffInHours / 24);
-  
+
   // Calculate years, months, and days more accurately
   const years = Math.floor(diffInDays / 365.25);
   const remainingDaysAfterYears = diffInDays % 365.25;
   const months = Math.floor(remainingDaysAfterYears / 30.44);
   const days = Math.floor(remainingDaysAfterYears % 30.44);
-  
+
   // For very short periods, show seconds/minutes/hours
   if (diffInSeconds < 60) return `${diffInSeconds}s`;
   if (diffInMinutes < 60) return `${diffInMinutes}m`;
   if (diffInHours < 24) return `${diffInHours}h`;
   if (diffInDays < 30) return `${diffInDays}d`;
-  
+
   // For periods less than a year, show months and days
   if (years === 0) {
     if (months === 0) return `${days}d`;
     if (days === 0) return `${months}m`;
     return `${months}m ${days}d`;
   }
-  
+
   // For periods of a year or more, show years, months, and days
   if (months === 0 && days === 0) return `${years}y`;
   if (days === 0) return `${years}y ${months}m`;
@@ -354,7 +362,7 @@ export default function CryptoDetailInfo({
       {showOverview && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
           <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">Overview</h3>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1 min-w-0">
               <p className="text-gray-400 text-xs truncate font-medium">Current Price</p>
@@ -365,7 +373,7 @@ export default function CryptoDetailInfo({
                 {formatPercentage(coinData.price_change_percentage_24h)}
               </div>
             </div>
-            
+
             <div className="space-y-1 min-w-0">
               <p className="text-gray-400 text-xs truncate font-medium">Market Cap</p>
               <p className="text-white font-bold text-sm truncate">
@@ -373,14 +381,14 @@ export default function CryptoDetailInfo({
               </p>
               <p className="text-gray-400 text-xs truncate">Rank #{coinData.market_cap_rank}</p>
             </div>
-            
+
             <div className="space-y-1 min-w-0">
               <p className="text-gray-400 text-xs truncate font-medium">24h Volume</p>
               <p className="text-white font-bold text-sm truncate">
                 ${formatMarketCap(coinData.total_volume)}
               </p>
             </div>
-            
+
             <div className="space-y-1 min-w-0">
               <p className="text-gray-400 text-xs truncate font-medium">Circulating Supply</p>
               <p className="text-white font-bold text-sm truncate">
@@ -395,7 +403,7 @@ export default function CryptoDetailInfo({
       {showPerformance && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
           <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">Performance</h3>
-          
+
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
               <p className="text-gray-400 text-xs mb-1 truncate font-medium">1h</p>
@@ -403,40 +411,40 @@ export default function CryptoDetailInfo({
                 {formatPercentage(coinData.price_change_percentage_1h_in_currency)}
               </div>
             </div>
-            
+
             <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
               <p className="text-gray-400 text-xs mb-1 truncate font-medium">24h</p>
               <div className="font-semibold text-xs truncate">
                 {formatPercentage(coinData.price_change_percentage_24h_in_currency)}
               </div>
             </div>
-            
+
             <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
               <p className="text-gray-400 text-xs mb-1 truncate font-medium">7d</p>
               <div className="font-semibold text-xs truncate">
                 {formatPercentage(coinData.price_change_percentage_7d_in_currency)}
               </div>
             </div>
-            
+
             <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
               <p className="text-gray-400 text-xs mb-1 truncate font-medium">30d</p>
               <div className="font-semibold text-xs truncate">
                 {formatPercentage(coinData.price_change_percentage_30d_in_currency)}
               </div>
             </div>
-            
+
             <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
               <p className="text-gray-400 text-xs mb-1 truncate font-medium">1y</p>
               <div className="font-semibold text-xs truncate">
                 {formatPercentage(coinData.price_change_percentage_1y_in_currency)}
               </div>
             </div>
-            
+
             <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
               <p className="text-gray-400 text-xs mb-1 truncate font-medium">ATH</p>
               <div className="font-semibold text-xs text-red-400 truncate">
-                {detailedData?.market_data?.ath_change_percentage?.usd ? 
-                  `${detailedData.market_data.ath_change_percentage.usd.toFixed(2)}%` : 
+                {detailedData?.market_data?.ath_change_percentage?.usd ?
+                  `${detailedData.market_data.ath_change_percentage.usd.toFixed(2)}%` :
                   'N/A'
                 }
               </div>
@@ -449,7 +457,7 @@ export default function CryptoDetailInfo({
       {showSupplyInfo && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
           <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">Supply</h3>
-          
+
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
               <p className="text-gray-400 text-xs mb-1 truncate font-medium">Circulating Supply</p>
@@ -460,12 +468,12 @@ export default function CryptoDetailInfo({
                 {coinData.symbol?.toUpperCase()}
               </div>
             </div>
-            
+
             <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
               <p className="text-gray-400 text-xs mb-1 truncate font-medium">Total Supply</p>
               <div className="font-semibold text-xs truncate">
-                {(detailedData?.market_data?.total_supply || coinData.total_supply) ? 
-                  formatNumber(detailedData.market_data?.total_supply || coinData.total_supply) : 
+                {(detailedData?.market_data?.total_supply || coinData.total_supply) ?
+                  formatNumber(detailedData.market_data?.total_supply || coinData.total_supply) :
                   'Unlimited'
                 }
               </div>
@@ -473,12 +481,12 @@ export default function CryptoDetailInfo({
                 {(detailedData?.market_data?.total_supply || coinData.total_supply) ? coinData.symbol?.toUpperCase() : ''}
               </div>
             </div>
-            
+
             <div className="text-center p-3 bg-gray-700/50 rounded-lg min-w-0 backdrop-blur-sm">
               <p className="text-gray-400 text-xs mb-1 truncate font-medium">Max Supply</p>
               <div className="font-semibold text-xs truncate">
-                {(detailedData?.market_data?.max_supply || coinData.max_supply) ? 
-                  formatNumber(detailedData.market_data?.max_supply || coinData.max_supply) : 
+                {(detailedData?.market_data?.max_supply || coinData.max_supply) ?
+                  formatNumber(detailedData.market_data?.max_supply || coinData.max_supply) :
                   'Unlimited'
                 }
               </div>
@@ -494,7 +502,7 @@ export default function CryptoDetailInfo({
       {showSupplyInfo && detailedData && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
           <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">Supply Information</h3>
-          
+
           <div className="space-y-3">
             <div className="flex justify-between items-center py-2 border-b border-gray-600/30">
               <span className="text-gray-400 text-xs font-medium">Circulating Supply</span>
@@ -502,67 +510,67 @@ export default function CryptoDetailInfo({
                 {formatNumber(detailedData.market_data?.circulating_supply || coinData.circulating_supply)} {coinData.symbol?.toUpperCase()}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center py-2 border-b border-gray-600/30">
               <span className="text-gray-400 text-xs font-medium">Total Supply</span>
               <span className="text-white font-semibold text-xs">
-                {(detailedData.market_data?.total_supply || coinData.total_supply) ? 
-                  `${formatNumber(detailedData.market_data?.total_supply || coinData.total_supply)} ${coinData.symbol?.toUpperCase()}` : 
+                {(detailedData.market_data?.total_supply || coinData.total_supply) ?
+                  `${formatNumber(detailedData.market_data?.total_supply || coinData.total_supply)} ${coinData.symbol?.toUpperCase()}` :
                   'Unlimited'
                 }
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center py-2 border-b border-gray-600/30">
               <span className="text-gray-400 text-xs font-medium">Max Supply</span>
               <span className="text-white font-semibold text-xs">
-                {(detailedData.market_data?.max_supply || coinData.max_supply) ? 
-                  `${formatNumber(detailedData.market_data?.max_supply || coinData.max_supply)} ${coinData.symbol?.toUpperCase()}` : 
+                {(detailedData.market_data?.max_supply || coinData.max_supply) ?
+                  `${formatNumber(detailedData.market_data?.max_supply || coinData.max_supply)} ${coinData.symbol?.toUpperCase()}` :
                   'Unlimited'
                 }
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center py-2 border-b border-gray-600/30">
               <span className="text-gray-400 text-xs font-medium">Volume/Market Cap</span>
               <span className="text-white font-semibold text-xs">
-                {coinData.total_volume && coinData.market_cap ? 
-                  `${(coinData.total_volume / coinData.market_cap * 100).toFixed(2)}%` : 
+                {coinData.total_volume && coinData.market_cap ?
+                  `${(coinData.total_volume / coinData.market_cap * 100).toFixed(2)}%` :
                   'N/A'
                 }
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center py-2 border-b border-gray-600/30">
               <span className="text-gray-400 text-xs font-medium">Fully Diluted Valuation</span>
               <span className="text-white font-semibold text-xs">
-                {detailedData.market_data?.fully_diluted_valuation?.usd ? 
-                  `$${formatMarketCap(detailedData.market_data.fully_diluted_valuation.usd)}` : 
+                {detailedData.market_data?.fully_diluted_valuation?.usd ?
+                  `$${formatMarketCap(detailedData.market_data.fully_diluted_valuation.usd)}` :
                   'N/A'
                 }
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center py-2 border-b border-gray-600/30">
               <span className="text-gray-400 text-xs font-medium">Age of Coin</span>
               <span className="text-white font-semibold text-xs">
-                {detailedData.genesis_date ? 
-                  calculateAge(detailedData.genesis_date) : 
+                {detailedData.genesis_date ?
+                  calculateAge(detailedData.genesis_date) :
                   'N/A'
                 }
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center py-2 border-b border-gray-600/30">
               <span className="text-gray-400 text-xs font-medium">Platform</span>
               <span className="text-white font-semibold text-xs">
-                {detailedData.asset_platform_id ? 
-                  detailedData.asset_platform_id.toUpperCase() : 
+                {detailedData.asset_platform_id ?
+                  detailedData.asset_platform_id.toUpperCase() :
                   'Native'
                 }
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center py-2">
               <span className="text-gray-400 text-xs font-medium">Category</span>
               <span className="text-white font-semibold text-xs">
@@ -595,7 +603,7 @@ export default function CryptoDetailInfo({
 
       {/* Academy & News Section - Combined Horizontal Grid */}
       <div className="space-y-6">
-      {/* Academy Section */}
+        {/* Academy Section */}
         <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm rounded-xl border border-gray-600/30 p-6 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -610,106 +618,107 @@ export default function CryptoDetailInfo({
               Research Articles
             </div>
           </div>
-        
-        {(() => {
-          // CTO Debug: Log conditional rendering decision
-          console.log('🎭 ACADEMY: Conditional rendering check:', {
-            loadingAcademy,
-            academyArticlesLength: academyArticles.length,
-            shouldShowLoading: loadingAcademy,
-            shouldShowArticles: !loadingAcademy && academyArticles.length > 0,
-            shouldShowComingSoon: !loadingAcademy && academyArticles.length === 0
-          });
 
-          if (loadingAcademy) {
-            return (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                  <div className="text-gray-400 text-sm">Loading academy content...</div>
+          {(() => {
+            // CTO Debug: Log conditional rendering decision
+            console.log('🎭 ACADEMY: Conditional rendering check:', {
+              loadingAcademy,
+              academyArticlesLength: academyArticles.length,
+              shouldShowLoading: loadingAcademy,
+              shouldShowArticles: !loadingAcademy && academyArticles.length > 0,
+              shouldShowComingSoon: !loadingAcademy && academyArticles.length === 0
+            });
+
+            if (loadingAcademy) {
+              return (
+                <div className="flex items-center justify-center py-12">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="text-gray-400 text-sm">Loading academy content...</div>
+                  </div>
                 </div>
-              </div>
-            );
-          }
+              );
+            }
 
-          if (academyArticles.length > 0) {
-            return (
-            <div className="relative">
-              {/* Horizontal Scroll Container */}
-              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-track-gray-700 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400">
-            {academyArticles.map((article) => (
-                  <div
-                    key={article._id}
-                    className="flex-shrink-0 w-72 bg-gray-700/40 rounded-lg overflow-hidden hover:bg-gray-700/60 transition-all duration-300 group cursor-pointer border border-gray-600/30 hover:border-gray-500/50 hover:shadow-lg hover:shadow-blue-500/10"
-                  >
-                    {/* Article Image */}
-                    <div className="relative h-32 bg-gradient-to-br from-blue-900/30 to-blue-800/30 overflow-hidden">
-                      {article.image?.asset ? (
-                        <Image
-                          src={urlFor(article.image).width(400).height(200).url()}
-                          alt={article.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="text-2xl text-blue-400 opacity-30">📚</div>
+            if (academyArticles.length > 0) {
+              return (
+                <div className="relative">
+                  {/* Horizontal Scroll Container */}
+                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-track-gray-700 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400">
+                    {academyArticles.map((article) => (
+                      <Link
+                        key={article._id}
+                        href={`/crypto/${article.slug?.current || article.slug}`}
+                        className="flex-shrink-0 w-72 bg-gray-700/40 rounded-lg overflow-hidden hover:bg-gray-700/60 transition-all duration-300 group cursor-pointer border border-gray-600/30 hover:border-gray-500/50 hover:shadow-lg hover:shadow-blue-500/10"
+                      >
+                        {/* Article Image */}
+                        <div className="relative h-32 bg-gradient-to-br from-blue-900/30 to-blue-800/30 overflow-hidden">
+                          {article.image?.asset ? (
+                            <Image
+                              src={urlFor(article.image).width(400).height(200).url()}
+                              alt={article.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <div className="text-2xl text-blue-400 opacity-30">📚</div>
+                            </div>
+                          )}
+
+                          {/* Overlay Gradient */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+
+                          {/* Coin Tags */}
+                          <div className="absolute top-2 right-2">
+                            {article.coinTags && article.coinTags.length > 0 && (
+                              <CoinLogosOnly
+                                coinTags={article.coinTags}
+                                size="xs"
+                                maxDisplay={3}
+                              />
+                            )}
+                          </div>
+
+                          {/* Category Badge */}
+                          <div className="absolute bottom-2 left-2">
+                            <span className="px-2 py-1 text-xs font-medium rounded-md text-white bg-blue-500/80 backdrop-blur-sm">
+                              Academy
+                            </span>
+                          </div>
                         </div>
-                      )}
 
-                      {/* Overlay Gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        {/* Article Content */}
+                        <div className="p-4">
+                          <div className="text-xs text-gray-400 mb-1 flex items-center gap-2">
+                            <span>📅</span>
+                            {dayjs(article.publishedAt).format('MMM D, YYYY')}
+                          </div>
 
-                      {/* Coin Tags */}
-                      <div className="absolute top-2 right-2">
-                        {article.coinTags && article.coinTags.length > 0 && (
-                          <CoinLogosOnly
-                            coinTags={article.coinTags}
-                            size="xs"
-                            maxDisplay={3}
-                          />
-                        )}
-                      </div>
+                          <h4 className="text-white font-medium text-sm line-clamp-2 mb-3 group-hover:text-blue-400 transition-colors leading-relaxed">
+                            {article.title}
+                          </h4>
 
-                      {/* Category Badge */}
-                      <div className="absolute bottom-2 left-2">
-                        <span className="px-2 py-1 text-xs font-medium rounded-md text-white bg-blue-500/80 backdrop-blur-sm">
-                          Academy
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Article Content */}
-                    <div className="p-4">
-                      <div className="text-xs text-gray-400 mb-1 flex items-center gap-2">
-                        <span>📅</span>
-                        {dayjs(article.publishedAt).format('MMM D, YYYY')}
-                  </div>
-                  
-                      <h4 className="text-white font-medium text-sm line-clamp-2 mb-3 group-hover:text-blue-400 transition-colors leading-relaxed">
-                        {article.title}
-                      </h4>
-
-                      <div className="flex items-center justify-between text-xs text-gray-400">
-                        <span>Dunia Crypto Team</span>
-                        <div className="flex -space-x-1">
-                          <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
-                          <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
+                          <div className="flex items-center justify-between text-xs text-gray-400">
+                            <span>Dunia Crypto Team</span>
+                            <div className="flex -space-x-1">
+                              <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
+                              <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      </Link>
+                    ))}
                   </div>
-                ))}
+
+                  {/* Scroll Indicator */}
+                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gray-700/50 rounded-full flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
+                    <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
-                  
-              {/* Scroll Indicator */}
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gray-700/50 rounded-full flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
-                <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-            );
+                </div>
+              );
             }
 
             // CTO Debug: Should show "Coming Soon" for academy
@@ -766,82 +775,83 @@ export default function CryptoDetailInfo({
 
             if (newsArticles.length > 0) {
               return (
-            <div className="relative">
-              {/* Horizontal Scroll Container */}
-              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-track-gray-700 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400">
-                {newsArticles.map((article) => (
-                  <div
-                    key={article._id}
-                    className="flex-shrink-0 w-72 bg-gray-700/40 rounded-lg overflow-hidden hover:bg-gray-700/60 transition-all duration-300 group cursor-pointer border border-gray-600/30 hover:border-gray-500/50 hover:shadow-lg hover:shadow-green-500/10"
-                  >
-                    {/* Article Image */}
-                    <div className="relative h-32 bg-gradient-to-br from-green-900/30 to-green-800/30 overflow-hidden">
-                      {article.image?.asset ? (
-                        <Image
-                          src={urlFor(article.image).width(400).height(200).url()}
-                          alt={article.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="text-2xl text-green-400 opacity-30">📰</div>
+                <div className="relative">
+                  {/* Horizontal Scroll Container */}
+                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-track-gray-700 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400">
+                    {newsArticles.map((article) => (
+                      <Link
+                        key={article._id}
+                        href={`/newsroom/${article.slug?.current || article.slug}`}
+                        className="flex-shrink-0 w-72 bg-gray-700/40 rounded-lg overflow-hidden hover:bg-gray-700/60 transition-all duration-300 group cursor-pointer border border-gray-600/30 hover:border-gray-500/50 hover:shadow-lg hover:shadow-green-500/10"
+                      >
+                        {/* Article Image */}
+                        <div className="relative h-32 bg-gradient-to-br from-green-900/30 to-green-800/30 overflow-hidden">
+                          {article.image?.asset ? (
+                            <Image
+                              src={urlFor(article.image).width(400).height(200).url()}
+                              alt={article.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <div className="text-2xl text-green-400 opacity-30">📰</div>
+                            </div>
+                          )}
+
+                          {/* Overlay Gradient */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+
+                          {/* Coin Tags */}
+                          <div className="absolute top-2 right-2">
+                            {article.coinTags && article.coinTags.length > 0 && (
+                              <CoinLogosOnly
+                                coinTags={article.coinTags}
+                                size="xs"
+                                maxDisplay={3}
+                              />
+                            )}
+                          </div>
+
+                          {/* Category Badge */}
+                          <div className="absolute bottom-2 left-2">
+                            <span className="px-2 py-1 text-xs font-medium rounded-md text-white bg-green-500/80 backdrop-blur-sm">
+                              News
+                            </span>
+                          </div>
                         </div>
-                      )}
 
-                      {/* Overlay Gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        {/* Article Content */}
+                        <div className="p-4">
+                          <div className="text-xs text-gray-400 mb-1 flex items-center gap-2">
+                            <span>📅</span>
+                            {dayjs(article.publishedAt).format('MMM D, YYYY')}
+                          </div>
 
-                      {/* Coin Tags */}
-                      <div className="absolute top-2 right-2">
-                        {article.coinTags && article.coinTags.length > 0 && (
-                          <CoinLogosOnly
-                            coinTags={article.coinTags}
-                            size="xs"
-                            maxDisplay={3}
-                          />
-                        )}
-                      </div>
-                  
-                  {/* Category Badge */}
-                      <div className="absolute bottom-2 left-2">
-                        <span className="px-2 py-1 text-xs font-medium rounded-md text-white bg-green-500/80 backdrop-blur-sm">
-                          News
-                    </span>
+                          <h4 className="text-white font-medium text-sm line-clamp-2 mb-3 group-hover:text-green-400 transition-colors leading-relaxed">
+                            {article.title}
+                          </h4>
+
+                          <div className="flex items-center justify-between text-xs text-gray-400">
+                            <span>Dunia Crypto Team</span>
+                            <div className="flex -space-x-1">
+                              <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
+                              <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Scroll Indicator */}
+                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gray-700/50 rounded-full flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
+                    <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
                 </div>
-                
-                {/* Article Content */}
-                    <div className="p-4">
-                      <div className="text-xs text-gray-400 mb-1 flex items-center gap-2">
-                        <span>📅</span>
-                    {dayjs(article.publishedAt).format('MMM D, YYYY')}
-                  </div>
-                  
-                      <h4 className="text-white font-medium text-sm line-clamp-2 mb-3 group-hover:text-green-400 transition-colors leading-relaxed">
-                    {article.title}
-                  </h4>
-                  
-                      <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>Dunia Crypto Team</span>
-                        <div className="flex -space-x-1">
-                          <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
-                          <div className="w-5 h-5 bg-gray-600 rounded-full border-2 border-gray-700"></div>
-                        </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-              </div>
-
-              {/* Scroll Indicator */}
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gray-700/50 rounded-full flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
-                <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </div>
-            );
+              );
             }
 
             // CTO Debug: Should show "Coming Soon" for news
@@ -857,7 +867,7 @@ export default function CryptoDetailInfo({
               </div>
             );
           })()}
-      </div>
+        </div>
       </div>
 
     </div>

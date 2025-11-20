@@ -5,8 +5,8 @@ import { createClient as createSanityClient } from 'next-sanity'
 import { TOP_CRYPTO_IDS, getTrendingCoinIds } from '@/utils/getAllCoinIds'
 
 // Base URL for the site
-const baseUrl = process.env.NODE_ENV === 'production' 
-  ? 'https://beluga.id' 
+const baseUrl = process.env.NODE_ENV === 'production'
+  ? 'https://beluga.id'
   : 'http://localhost:3000'
 
 // Sanity client for fetching articles and news
@@ -64,7 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
   const lastModified = now.toISOString()
 
-  // Prepare crypto IDs (only for chart-txns pages)
+  // Prepare crypto IDs (for cryptocurrency detail pages)
   let allCryptoIds = TOP_CRYPTO_IDS
   try {
     const trendingIds = await getTrendingCoinIds()
@@ -190,7 +190,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/academy`,
+      url: `${baseUrl}/crypto`,
       lastModified,
       changeFrequency: 'daily' as const,
       priority: 0.9,
@@ -211,9 +211,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getAllNewsSlugs(),
   ])
 
-  // Add academy articles
-  const academyPages = academyArticles.map(article => ({
-    url: `${baseUrl}/academy/${article.slug?.current || article.slug}`,
+  // Add crypto articles (formerly academy)
+  const cryptoArticlePages = academyArticles.map(article => ({
+    url: `${baseUrl}/crypto/${article.slug?.current || article.slug}`,
     lastModified,
     changeFrequency: 'weekly' as const,
     priority: 0.7,
@@ -235,9 +235,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  // Add crypto chart transactions pages (allowed to be indexed)
-  const cryptoChartTxPages = allCryptoIds.map(id => ({
-    url: `${baseUrl}/crypto/${id}/chart-txns`,
+  // Add cryptocurrency detail pages
+  const cryptocurrencyPages = allCryptoIds.map(id => ({
+    url: `${baseUrl}/cryptocurrencies/${id}`,
     lastModified,
     changeFrequency: 'hourly' as const,
     priority: 0.7,
@@ -246,10 +246,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Combine all pages
   return [
     ...staticPages,
-    ...academyPages,
+    ...cryptoArticlePages,
     ...newsroomPages,
     ...newsPages,
-    ...cryptoChartTxPages,
+    ...cryptocurrencyPages,
   ]
 }
 

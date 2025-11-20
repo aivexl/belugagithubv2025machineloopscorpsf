@@ -13,16 +13,14 @@ export default function robots(): MetadataRoute.Robots {
     '/test-*',
     '/profile',
     '/auth/',
-    '/crypto/',
-    '/crypto/*/chart',
-    '/crypto/*/txns',
+    '/academy/',
   ]
 
   const allow = [
     '/',
-    '/crypto/*/chart-txns',
+    '/cryptocurrencies/*',
+    '/crypto/*',
     '/newsroom',
-    '/academy',
     '/about',
     '/contact',
     '/exchanges',
@@ -41,21 +39,21 @@ export default function robots(): MetadataRoute.Robots {
 
   return {
     rules: [
-      { 
-        userAgent: '*', 
-        allow, 
+      {
+        userAgent: '*',
+        allow,
         disallow,
         crawlDelay: 1,
       },
-      { 
-        userAgent: 'Googlebot', 
-        allow, 
+      {
+        userAgent: 'Googlebot',
+        allow,
         disallow,
         crawlDelay: 0,
       },
-      { 
-        userAgent: 'Bingbot', 
-        allow, 
+      {
+        userAgent: 'Bingbot',
+        allow,
         disallow,
         crawlDelay: 1,
       },

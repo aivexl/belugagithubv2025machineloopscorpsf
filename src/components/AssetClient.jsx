@@ -13,7 +13,7 @@ import MarketOverviewSimple from './MarketOverviewSimple';
 // Utility functions
 const formatPrice = (price) => {
   if (!price || price === 0) return '$0.00';
-  
+
   // Add commas for thousands and keep 2 decimal places
   return '$' + price.toLocaleString(undefined, {
     minimumFractionDigits: 2,
@@ -56,7 +56,7 @@ export default function AssetClient() {
   const [activeSection, setActiveSection] = useState('top-100');
   const [searchQuery, setSearchQuery] = useState('');
   const [cryptoFilter, setCryptoFilter] = useState('top-100');
-  
+
   // Debug logging for state changes
   useEffect(() => {
     console.log('AssetClient: State changed:', { activeSection, cryptoFilter, searchQuery });
@@ -67,10 +67,10 @@ export default function AssetClient() {
   const [showDateRangeFilter, setShowDateRangeFilter] = useState(false);
   const [dateRange, setDateRange] = useState('24h');
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'heatmap'
-  
+
   useEffect(() => {
     setIsClient(true);
-    
+
     // Debug logging for enterprise troubleshooting
     console.log('AssetClient: Component mounted with initial state:', {
       activeSection,
@@ -161,27 +161,26 @@ export default function AssetClient() {
     <>
       {/* DISABLED: CoinGeckoProvider to prevent data corruption from duplicate API calls */}
       {/* DISABLED: Ticker to prevent data corruption from duplicate API calls */}
-      
+
       {/* Main Layout */}
       <main className="w-full py-2 sm:py-3 md:py-4 lg:py-6">
-        
+
         {/* Market Overview - Always Visible */}
-         <section className="mb-3 sm:mb-4 md:mb-6 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
+        <section className="mb-3 sm:mb-4 md:mb-6 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
           <MarketOverviewRedesigned />
         </section>
 
         {/* Horizontal Menu Navigation */}
-         <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
           <div className="flex gap-2 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-hide">
             {menuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className={`px-3 py-1.5 rounded-md font-bold text-xs transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
-                  activeSection === item.id
+                className={`px-3 py-1.5 rounded-md font-bold text-xs transition-all duration-200 whitespace-nowrap flex-shrink-0 ${activeSection === item.id
                     ? 'bg-blue-600 text-white shadow-lg'
                     : 'bg-duniacrypto-panel text-gray-300 hover:bg-gray-800 hover:text-white border border-gray-700'
-                }`}
+                  }`}
               >
                 {item.label}
               </button>
@@ -192,7 +191,7 @@ export default function AssetClient() {
 
         {/* Search Bar for Top 100 */}
         {activeSection === 'top-100' && (
-           <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
+          <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
             <div className="relative">
               <input
                 type="text"
@@ -221,13 +220,13 @@ export default function AssetClient() {
         {/* Content Sections */}
         {activeSection === 'top-100' && (
           <section className="mb-3 sm:mb-4 md:mb-6">
-                         <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
-               <h2 className="text-sm sm:text-base md:text-lg font-bold text-white mb-2 sm:mb-3">
+            <div className="mb-2 sm:mb-3 md:mb-4 px-3 sm:px-4 md:px-6 lg:px-8 max-w-6xl mx-auto">
+              <h2 className="text-sm sm:text-base md:text-lg font-bold text-white mb-2 sm:mb-3">
                 Top 100 Cryptocurrencies
               </h2>
-              
+
               {/* Filter Controls */}
-               <div className="flex items-center gap-2 max-w-6xl mx-auto">
+              <div className="flex items-center gap-2 max-w-6xl mx-auto">
                 {/* Filter Button */}
                 <div className="relative">
                   <button
@@ -280,11 +279,10 @@ export default function AssetClient() {
                               setDateRange(option.id);
                               setShowDateRangeFilter(false);
                             }}
-                            className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                              dateRange === option.id
+                            className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${dateRange === option.id
                                 ? 'bg-blue-600 text-white'
                                 : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                            }`}
+                              }`}
                           >
                             {option.label}
                           </button>
@@ -298,11 +296,10 @@ export default function AssetClient() {
                 <div className="flex items-center bg-duniacrypto-panel border border-gray-700 rounded-lg p-0.5">
                   <button
                     onClick={() => setViewMode('table')}
-                    className={`px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
-                      viewMode === 'table'
+                    className={`px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 ${viewMode === 'table'
                         ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-gray-300 hover:text-white hover:bg-gray-700'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center space-x-1">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,11 +310,10 @@ export default function AssetClient() {
                   </button>
                   <button
                     onClick={() => setViewMode('heatmap')}
-                    className={`px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
-                      viewMode === 'heatmap'
+                    className={`px-2 py-1 rounded-md text-xs font-medium transition-all duration-200 ${viewMode === 'heatmap'
                         ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-gray-300 hover:text-white hover:bg-gray-700'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center space-x-1">
                       {/* Heatmap Icon - Grid of squares */}
@@ -338,27 +334,27 @@ export default function AssetClient() {
                 </div>
               </div>
             </div>
-            
-                         <div className={`bg-duniacrypto-panel border border-gray-700 max-w-6xl mx-auto ${viewMode === 'heatmap' ? 'p-1' : 'px-2'}`}>
+
+            <div className={`bg-duniacrypto-panel border border-gray-700 max-w-6xl mx-auto ${viewMode === 'heatmap' ? 'p-1' : 'px-2'}`}>
 
               {viewMode === 'table' ? (
-                <CryptoTableWithSearch 
-                  searchQuery={searchQuery} 
+                <CryptoTableWithSearch
+                  searchQuery={searchQuery}
                   filter={activeSection === 'top-100' ? 'top-100' : cryptoFilter}
                   dateRange={dateRange}
                   onCoinClick={(coin) => {
-                    // Navigate to chart-txns page
-                    router.push(`/crypto/${coin.id}/chart-txns`);
+                    // Navigate to cryptocurrency detail page
+                    router.push(`/cryptocurrencies/${coin.id}`);
                   }}
                 />
-                            ) : (
-                <CryptoHeatmap 
-                  searchQuery={searchQuery} 
+              ) : (
+                <CryptoHeatmap
+                  searchQuery={searchQuery}
                   filter={cryptoFilter}
                   dateRange={dateRange}
                   onCoinClick={(coin) => {
-                    // Navigate to chart-txns page
-                    router.push(`/crypto/${coin.id}/chart-txns`);
+                    // Navigate to cryptocurrency detail page
+                    router.push(`/cryptocurrencies/${coin.id}`);
                   }}
                 />
               )}
@@ -370,7 +366,7 @@ export default function AssetClient() {
         {showFilterDropdown && (
           <>
             {/* Backdrop */}
-            <div 
+            <div
               className="fixed inset-0 bg-black bg-opacity-50 z-50"
               onClick={() => {
                 setShowFilterDropdown(false);
@@ -378,14 +374,14 @@ export default function AssetClient() {
                 setShowDateRangeFilter(false);
               }}
             ></div>
-            
+
             {/* Filter Menu - Bottom Sheet */}
             <div className="fixed bottom-0 left-0 right-0 bg-duniacrypto-panel border-t border-gray-700 rounded-t-xl z-50 animate-slide-up">
               {/* Handle Bar */}
               <div className="flex justify-center pt-3 pb-2">
                 <div className="w-12 h-1 bg-gray-600 rounded-full"></div>
               </div>
-              
+
               {/* Header */}
               <div className="px-4 sm:px-6 pb-4 border-b border-gray-700">
                 <div className="flex items-center justify-between">
@@ -409,7 +405,7 @@ export default function AssetClient() {
                   )}
                 </div>
               </div>
-              
+
               {/* Filter Options */}
               <div className="p-4 sm:p-6">
                 {!showEcosystemSubFilter ? (
@@ -425,11 +421,10 @@ export default function AssetClient() {
                             setShowFilterDropdown(false);
                           }
                         }}
-                        className={`w-full flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-lg transition-all duration-200 ${
-                          cryptoFilter === option.id
+                        className={`w-full flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-lg transition-all duration-200 ${cryptoFilter === option.id
                             ? 'bg-blue-600 text-white shadow-lg'
                             : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700'
-                        }`}
+                          }`}
                       >
                         {/* Icon */}
                         <div className="flex-shrink-0">
@@ -454,7 +449,7 @@ export default function AssetClient() {
                             </svg>
                           )}
                         </div>
-                        
+
                         {/* Label */}
                         <div className="flex-1 text-left">
                           <div className="font-medium text-sm sm:text-base">{option.label}</div>
@@ -465,14 +460,14 @@ export default function AssetClient() {
                             {option.id === 'ecosystems' && 'Blockchain ecosystems'}
                           </div>
                         </div>
-                        
+
                         {/* Arrow for sub-filter */}
                         {option.hasSubFilter && (
                           <svg className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         )}
-                        
+
                         {/* Check Icon for Active */}
                         {cryptoFilter === option.id && !option.hasSubFilter && (
                           <svg className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -492,16 +487,15 @@ export default function AssetClient() {
                           setShowFilterDropdown(false);
                           setShowEcosystemSubFilter(false);
                         }}
-                        className={`flex items-center space-x-2 p-2 sm:p-3 rounded-lg transition-all duration-200 ${
-                          cryptoFilter === ecosystem.id
+                        className={`flex items-center space-x-2 p-2 sm:p-3 rounded-lg transition-all duration-200 ${cryptoFilter === ecosystem.id
                             ? 'bg-blue-600 text-white shadow-lg'
                             : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700'
-                        }`}
+                          }`}
                       >
                         {/* Logo */}
                         <div className="flex-shrink-0">
-                          <img 
-                            src={ecosystem.logo} 
+                          <img
+                            src={ecosystem.logo}
                             alt={ecosystem.label}
                             className="w-6 h-6 sm:w-8 sm:h-8 rounded-full"
                             onError={(e) => {
@@ -509,12 +503,12 @@ export default function AssetClient() {
                             }}
                           />
                         </div>
-                        
+
                         {/* Label */}
                         <div className="flex-1 text-left min-w-0">
                           <div className="font-medium text-xs sm:text-sm truncate">{ecosystem.label}</div>
                         </div>
-                        
+
                         {/* Check Icon for Active */}
                         {cryptoFilter === ecosystem.id && (
                           <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -526,7 +520,7 @@ export default function AssetClient() {
                   </div>
                 )}
               </div>
-              
+
               {/* Bottom Padding for Mobile */}
               <div className="h-4 sm:h-6"></div>
             </div>
@@ -539,12 +533,12 @@ export default function AssetClient() {
               Trending Coins
             </h2>
             <div className="bg-duniacrypto-panel rounded-lg border border-gray-700 p-2">
-                              <TrendingCoins100 
-                  onCoinClick={(coin) => {
-                    // Navigate to chart-txns page
-                    router.push(`/crypto/${coin.id}/chart-txns`);
-                  }}
-                />
+              <TrendingCoins100
+                onCoinClick={(coin) => {
+                  // Navigate to cryptocurrency detail page
+                  router.push(`/cryptocurrencies/${coin.id}`);
+                }}
+              />
             </div>
           </section>
         )}
@@ -592,7 +586,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
   const [lastValidData, setLastValidData] = useState(null); // Backup of last valid data
   const [dataUpdateCount, setDataUpdateCount] = useState(0); // Track data update frequency
   const [dataSource, setDataSource] = useState(null); // Track data source (API-only)
-  
+
   // CRITICAL FIX: Request deduplication to prevent race conditions
   const [isFetching, setIsFetching] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState(0);
@@ -618,7 +612,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         </svg>
       );
     }
-    
+
     return sortDirection === 'asc' ? (
       <svg className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -658,13 +652,13 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       // Set fetching state to prevent duplicates
       setIsFetching(true);
       setLastFetchTime(now);
-      
+
       // Create new abort controller for this request
       abortControllerRef.current = new AbortController();
 
       try {
         console.log('CryptoTableWithSearch: Fetching crypto data from CoinGecko proxy...');
-        
+
         const response = await fetch('/api/coingecko-proxy/coins', {
           signal: abortControllerRef.current.signal,
           headers: {
@@ -672,25 +666,25 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
             'Pragma': 'no-cache'
           }
         });
-        
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
-    
+
         // Enterprise-level data validation
         if (data && Array.isArray(data) && data.length > 0) {
-          const isValidData = data.every(coin => 
-            coin.id && coin.symbol && coin.name && 
+          const isValidData = data.every(coin =>
+            coin.id && coin.symbol && coin.name &&
             typeof coin.current_price === 'number' &&
             typeof coin.market_cap === 'number' &&
             typeof coin.market_cap_rank === 'number'
           );
-          
+
           if (isValidData && isMounted) {
             console.log(`CryptoTableWithSearch: Successfully loaded ${data.length} coins from CoinGecko proxy`);
-            
+
             // Store as backup data for corruption recovery
             setLastValidData([...data]);
             setCoins(data);
@@ -712,7 +706,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           console.log('CryptoTableWithSearch: Request was cancelled');
           return;
         }
-        
+
         console.error('CryptoTableWithSearch: API fetch failed:', error);
         if (isMounted) {
           setError('Failed to load crypto data. Please refresh the page to retry.');
@@ -727,7 +721,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
 
     // Load coins on mount
     loadCoins();
-    
+
     // Auto-refresh data every 5 minutes
     autoRefreshInterval = setInterval(() => {
       if (isMounted && !isFetching && coins.length > 0) {
@@ -735,7 +729,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         loadCoins();
       }
     }, 5 * 60 * 1000);
-    
+
     // Cleanup function
     return () => {
       isMounted = false;
@@ -751,7 +745,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
   // ENTERPRISE-LEVEL OPTIMIZATION: Memoized filtered coins to prevent excessive recalculations
   const filteredCoins = useMemo(() => {
     let filteredCoins = coins || [];
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('CryptoTableWithSearch: getFilteredCoins called with:', {
         inputCoinsCount: coins?.length || 0,
@@ -777,54 +771,54 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       case 'gainers':
         filteredCoins = filteredCoins.filter(coin => {
           const change = dateRange === '1h' ? coin.price_change_percentage_1h_in_currency :
-                        dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
-                        dateRange === '30d' ? coin.price_change_percentage_30d_in_currency :
-                        dateRange === '1y' ? coin.price_change_percentage_1y_in_currency :
-                        coin.price_change_percentage_24h;
+            dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
+              dateRange === '30d' ? coin.price_change_percentage_30d_in_currency :
+                dateRange === '1y' ? coin.price_change_percentage_1y_in_currency :
+                  coin.price_change_percentage_24h;
           return (change || 0) > 0;
         });
         filteredCoins.sort((a, b) => {
           const changeA = dateRange === '1h' ? a.price_change_percentage_1h_in_currency :
-                         dateRange === '7d' ? a.price_change_percentage_7d_in_currency :
-                         dateRange === '30d' ? a.price_change_percentage_30d_in_currency :
-                         dateRange === '1y' ? a.price_change_percentage_1y_in_currency :
-                         a.price_change_percentage_24h;
+            dateRange === '7d' ? a.price_change_percentage_7d_in_currency :
+              dateRange === '30d' ? a.price_change_percentage_30d_in_currency :
+                dateRange === '1y' ? a.price_change_percentage_1y_in_currency :
+                  a.price_change_percentage_24h;
           const changeB = dateRange === '1h' ? b.price_change_percentage_1h_in_currency :
-                         dateRange === '7d' ? b.price_change_percentage_7d_in_currency :
-                         dateRange === '30d' ? b.price_change_percentage_30d_in_currency :
-                         dateRange === '1y' ? b.price_change_percentage_1y_in_currency :
-                         b.price_change_percentage_24h;
+            dateRange === '7d' ? b.price_change_percentage_7d_in_currency :
+              dateRange === '30d' ? b.price_change_percentage_30d_in_currency :
+                dateRange === '1y' ? b.price_change_percentage_1y_in_currency :
+                  b.price_change_percentage_24h;
           return (changeB || 0) - (changeA || 0);
         });
         break;
       case 'losers':
         filteredCoins = filteredCoins.filter(coin => {
           const change = dateRange === '1h' ? coin.price_change_percentage_1h_in_currency :
-                        dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
-                        dateRange === '30d' ? coin.price_change_percentage_30d_in_currency :
-                        dateRange === '1y' ? coin.price_change_percentage_1y_in_currency :
-                        coin.price_change_percentage_24h;
+            dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
+              dateRange === '30d' ? coin.price_change_percentage_30d_in_currency :
+                dateRange === '1y' ? coin.price_change_percentage_1y_in_currency :
+                  coin.price_change_percentage_24h;
           return (change || 0) < 0;
         });
         filteredCoins.sort((a, b) => {
           const changeA = dateRange === '1h' ? a.price_change_percentage_1h_in_currency :
-                         dateRange === '7d' ? a.price_change_percentage_7d_in_currency :
-                         dateRange === '30d' ? a.price_change_percentage_30d_in_currency :
-                         dateRange === '1y' ? a.price_change_percentage_1y_in_currency :
-                         a.price_change_percentage_24h;
+            dateRange === '7d' ? a.price_change_percentage_7d_in_currency :
+              dateRange === '30d' ? a.price_change_percentage_30d_in_currency :
+                dateRange === '1y' ? a.price_change_percentage_1y_in_currency :
+                  a.price_change_percentage_24h;
           const changeB = dateRange === '1h' ? b.price_change_percentage_1h_in_currency :
-                         dateRange === '7d' ? b.price_change_percentage_7d_in_currency :
-                         dateRange === '30d' ? b.price_change_percentage_30d_in_currency :
-                         dateRange === '1y' ? b.price_change_percentage_1y_in_currency :
-                         b.price_change_percentage_24h;
+            dateRange === '7d' ? b.price_change_percentage_7d_in_currency :
+              dateRange === '30d' ? b.price_change_percentage_30d_in_currency :
+                dateRange === '1y' ? b.price_change_percentage_1y_in_currency :
+                  b.price_change_percentage_24h;
           return (changeA || 0) - (changeB || 0);
         });
         break;
       case 'ethereum': {
         const ethKeywords = ['eth', 'ethereum', 'erc', 'defi', 'dao', 'uni', 'aave', 'comp', 'mkr', 'sushi', '1inch', 'curve', 'balancer'];
-        filteredCoins = filteredCoins.filter(coin => 
-          ethKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          ethKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -832,9 +826,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'solana': {
         const solKeywords = ['sol', 'solana', 'serum', 'ray', 'orca', 'srm', 'raydium', 'phantom', 'jupiter'];
-        filteredCoins = filteredCoins.filter(coin => 
-          solKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          solKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -842,9 +836,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'binance': {
         const bscKeywords = ['bnb', 'binance', 'cake', 'pancake', 'bsc', 'venus', 'alpaca', 'biswap'];
-        filteredCoins = filteredCoins.filter(coin => 
-          bscKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          bscKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -852,9 +846,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'polygon': {
         const maticKeywords = ['matic', 'polygon', 'quick', 'aave', 'curve', 'sushi'];
-        filteredCoins = filteredCoins.filter(coin => 
-          maticKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          maticKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -862,9 +856,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'cardano': {
         const adaKeywords = ['ada', 'cardano', 'sundae', 'wingriders', 'minswap'];
-        filteredCoins = filteredCoins.filter(coin => 
-          adaKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          adaKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -872,9 +866,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'avalanche': {
         const avaxKeywords = ['avax', 'avalanche', 'trader', 'pangolin', 'benqi', 'aave'];
-        filteredCoins = filteredCoins.filter(coin => 
-          avaxKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          avaxKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -882,9 +876,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'polkadot': {
         const dotKeywords = ['dot', 'polkadot', 'kusama', 'moonbeam', 'acala', 'astar'];
-        filteredCoins = filteredCoins.filter(coin => 
-          dotKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          dotKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -892,9 +886,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'base': {
         const baseKeywords = ['base', 'coinbase', 'cbeth', 'aerodrome'];
-        filteredCoins = filteredCoins.filter(coin => 
-          baseKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          baseKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -902,9 +896,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'arbitrum': {
         const arbKeywords = ['arb', 'arbitrum', 'gmx', 'camelot', 'pendle'];
-        filteredCoins = filteredCoins.filter(coin => 
-          arbKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          arbKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -912,9 +906,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'optimism': {
         const opKeywords = ['op', 'optimism', 'velodrome', 'synthetix'];
-        filteredCoins = filteredCoins.filter(coin => 
-          opKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          opKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -922,9 +916,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'cosmos': {
         const atomKeywords = ['atom', 'cosmos', 'osmo', 'juno', 'evmos'];
-        filteredCoins = filteredCoins.filter(coin => 
-          atomKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          atomKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -932,9 +926,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'chainlink': {
         const linkKeywords = ['link', 'chainlink', 'oracle'];
-        filteredCoins = filteredCoins.filter(coin => 
-          linkKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          linkKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -942,9 +936,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'filecoin': {
         const filKeywords = ['fil', 'filecoin', 'ipfs'];
-        filteredCoins = filteredCoins.filter(coin => 
-          filKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          filKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -952,9 +946,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'near': {
         const nearKeywords = ['near', 'aurora', 'ref'];
-        filteredCoins = filteredCoins.filter(coin => 
-          nearKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          nearKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -962,9 +956,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'algorand': {
         const algoKeywords = ['algo', 'algorand', 'yieldly', 'tinyman'];
-        filteredCoins = filteredCoins.filter(coin => 
-          algoKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          algoKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -972,9 +966,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
       case 'stellar': {
         const xlmKeywords = ['xlm', 'stellar', 'xrp', 'ripple'];
-        filteredCoins = filteredCoins.filter(coin => 
-          xlmKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+        filteredCoins = filteredCoins.filter(coin =>
+          xlmKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -990,29 +984,29 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     if (dateRange) {
       switch (dateRange) {
         case '1h':
-          filteredCoins.sort((a, b) => 
+          filteredCoins.sort((a, b) =>
             (b.price_change_percentage_1h_in_currency || 0) - (a.price_change_percentage_1h_in_currency || 0)
           );
           break;
         case '7d':
-          filteredCoins.sort((a, b) => 
+          filteredCoins.sort((a, b) =>
             (b.price_change_percentage_7d_in_currency || 0) - (a.price_change_percentage_7d_in_currency || 0)
           );
           break;
         case '30d':
-          filteredCoins.sort((a, b) => 
+          filteredCoins.sort((a, b) =>
             (b.price_change_percentage_30d_in_currency || 0) - (a.price_change_percentage_30d_in_currency || 0)
           );
           break;
         case '1y':
-          filteredCoins.sort((a, b) => 
+          filteredCoins.sort((a, b) =>
             (b.price_change_percentage_1y_in_currency || 0) - (a.price_change_percentage_1y_in_currency || 0)
           );
           break;
         case '24h':
         default:
           // Sort by 24h performance (default)
-          filteredCoins.sort((a, b) => 
+          filteredCoins.sort((a, b) =>
             (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0)
           );
           break;
@@ -1024,7 +1018,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       // Override the date range sorting with column sorting
       filteredCoins.sort((a, b) => {
         let aValue, bValue;
-        
+
         switch (sortColumn) {
           case 'rank':
             aValue = a.market_cap_rank || 999;
@@ -1040,14 +1034,14 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
             break;
           case 'percentage':
             aValue = dateRange === '1h' ? a.price_change_percentage_1h_in_currency :
-                    dateRange === '7d' ? a.price_change_percentage_7d_in_currency :
-                    dateRange === '30d' ? a.price_change_percentage_30d_in_currency :
-                    dateRange === '1y' ? a.price_change_percentage_1y_in_currency :
+              dateRange === '7d' ? a.price_change_percentage_7d_in_currency :
+                dateRange === '30d' ? a.price_change_percentage_30d_in_currency :
+                  dateRange === '1y' ? a.price_change_percentage_1y_in_currency :
                     a.price_change_percentage_24h || 0;
             bValue = dateRange === '1h' ? b.price_change_percentage_1h_in_currency :
-                    dateRange === '7d' ? b.price_change_percentage_7d_in_currency :
-                    dateRange === '30d' ? b.price_change_percentage_30d_in_currency :
-                    dateRange === '1y' ? b.price_change_percentage_1y_in_currency :
+              dateRange === '7d' ? b.price_change_percentage_7d_in_currency :
+                dateRange === '30d' ? b.price_change_percentage_30d_in_currency :
+                  dateRange === '1y' ? b.price_change_percentage_1y_in_currency :
                     b.price_change_percentage_24h || 0;
             break;
           case '7d':
@@ -1064,7 +1058,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
             bValue = b.market_cap || 0;
             break;
         }
-        
+
         if (typeof aValue === 'string' && typeof bValue === 'string') {
           return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
         } else {
@@ -1083,7 +1077,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         marketCap: coin.market_cap
       }))
     });
-    
+
     return filteredCoins;
   }, [coins, searchQuery, filter, dateRange, sortColumn, sortDirection]); // ENTERPRISE-LEVEL: Proper dependency array for useMemo
 
@@ -1093,15 +1087,15 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       console.log('CryptoTableWithSearch: Refresh skipped - already fetching');
       return;
     }
-    
+
     console.log('CryptoTableWithSearch: Manual refresh initiated by user');
     setLoading(true);
     setError(null);
-    
+
     // Reset fetching state to allow new request
     setIsFetching(false);
     setLastFetchTime(0);
-    
+
     // Trigger new data fetch
     const loadCoins = async () => {
       try {
@@ -1109,17 +1103,17 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data && Array.isArray(data) && data.length > 0) {
-          const isValidData = data.every(coin => 
-            coin.id && coin.symbol && coin.name && 
+          const isValidData = data.every(coin =>
+            coin.id && coin.symbol && coin.name &&
             typeof coin.current_price === 'number' &&
             typeof coin.market_cap === 'number' &&
             typeof coin.market_cap_rank === 'number'
           );
-          
+
           if (isValidData) {
             console.log(`CryptoTableWithSearch: Manual refresh successful - loaded ${data.length} coins`);
             setLastValidData([...data]);
@@ -1139,14 +1133,14 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         setLoading(false);
       }
     };
-    
+
     loadCoins();
   };
 
   // ENTERPRISE-LEVEL OPTIMIZATION: Memoized data integrity check to prevent excessive calculations
   const dataIntegrity = React.useMemo(() => {
     if (!coins || coins.length === 0) return null;
-    
+
     return {
       hasValidIds: coins.every(coin => coin.id && typeof coin.id === 'string'),
       hasValidPrices: coins.every(coin => typeof coin.current_price === 'number' && coin.current_price > 0),
@@ -1154,7 +1148,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       hasValidRanks: coins.every(coin => typeof coin.market_cap_rank === 'number' && coin.market_cap_rank > 0)
     };
   }, [coins]);
-  
+
   // ENTERPRISE-LEVEL OPTIMIZATION: Reduced logging for production performance
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
@@ -1167,7 +1161,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       });
     }
   }, [coins?.length, loading, error, dataSource, dataUpdateCount]);
-  
+
   // ENTERPRISE-LEVEL OPTIMIZATION: Data corruption detection with performance optimization
   useEffect(() => {
     if (coins && coins.length > 0 && dataIntegrity && !dataIntegrity.hasValidIds) {
@@ -1182,7 +1176,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       }
     }
   }, [coins?.length, dataIntegrity?.hasValidIds, lastValidData?.length]);
-  
+
   // ENTERPRISE-LEVEL OPTIMIZATION: Conditional logging for production performance
   if (process.env.NODE_ENV === 'development') {
     console.log('AssetClient: CryptoTableWithSearch Debug Info:', {
@@ -1240,7 +1234,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
   if (filteredCoins.length === 0 && coins?.length > 0) {
     return (
       <div className="text-center text-gray-400 py-6 sm:py-8 text-sm">
-        {searchQuery 
+        {searchQuery
           ? `No cryptocurrencies found matching "${searchQuery}"`
           : `No cryptocurrencies found for ${filter} filter`
         }
@@ -1256,16 +1250,16 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       {/* Data source info */}
       <div className="mb-3 px-2">
         <div className="text-xs text-gray-400">
-          Data source: {dataSource || 'Loading...'} | 
+          Data source: {dataSource || 'Loading...'} |
           Last update: {dataUpdateCount > 0 ? `${dataUpdateCount} update(s)` : 'Never'} |
           Total coins: {coins?.length || 0}
         </div>
       </div>
-      
+
       <table className="w-full max-w-6xl mx-auto text-xs">
         <thead>
           <tr className="border-b border-gray-700 h-10">
-            <th 
+            <th
               className={`text-left py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'rank' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('rank')}
             >
@@ -1274,7 +1268,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                 {getSortIcon('rank')}
               </div>
             </th>
-            <th 
+            <th
               className={`text-left py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'name' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('name')}
             >
@@ -1283,7 +1277,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                 {getSortIcon('name')}
               </div>
             </th>
-            <th 
+            <th
               className={`text-right py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'price' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('price')}
             >
@@ -1292,21 +1286,21 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                 {getSortIcon('price')}
               </div>
             </th>
-            <th 
+            <th
               className={`text-right py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'percentage' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('percentage')}
             >
               <div className="flex items-center justify-end space-x-1">
                 <span>
-                  {dateRange === '1h' ? '1h %' : 
-                   dateRange === '7d' ? '7d %' : 
-                   dateRange === '30d' ? '30d %' : 
-                   dateRange === '1y' ? '1y %' : '24h %'}
+                  {dateRange === '1h' ? '1h %' :
+                    dateRange === '7d' ? '7d %' :
+                      dateRange === '30d' ? '30d %' :
+                        dateRange === '1y' ? '1y %' : '24h %'}
                 </span>
                 {getSortIcon('percentage')}
               </div>
             </th>
-            <th 
+            <th
               className={`text-right py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === '7d' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('7d')}
             >
@@ -1315,7 +1309,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                 {getSortIcon('7d')}
               </div>
             </th>
-            <th 
+            <th
               className={`text-right py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === '30d' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('30d')}
             >
@@ -1324,12 +1318,12 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                 {getSortIcon('30d')}
               </div>
             </th>
-            <th 
+            <th
               className={`text-center py-1 px-2 font-semibold text-xs text-gray-300`}
             >
               <span>Chart</span>
             </th>
-            <th 
+            <th
               className={`text-right py-1 px-2 font-semibold text-xs cursor-pointer transition-colors hover:text-blue-400 ${sortColumn === 'market_cap' ? 'text-blue-400' : 'text-gray-300'}`}
               onClick={() => handleSort('market_cap')}
             >
@@ -1342,8 +1336,8 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
         </thead>
         <tbody>
           {(filteredCoins || []).map((coin, index) => (
-            <tr 
-              key={coin.id} 
+            <tr
+              key={coin.id}
               className="border-b border-gray-800 hover:bg-blue-900/20 transition-all duration-200 cursor-pointer group h-12"
               onClick={() => onCoinClick && onCoinClick(coin)}
             >
@@ -1384,10 +1378,10 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
               <td className="py-1 px-2 text-right font-medium text-xs">
                 {formatPercentage(
                   dateRange === '1h' ? coin.price_change_percentage_1h_in_currency :
-                  dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
-                  dateRange === '30d' ? coin.price_change_percentage_30d_in_currency :
-                  dateRange === '1y' ? coin.price_change_percentage_1y_in_currency :
-                  coin.price_change_percentage_24h
+                    dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
+                      dateRange === '30d' ? coin.price_change_percentage_30d_in_currency :
+                        dateRange === '1y' ? coin.price_change_percentage_1y_in_currency :
+                          coin.price_change_percentage_24h
                 )}
               </td>
               <td className="py-1 px-2 text-right font-medium text-xs">
@@ -1399,9 +1393,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
               <td className="py-1 px-2 text-center chart-cell">
                 <div className="w-16 h-8 rounded flex items-center justify-center overflow-hidden mx-auto chart-container">
                   {/* Perfectly Centered Line Chart */}
-                  <svg 
-                    className="w-full h-full chart-svg" 
-                    viewBox="0 0 48 24" 
+                  <svg
+                    className="w-full h-full chart-svg"
+                    viewBox="0 0 48 24"
                     preserveAspectRatio="xMidYMid meet"
                     style={{ display: 'block' }}
                   >
@@ -1411,16 +1405,16 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                         <rect x="0" y="0" width="48" height="24" />
                       </clipPath>
                     </defs>
-                    
+
                     {/* Background - full container */}
                     <rect x="0" y="0" width="48" height="24" fill="transparent" />
-                    
+
                     {/* Subtle Grid Lines - perfectly centered and evenly distributed */}
                     <line x1="0" y1="4" x2="48" y2="4" stroke="#374151" strokeWidth="0.3" opacity="0.5" />
                     <line x1="0" y1="10" x2="48" y2="10" stroke="#374151" strokeWidth="0.3" opacity="0.5" />
                     <line x1="0" y1="16" x2="48" y2="16" stroke="#374151" strokeWidth="0.3" opacity="0.5" />
                     <line x1="0" y1="22" x2="48" y2="22" stroke="#374151" strokeWidth="0.3" opacity="0.5" />
-                    
+
                     {/* Price Line Chart - perfectly centered with balanced vertical range */}
                     <path
                       d="M0,16 L6,13 L12,19 L18,11 L24,21 L30,16 L36,22 L42,13 L48,16"
@@ -1431,7 +1425,7 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
                       strokeLinejoin="round"
                       clipPath={`url(#chart-clip-${coin.id})`}
                     />
-                    
+
                     {/* Price Points - perfectly centered and aligned with the line */}
                     <circle cx="0" cy="16" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
                     <circle cx="6" cy="13" r="0.8" fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'} />
@@ -1470,7 +1464,7 @@ function TrendingCoins100({ onCoinClick }) {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await fetch('/api/coingecko-proxy/search/trending', {
           signal: abortController.signal,
           headers: {
@@ -1478,13 +1472,13 @@ function TrendingCoins100({ onCoinClick }) {
             'Cache-Control': 'no-cache'
           }
         });
-        
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (isMounted) {
           if (data && data.coins && Array.isArray(data.coins)) {
             setTrendingCoins(data.coins);
@@ -1498,7 +1492,7 @@ function TrendingCoins100({ onCoinClick }) {
           console.log('TrendingCoins100: Request was cancelled');
           return;
         }
-        
+
         console.error('Error fetching trending coins:', error);
         if (isMounted) {
           setError('Failed to load trending coins');
@@ -1534,8 +1528,8 @@ function TrendingCoins100({ onCoinClick }) {
           <p className="text-red-400 text-sm mb-2">Error loading trending coins:</p>
           <p className="text-red-300 text-xs">{error}</p>
         </div>
-        <button 
-          onClick={() => window.location.reload()} 
+        <button
+          onClick={() => window.location.reload()}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
         >
           Retry
@@ -1547,14 +1541,14 @@ function TrendingCoins100({ onCoinClick }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
       {(trendingCoins || []).map((coin, index) => (
-        <div 
-          key={index} 
+        <div
+          key={index}
           className="bg-gray-800 rounded-md sm:rounded-lg p-2 sm:p-3 md:p-4 border border-gray-700 hover:border-blue-500 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group"
           onClick={() => onCoinClick && onCoinClick(coin.item)}
         >
           <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-            <img 
-              src={coin.item.small} 
+            <img
+              src={coin.item.small}
               alt={coin.item.name}
               className="w-6 h-6 sm:w-8 sm:h-8 rounded-full"
               onError={(e) => {
@@ -1618,9 +1612,8 @@ function CryptoSectors() {
         <div key={index} className="bg-gray-800 rounded-md sm:rounded-lg p-2 sm:p-3 md:p-4 border border-gray-700 hover:border-gray-600 transition-colors">
           <div className="flex items-center justify-between mb-2 sm:mb-3">
             <h3 className="text-white font-semibold text-sm sm:text-base md:text-lg">{sector.name}</h3>
-            <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs font-medium ${
-              sector.change >= 0 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
-            }`}>
+            <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs font-medium ${sector.change >= 0 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+              }`}>
               {sector.change >= 0 ? '+' : ''}{sector.change}%
             </span>
           </div>
@@ -1656,7 +1649,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
         console.log('Fetching coins for heatmap...');
         setLoading(true);
         setError(null);
-        
+
         const response = await fetch('/api/coingecko-proxy/coins', {
           signal: abortController.signal,
           headers: {
@@ -1664,11 +1657,11 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
             'Pragma': 'no-cache'
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           const heatmapData = data.slice(0, 25); // Get top 25 for heatmap
-          
+
           if (isMounted) {
             console.log('Coins loaded successfully for heatmap:', heatmapData.length);
             setCoins(heatmapData);
@@ -1682,7 +1675,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           console.log('CryptoHeatmap: Request was cancelled');
           return;
         }
-        
+
         console.error('CryptoHeatmap: API failed:', error);
         if (isMounted) {
           setError('Failed to load crypto data from API for heatmap. Please refresh the page to retry.');
@@ -1702,7 +1695,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
 
   const getFilteredCoins = () => {
     let filteredCoins = coins || [];
-    
+
     console.log('Initial coins count for heatmap:', filteredCoins.length);
     console.log('Current filter for heatmap:', filter);
     console.log('Current search query for heatmap:', searchQuery);
@@ -1721,28 +1714,28 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'gainers':
         filteredCoins = filteredCoins.filter(coin => {
           const change = dateRange === '1h' ? coin.price_change_percentage_1h_in_currency :
-                        dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
-                        dateRange === '30d' ? coin.price_change_percentage_30d_in_currency :
-                        dateRange === '1y' ? coin.price_change_percentage_1y_in_currency :
-                        coin.price_change_percentage_24h;
+            dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
+              dateRange === '30d' ? coin.price_change_percentage_30d_in_currency :
+                dateRange === '1y' ? coin.price_change_percentage_1y_in_currency :
+                  coin.price_change_percentage_24h;
           return (change || 0) > 0;
         });
         break;
       case 'losers':
         filteredCoins = filteredCoins.filter(coin => {
           const change = dateRange === '1h' ? coin.price_change_percentage_1h_in_currency :
-                        dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
-                        dateRange === '30d' ? coin.price_change_percentage_30d_in_currency :
-                        dateRange === '1y' ? coin.price_change_percentage_1y_in_currency :
-                        coin.price_change_percentage_24h;
+            dateRange === '7d' ? coin.price_change_percentage_7d_in_currency :
+              dateRange === '30d' ? coin.price_change_percentage_30d_in_currency :
+                dateRange === '1y' ? coin.price_change_percentage_1y_in_currency :
+                  coin.price_change_percentage_24h;
           return (change || 0) < 0;
         });
         break;
       case 'ethereum': {
         const ethKeywords = ['ethereum', 'eth', 'erc', 'defi', 'nft'];
         filteredCoins = filteredCoins.filter(coin =>
-          ethKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          ethKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1751,8 +1744,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'solana': {
         const solKeywords = ['solana', 'sol', 'serum', 'raydium'];
         filteredCoins = filteredCoins.filter(coin =>
-          solKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          solKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1761,8 +1754,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'binance': {
         const bnbKeywords = ['binance', 'bnb', 'bsc', 'pancake'];
         filteredCoins = filteredCoins.filter(coin =>
-          bnbKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          bnbKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1771,8 +1764,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'polygon': {
         const maticKeywords = ['polygon', 'matic', 'quick'];
         filteredCoins = filteredCoins.filter(coin =>
-          maticKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          maticKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1781,8 +1774,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'cardano': {
         const adaKeywords = ['cardano', 'ada'];
         filteredCoins = filteredCoins.filter(coin =>
-          adaKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          adaKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1791,8 +1784,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'avalanche': {
         const avaxKeywords = ['avalanche', 'avax'];
         filteredCoins = filteredCoins.filter(coin =>
-          avaxKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          avaxKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1801,8 +1794,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'polkadot': {
         const dotKeywords = ['polkadot', 'dot', 'kusama'];
         filteredCoins = filteredCoins.filter(coin =>
-          dotKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          dotKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1811,8 +1804,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'base': {
         const baseKeywords = ['base', 'coinbase'];
         filteredCoins = filteredCoins.filter(coin =>
-          baseKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          baseKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1821,8 +1814,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'arbitrum': {
         const arbKeywords = ['arbitrum', 'arb'];
         filteredCoins = filteredCoins.filter(coin =>
-          arbKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          arbKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1831,8 +1824,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'optimism': {
         const optKeywords = ['optimism', 'op'];
         filteredCoins = filteredCoins.filter(coin =>
-          optKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          optKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1841,8 +1834,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'cosmos': {
         const atomKeywords = ['cosmos', 'atom', 'osmo'];
         filteredCoins = filteredCoins.filter(coin =>
-          atomKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          atomKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1851,8 +1844,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'chainlink': {
         const linkKeywords = ['chainlink', 'link'];
         filteredCoins = filteredCoins.filter(coin =>
-          linkKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          linkKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1861,8 +1854,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'filecoin': {
         const filKeywords = ['filecoin', 'fil'];
         filteredCoins = filteredCoins.filter(coin =>
-          filKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          filKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1871,8 +1864,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'near': {
         const nearKeywords = ['near', 'aurora'];
         filteredCoins = filteredCoins.filter(coin =>
-          nearKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          nearKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1881,8 +1874,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'algorand': {
         const algoKeywords = ['algorand', 'algo'];
         filteredCoins = filteredCoins.filter(coin =>
-          algoKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          algoKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1891,8 +1884,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       case 'stellar': {
         const xlmKeywords = ['stellar', 'xlm'];
         filteredCoins = filteredCoins.filter(coin =>
-          xlmKeywords.some(keyword => 
-            coin.name.toLowerCase().includes(keyword) || 
+          xlmKeywords.some(keyword =>
+            coin.name.toLowerCase().includes(keyword) ||
             coin.symbol.toLowerCase().includes(keyword)
           )
         );
@@ -1906,29 +1899,29 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
     if (dateRange) {
       switch (dateRange) {
         case '1h':
-          filteredCoins.sort((a, b) => 
+          filteredCoins.sort((a, b) =>
             (b.price_change_percentage_1h_in_currency || 0) - (a.price_change_percentage_1h_in_currency || 0)
           );
           break;
         case '7d':
-          filteredCoins.sort((a, b) => 
+          filteredCoins.sort((a, b) =>
             (b.price_change_percentage_7d_in_currency || 0) - (a.price_change_percentage_7d_in_currency || 0)
           );
           break;
         case '30d':
-          filteredCoins.sort((a, b) => 
+          filteredCoins.sort((a, b) =>
             (b.price_change_percentage_30d_in_currency || 0) - (a.price_change_percentage_30d_in_currency || 0)
           );
           break;
         case '1y':
-          filteredCoins.sort((a, b) => 
+          filteredCoins.sort((a, b) =>
             (b.price_change_percentage_1y_in_currency || 0) - (a.price_change_percentage_1y_in_currency || 0)
           );
           break;
         case '24h':
         default:
           // Sort by 24h performance (default)
-          filteredCoins.sort((a, b) => 
+          filteredCoins.sort((a, b) =>
             (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0)
           );
           break;
@@ -1968,8 +1961,8 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           <p className="text-red-400 text-sm mb-2">Error loading crypto data for heatmap:</p>
           <p className="text-red-300 text-xs">{error}</p>
         </div>
-        <button 
-          onClick={() => window.location.reload()} 
+        <button
+          onClick={() => window.location.reload()}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
         >
           Retry
@@ -1997,28 +1990,28 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
         {/* Header */}
         <div className="mb-3 sm:mb-4">
           <h3 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">
-            Top 48 Crypto Market Heatmap - {dateRange === '1h' ? '1h' : 
-                                           dateRange === '7d' ? '7d' : 
-                                           dateRange === '30d' ? '30d' : 
-                                           dateRange === '1y' ? '1y' : '24h'} Performance
+            Top 48 Crypto Market Heatmap - {dateRange === '1h' ? '1h' :
+              dateRange === '7d' ? '7d' :
+                dateRange === '30d' ? '30d' :
+                  dateRange === '1y' ? '1y' : '24h'} Performance
           </h3>
           <p className="text-gray-400 text-xs sm:text-sm">Real-time cryptocurrency market overview - Bitcoin dominates 50% of the space</p>
         </div>
-        
+
         {/* Custom Heatmap Container */}
         <div className="h-[500px] sm:h-[600px] w-full relative">
           {/* Heatmap Grid - Top 48 Only */}
           <div className="grid grid-cols-10 sm:grid-cols-12 md:grid-cols-14 lg:grid-cols-16 xl:grid-cols-18 gap-0.5 h-full">
             {(filteredCoins || []).slice(0, 48).map((coin, index) => {
               if (!coin || !coin.id) return null;
-              const priceChange = 
+              const priceChange =
                 dateRange === '1h' ? coin.price_change_percentage_1h_in_currency || 0 :
-                dateRange === '7d' ? coin.price_change_percentage_7d_in_currency || 0 :
-                dateRange === '30d' ? coin.price_change_percentage_30d_in_currency || 0 :
-                dateRange === '1y' ? coin.price_change_percentage_1y_in_currency || 0 :
-                coin.price_change_percentage_24h || 0;
+                  dateRange === '7d' ? coin.price_change_percentage_7d_in_currency || 0 :
+                    dateRange === '30d' ? coin.price_change_percentage_30d_in_currency || 0 :
+                      dateRange === '1y' ? coin.price_change_percentage_1y_in_currency || 0 :
+                        coin.price_change_percentage_24h || 0;
               const marketCapRank = coin.market_cap_rank || 999;
-              
+
               // Calculate size based on rank - Bitcoin 50% dominance, others scaled accordingly
               const getSizeClass = (rank) => {
                 if (rank === 1) return 'col-span-8 row-span-8'; // 50% - Bitcoin (8x8 in 16x16 grid = 50%)
@@ -2032,7 +2025,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
                 if (rank <= 35) return 'col-span-1 row-span-1'; // Smallest - Top 35
                 return 'col-span-1 row-span-1'; // Minimal - Top 48
               };
-              
+
               // Calculate logo size based on rank - Bitcoin dominant, others scaled
               const getLogoSize = (rank) => {
                 if (rank === 1) return 'w-16 h-16'; // 64px - Bitcoin (much larger)
@@ -2046,7 +2039,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
                 if (rank <= 35) return 'w-2 h-2';   // 8px - Top 35
                 return 'w-1 h-1';                   // 4px - Top 48
               };
-              
+
               // Calculate color intensity based on price change - much darker colors for better visibility
               const getColorIntensity = (change) => {
                 const absChange = Math.abs(change);
@@ -2058,13 +2051,13 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
                 if (absChange >= 0.5) return change > 0 ? 'bg-emerald-300' : 'bg-red-300';
                 return change > 0 ? 'bg-emerald-200' : 'bg-red-200';
               };
-              
+
               return (
-                <div 
-                  key={coin.id} 
+                <div
+                  key={coin.id}
                   className={`relative group cursor-pointer transition-all duration-300 hover:scale-110 hover:z-10 ${getSizeClass(marketCapRank)}`}
                 >
-                  <div 
+                  <div
                     className={`w-full h-full rounded-sm border border-gray-600/70 transition-all duration-300 hover:border-gray-400/90 ${getColorIntensity(priceChange)} cursor-pointer`}
                     onClick={() => onCoinClick(coin)}
                   >
@@ -2087,11 +2080,10 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
                       )}
                       {/* Percentage - only show for top 4 */}
                       {marketCapRank <= 4 && (
-                        <div className={`text-white font-bold leading-none ${
-                          marketCapRank === 1 ? 'text-xl' : 
-                          marketCapRank === 2 ? 'text-base' : 
-                          'text-sm'
-                        }`}>
+                        <div className={`text-white font-bold leading-none ${marketCapRank === 1 ? 'text-xl' :
+                            marketCapRank === 2 ? 'text-base' :
+                              'text-sm'
+                          }`}>
                           {priceChange > 0 ? '+' : ''}{priceChange.toFixed(1)}%
                         </div>
                       )}
@@ -2101,7 +2093,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
               );
             })}
           </div>
-          
+
           {/* Legend */}
           <div className="absolute bottom-2 left-2 bg-duniacrypto-bg-darker/80 backdrop-blur-sm rounded-lg p-2 border border-gray-700">
             <div className="flex items-center space-x-4 text-xs text-white">

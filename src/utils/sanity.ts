@@ -22,6 +22,8 @@ export interface SanityArticle {
   title: string
   slug: { current: string } // Fix: slug is an object with current property
   excerpt?: string
+  metaTitle?: string
+  metaDescription?: string
   // Portable Text content (array of blocks) or legacy string
   content: any
   image?: {
@@ -69,6 +71,8 @@ export async function getAllArticles(): Promise<SanityArticle[]> {
       title,
       slug,
       excerpt,
+      metaTitle,
+      metaDescription,
       content,
       image,
       category,
@@ -96,12 +100,14 @@ export async function getAllArticles(): Promise<SanityArticle[]> {
 
 // Fetch articles by category
 export async function getArticlesByCategory(category: 'newsroom' | 'academy'): Promise<SanityArticle[]> {
-const query = `
+  const query = `
   *[_type == "article" && category == $category && defined(publishedAt)] | order(publishedAt desc) {
     _id,
     title,
     slug,
     excerpt,
+    metaTitle,
+    metaDescription,
     content,
     image,
     category,
@@ -133,6 +139,8 @@ export async function getArticleBySlug(slug: string): Promise<SanityArticle | nu
       title,
       slug,
       excerpt,
+      metaTitle,
+      metaDescription,
       content,
       image,
       category,
@@ -300,7 +308,7 @@ export function addImageUrls(articles: SanityArticle[]): SanityArticleWithImage[
     console.warn('addImageUrls: articles is not an array:', articles);
     return [];
   }
-  
+
   return articles.map(article => {
     try {
       // Check if article.image exists and has the required structure
