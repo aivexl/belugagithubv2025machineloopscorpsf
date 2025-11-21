@@ -1,5 +1,5 @@
 "use client";
-    import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
@@ -7,7 +7,7 @@ import GradientText from "./GradientText";
 import { useAuth } from "../hooks/useAuth";
 import AuthModalManager, { AuthModalType } from "./auth/AuthModalManager";
 import Profile from "./Profile";
-import { 
+import {
   AiOutlineHome,
   AiOutlineExperiment,
   AiOutlineRead,
@@ -113,7 +113,7 @@ export default function Navbar() {
     };
 
     window.addEventListener('openAuthModal', handleCustomAuthModal as EventListener);
-    
+
     return () => {
       window.removeEventListener('openAuthModal', handleCustomAuthModal as EventListener);
     };
@@ -131,180 +131,167 @@ export default function Navbar() {
     <>
       {/* Spacer for fixed navbar - dynamic height to avoid gaps/overlap */}
       <div style={{ height: 'var(--nav-height, 64px)' }} aria-hidden="true"></div>
-      
+
       {/* Desktop Sidebar - Only visible on desktop */}
       <aside className="hidden xl:block fixed left-0 top-0 h-full w-20 z-40 bg-black/40 backdrop-blur-xl backdrop-saturate-150 shadow-lg">
         <div className="flex flex-col items-center space-y-1" style={{ paddingTop: 'calc(var(--nav-height, 64px) + 1rem)' }}>
           {/* Home */}
-          <Link 
-            href="/" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <AiOutlineHome className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">Home</span>
           </Link>
 
           {/* Academy */}
-          <Link 
-            href="/academy" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/academy')
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/academy"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/academy')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <HiAcademicCap className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">Academy</span>
           </Link>
 
           {/* Research */}
-          <Link 
-            href="/research" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/research') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/research"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/research')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <AiOutlineExperiment className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">Research</span>
           </Link>
 
           {/* Newsroom */}
-          <Link 
-            href="/newsroom" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/newsroom') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/newsroom"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/newsroom')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <AiOutlineRead className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">Newsroom</span>
           </Link>
 
           {/* Asset */}
-          <Link 
-            href="/asset" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/asset') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/asset"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/asset')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <FaBitcoin className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">Asset</span>
           </Link>
 
           {/* Beluga AI */}
-          <Link 
-            href="/beluga-ai" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/beluga-ai') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/beluga-ai"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/beluga-ai')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
-            <Image 
-              src="/Asset/aistar.png" 
-              alt="AI" 
-              width={20} 
-              height={20} 
-              className="mb-0.5 brightness-0 invert" 
+            <Image
+              src="/Asset/aistar.png"
+              alt="AI"
+              width={20}
+              height={20}
+              className="mb-0.5 brightness-0 invert"
             />
             <span className="text-[10px] font-medium text-center leading-tight">Beluga AI</span>
           </Link>
 
           {/* Exchanges */}
-          <Link 
-            href="/exchanges" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/exchanges') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/exchanges"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/exchanges')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <AiOutlineSwap className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">Exchanges</span>
           </Link>
 
           {/* Airdrop */}
-          <Link 
-            href="/airdrop" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/airdrop') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/airdrop"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/airdrop')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <AiOutlineGift className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">Airdrop</span>
           </Link>
 
           {/* ICO/IDO */}
-          <Link 
-            href="/ico-ido" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/ico-ido') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/ico-ido"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/ico-ido')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <AiOutlineRocket className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">ICO/IDO</span>
           </Link>
 
           {/* Fundraising */}
-          <Link 
-            href="/fundraising" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/fundraising') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/fundraising"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/fundraising')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <HiOutlineCash className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">Fundraising</span>
           </Link>
 
           {/* Kamus WEB3 */}
-          <Link 
-            href="/kamus" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/kamus') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/kamus"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/kamus')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <AiOutlineBook className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">Kamus WEB3</span>
           </Link>
 
           {/* About */}
-          <Link 
-            href="/about" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/about') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/about"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/about')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <AiOutlineInfoCircle className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">About</span>
           </Link>
 
           {/* Contact */}
-          <Link 
-            href="/contact" 
-            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${
-              isActive('/contact') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/contact"
+            className={`flex flex-col items-center p-1 rounded-md transition-all duration-200 group w-16 no-underline hover:no-underline focus:no-underline ${isActive('/contact')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <AiOutlinePhone className="w-5 h-5 mb-0.5" />
             <span className="text-[10px] font-medium text-center leading-tight">Contact</span>
@@ -354,7 +341,7 @@ export default function Navbar() {
               aria-label="Telegram"
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
               </svg>
             </a>
           </div>
@@ -401,37 +388,37 @@ export default function Navbar() {
 
           {/* Desktop Auth Buttons - Right side */}
           <div className="hidden xl:flex items-center space-x-3 flex-shrink-0">
-              {/* Telegram Icon */}
-              <a
-                href="https://t.me/belugaID"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-blue-400 transition-colors duration-200 flex items-center mr-6"
-                aria-label="Telegram"
-              >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                </svg>
-              </a>
-              {user ? (
-                <Profile showDropdown={true} />
-              ) : (
-                <>
-                  <button
-                    onClick={() => setShowLoginModal(true)}
-                    className="text-white font-bold hover:text-blue-400 transition-colors duration-200"
-                  >
-                    Login
-                  </button>
-                  <button
-                    onClick={() => setShowSignUpModal(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
-                  >
-                    Sign Up
-                  </button>
-                </>
-              )}
-            </div>
+            {/* Telegram Icon */}
+            <a
+              href="https://t.me/belugaID"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white hover:text-blue-400 transition-colors duration-200 flex items-center mr-6"
+              aria-label="Telegram"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+              </svg>
+            </a>
+            {user ? (
+              <Profile showDropdown={true} />
+            ) : (
+              <>
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="text-white font-bold hover:text-blue-400 transition-colors duration-200"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setShowSignUpModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
@@ -439,13 +426,12 @@ export default function Navbar() {
       <div className="xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-lg backdrop-saturate-150 border-t border-white/10">
         <div className="flex items-center justify-around py-2 md:py-3">
           {/* Home */}
-          <Link 
-            href="/" 
-            className={`flex flex-col items-center p-2 md:p-3 rounded-lg transition-all duration-200 focus:outline-none focus:no-underline ${
-              isActive('/') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/"
+            className={`flex flex-col items-center p-2 md:p-3 rounded-lg transition-all duration-200 focus:outline-none focus:no-underline ${isActive('/')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <svg className="w-6 h-6 md:w-7 md:h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -454,13 +440,12 @@ export default function Navbar() {
           </Link>
 
           {/* Newsroom */}
-          <Link 
-            href="/newsroom" 
-            className={`flex flex-col items-center p-2 md:p-3 rounded-lg transition-all duration-200 focus:outline-none focus:no-underline ${
-              isActive('/newsroom') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/newsroom"
+            className={`flex flex-col items-center p-2 md:p-3 rounded-lg transition-all duration-200 focus:outline-none focus:no-underline ${isActive('/newsroom')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <svg className="w-6 h-6 md:w-7 md:h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
@@ -469,13 +454,12 @@ export default function Navbar() {
           </Link>
 
           {/* Academy */}
-          <Link 
-            href="/academy" 
-            className={`flex flex-col items-center p-2 md:p-3 rounded-lg transition-all duration-200 focus:outline-none focus:no-underline ${
-              isActive('/academy') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/academy"
+            className={`flex flex-col items-center p-2 md:p-3 rounded-lg transition-all duration-200 focus:outline-none focus:no-underline ${isActive('/academy')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <svg className="w-6 h-6 md:w-7 md:h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -484,13 +468,12 @@ export default function Navbar() {
           </Link>
 
           {/* Asset */}
-          <Link 
-            href="/asset" 
-            className={`flex flex-col items-center p-2 md:p-3 rounded-lg transition-all duration-200 focus:outline-none focus:no-underline ${
-              isActive('/asset') 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+          <Link
+            href="/asset"
+            className={`flex flex-col items-center p-2 md:p-3 rounded-lg transition-all duration-200 focus:outline-none focus:no-underline ${isActive('/asset')
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
           >
             <svg className="w-6 h-6 md:w-7 md:h-7 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
@@ -502,11 +485,10 @@ export default function Navbar() {
 
           {/* Hamburger Menu */}
           <button
-            className={`flex flex-col items-center p-2 md:p-3 rounded-lg transition-all duration-200 focus:outline-none focus:no-underline ${
-              navOpen 
-                ? 'bg-blue-600 text-white' 
-                : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
-            }`}
+            className={`flex flex-col items-center p-2 md:p-3 rounded-lg transition-all duration-200 focus:outline-none focus:no-underline ${navOpen
+              ? 'bg-blue-600 text-white'
+              : 'text-white hover:bg-blue-500/20 hover:text-blue-400'
+              }`}
             onClick={() => setNavOpen(!navOpen)}
             aria-label="Open navigation menu"
           >
@@ -583,9 +565,9 @@ export default function Navbar() {
 
             {/* Navigation Links - Only items NOT in bottom navigation */}
             <div className="space-y-3 md:space-y-4">
-              <Link href="/kamus" className="text-white text-lg md:text-xl font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline py-2 md:py-3 px-2" onClick={() => setNavOpen(false)} style={{borderRadius: 16, textDecoration: 'none'}}>Kamus WEB3</Link>
-              <Link href="/about" className="text-white text-lg md:text-xl font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline py-2 md:py-3 px-2" onClick={() => setNavOpen(false)} style={{borderRadius: 16, textDecoration: 'none'}}>About</Link>
-              <Link href="/contact" className="text-white text-lg md:text-xl font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline py-2 md:py-3 px-2" onClick={() => setNavOpen(false)} style={{borderRadius: 16, textDecoration: 'none'}}>Contact</Link>
+              <Link href="/kamus" className="text-white text-lg md:text-xl font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline py-2 md:py-3 px-2" onClick={() => setNavOpen(false)} style={{ borderRadius: 16, textDecoration: 'none' }}>Kamus WEB3</Link>
+              <Link href="/about" className="text-white text-lg md:text-xl font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline py-2 md:py-3 px-2" onClick={() => setNavOpen(false)} style={{ borderRadius: 16, textDecoration: 'none' }}>About</Link>
+              <Link href="/contact" className="text-white text-lg md:text-xl font-bold transition block hover:text-blue-400 focus:outline-none focus:no-underline py-2 md:py-3 px-2" onClick={() => setNavOpen(false)} style={{ borderRadius: 16, textDecoration: 'none' }}>Contact</Link>
             </div>
 
             {/* Auth Buttons - Mobile/Tablet Menu */}
@@ -600,7 +582,7 @@ export default function Navbar() {
                   aria-label="Telegram"
                 >
                   <svg className="w-6 h-6 md:w-7 md:h-7" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
                   </svg>
                   <span className="ml-2 text-base md:text-lg font-medium">Telegram</span>
                 </a>
@@ -642,7 +624,7 @@ export default function Navbar() {
         onClose={() => setShowLoginModal(false)}
         initialModal="login"
       />
-      
+
       <AuthModalManager
         isOpen={showSignUpModal}
         onClose={() => setShowSignUpModal(false)}
