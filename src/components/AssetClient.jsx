@@ -57,10 +57,6 @@ export default function AssetClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cryptoFilter, setCryptoFilter] = useState('top-100');
 
-  // Debug logging for state changes
-  useEffect(() => {
-    console.log('AssetClient: State changed:', { activeSection, cryptoFilter, searchQuery });
-  }, [activeSection, cryptoFilter, searchQuery]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showEcosystemSubFilter, setShowEcosystemSubFilter] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -72,12 +68,14 @@ export default function AssetClient() {
     setIsClient(true);
 
     // Debug logging for enterprise troubleshooting
-    console.log('AssetClient: Component mounted with initial state:', {
-      activeSection,
-      cryptoFilter,
-      searchQuery,
-      viewMode
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('AssetClient: Component mounted with initial state:', {
+        activeSection,
+        cryptoFilter,
+        searchQuery,
+        viewMode
+      });
+    }
   }, []);
 
   // Back to Top functionality
@@ -632,21 +630,27 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     const loadCoins = async () => {
       // Prevent multiple simultaneous API calls
       if (isFetching) {
-        console.log('CryptoTableWithSearch: Skipping API call - already fetching');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('CryptoTableWithSearch: Skipping API call - already fetching');
+        }
         return;
       }
 
       // Debounce rapid requests (prevent spam)
       const now = Date.now();
       if (now - lastFetchTime < 2000) { // 2 second debounce for better performance
-        console.log('CryptoTableWithSearch: Skipping API call - too soon after last request');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('CryptoTableWithSearch: Skipping API call - too soon after last request');
+        }
         return;
       }
 
       // Cancel any existing request
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
-        console.log('CryptoTableWithSearch: Cancelled previous request');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('CryptoTableWithSearch: Cancelled previous request');
+        }
       }
 
       // Set fetching state to prevent duplicates
@@ -657,7 +661,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       abortControllerRef.current = new AbortController();
 
       try {
-        console.log('CryptoTableWithSearch: Fetching crypto data from CoinGecko proxy...');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('CryptoTableWithSearch: Fetching crypto data from CoinGecko proxy...');
+        }
 
         const response = await fetch('/api/coingecko-proxy/coins', {
           signal: abortControllerRef.current.signal,
@@ -683,7 +689,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           );
 
           if (isValidData && isMounted) {
-            console.log(`CryptoTableWithSearch: Successfully loaded ${data.length} coins from CoinGecko proxy`);
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`CryptoTableWithSearch: Successfully loaded ${data.length} coins from CoinGecko proxy`);
+            }
 
             // Store as backup data for corruption recovery
             setLastValidData([...data]);
@@ -693,7 +701,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
             setDataUpdateCount(prev => prev + 1);
             setError(null); // Clear any previous errors
           } else if (!isMounted) {
-            console.log('CryptoTableWithSearch: Component unmounted, skipping state update');
+            if (process.env.NODE_ENV === 'development') {
+              console.log('CryptoTableWithSearch: Component unmounted, skipping state update');
+            }
           } else {
             throw new Error('Data validation failed - incomplete coin data structure');
           }
@@ -703,7 +713,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       } catch (error) {
         // Handle abort errors gracefully
         if (error.name === 'AbortError') {
-          console.log('CryptoTableWithSearch: Request was cancelled');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('CryptoTableWithSearch: Request was cancelled');
+          }
           return;
         }
 
@@ -725,7 +737,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     // Auto-refresh data every 5 minutes
     autoRefreshInterval = setInterval(() => {
       if (isMounted && !isFetching && coins.length > 0) {
-        console.log('CryptoTableWithSearch: Auto-refreshing data (5-minute interval)');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('CryptoTableWithSearch: Auto-refreshing data (5-minute interval)');
+        }
         loadCoins();
       }
     }, 5 * 60 * 1000);
@@ -1067,16 +1081,18 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       });
     }
 
-    console.log('CryptoTableWithSearch: Final filtered coins:', {
-      finalCount: filteredCoins.length,
-      sampleCoins: filteredCoins.slice(0, 3).map(coin => ({
-        id: coin.id,
-        symbol: coin.symbol,
-        name: coin.name,
-        price: coin.current_price,
-        marketCap: coin.market_cap
-      }))
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('CryptoTableWithSearch: Final filtered coins:', {
+        finalCount: filteredCoins.length,
+        sampleCoins: filteredCoins.slice(0, 3).map(coin => ({
+          id: coin.id,
+          symbol: coin.symbol,
+          name: coin.name,
+          price: coin.current_price,
+          marketCap: coin.market_cap
+        }))
+      });
+    }
 
     return filteredCoins;
   }, [coins, searchQuery, filter, dateRange, sortColumn, sortDirection]); // ENTERPRISE-LEVEL: Proper dependency array for useMemo
@@ -1084,11 +1100,15 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
   // CRITICAL FIX: Manual refresh function for user-initiated updates
   const handleManualRefresh = async () => {
     if (isFetching) {
-      console.log('CryptoTableWithSearch: Refresh skipped - already fetching');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('CryptoTableWithSearch: Refresh skipped - already fetching');
+      }
       return;
     }
 
-    console.log('CryptoTableWithSearch: Manual refresh initiated by user');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('CryptoTableWithSearch: Manual refresh initiated by user');
+    }
     setLoading(true);
     setError(null);
 
@@ -1115,7 +1135,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
           );
 
           if (isValidData) {
-            console.log(`CryptoTableWithSearch: Manual refresh successful - loaded ${data.length} coins`);
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`CryptoTableWithSearch: Manual refresh successful - loaded ${data.length} coins`);
+            }
             setLastValidData([...data]);
             setCoins(data);
             setDataSource('coingecko-api');
@@ -1167,7 +1189,9 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     if (coins && coins.length > 0 && dataIntegrity && !dataIntegrity.hasValidIds) {
       console.error('CryptoTableWithSearch: Data corruption detected! Attempting auto-recovery...');
       if (lastValidData && lastValidData.length > 0) {
-        console.log('CryptoTableWithSearch: Restoring from backup data...');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('CryptoTableWithSearch: Restoring from backup data...');
+        }
         setCoins(lastValidData);
         setError('Data corruption detected and recovered from backup');
       } else {
@@ -1489,7 +1513,9 @@ function TrendingCoins100({ onCoinClick }) {
         }
       } catch (error) {
         if (error.name === 'AbortError') {
-          console.log('TrendingCoins100: Request was cancelled');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('TrendingCoins100: Request was cancelled');
+          }
           return;
         }
 
@@ -1646,7 +1672,9 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
 
     const fetchCoins = async () => {
       try {
-        console.log('Fetching coins for heatmap...');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Fetching coins for heatmap...');
+        }
         setLoading(true);
         setError(null);
 
@@ -1663,7 +1691,9 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
           const heatmapData = data.slice(0, 25); // Get top 25 for heatmap
 
           if (isMounted) {
-            console.log('Coins loaded successfully for heatmap:', heatmapData.length);
+            if (process.env.NODE_ENV === 'development') {
+              console.log('Coins loaded successfully for heatmap:', heatmapData.length);
+            }
             setCoins(heatmapData);
             setLoading(false);
           }
@@ -1672,7 +1702,9 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
         }
       } catch (error) {
         if (error.name === 'AbortError') {
-          console.log('CryptoHeatmap: Request was cancelled');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('CryptoHeatmap: Request was cancelled');
+          }
           return;
         }
 
@@ -1696,9 +1728,11 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
   const getFilteredCoins = () => {
     let filteredCoins = coins || [];
 
-    console.log('Initial coins count for heatmap:', filteredCoins.length);
-    console.log('Current filter for heatmap:', filter);
-    console.log('Current search query for heatmap:', searchQuery);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Initial coins count for heatmap:', filteredCoins.length);
+      console.log('Current filter for heatmap:', filter);
+      console.log('Current search query for heatmap:', searchQuery);
+    }
 
     // Apply search filter
     if (searchQuery) {
@@ -1706,7 +1740,9 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
         coin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         coin.symbol.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      console.log('After search filter for heatmap:', filteredCoins.length);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('After search filter for heatmap:', filteredCoins.length);
+      }
     }
 
     // Apply category filter
