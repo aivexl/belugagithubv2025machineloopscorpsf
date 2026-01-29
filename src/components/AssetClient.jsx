@@ -1693,7 +1693,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
     };
   }, []); // Remove dateRange dependency to prevent excessive API calls
 
-  const getFilteredCoins = () => {
+  const filteredCoins = useMemo(() => {
     let filteredCoins = coins || [];
 
     console.log('Initial coins count for heatmap:', filteredCoins.length);
@@ -1929,7 +1929,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
     }
 
     return filteredCoins;
-  };
+  }, [coins, searchQuery, filter, dateRange]);
 
 
 
@@ -1978,10 +1978,6 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       </div>
     );
   }
-
-  const filteredCoins = getFilteredCoins();
-
-
 
   return (
     <div className="w-full">
