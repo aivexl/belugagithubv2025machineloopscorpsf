@@ -11,13 +11,18 @@ const TABLE_MAPPING = {
 };
 
 // Function untuk mendapatkan data dari database
-export const getDatabaseData = async (category) => {
+export const getDatabaseData = async (category, options = {}) => {
   try {
     if (!TABLE_MAPPING[category]) {
       throw new Error(`Unknown category: ${category}`);
     }
 
-    const response = await fetch(`${API_BASE_URL}?category=${category}&t=${Date.now()}`);
+    let url = `${API_BASE_URL}?category=${category}&t=${Date.now()}`;
+    if (options.count) {
+      url += '&count=true';
+    }
+
+    const response = await fetch(url);
     
     if (!response.ok) {
       const errorData = await response.json();
@@ -25,6 +30,11 @@ export const getDatabaseData = async (category) => {
     }
 
     const result = await response.json();
+
+    if (options.count) {
+      return result;
+    }
+
     return result.data || [];
   } catch (error) {
     console.error('Database error:', error);
@@ -209,10 +219,10 @@ export const getDatabaseDataPaginated = async (category, page = 1, limit = 10) =
 // Function untuk mendapatkan statistik data
 export const getDatabaseStats = async (category) => {
   try {
-    const data = await getDatabaseData(category);
+    const result = await getDatabaseData(category, { count: true });
     
     return {
-      total: data.length,
+      total: result.count,
       category
     };
   } catch (error) {

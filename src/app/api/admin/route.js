@@ -184,6 +184,7 @@ export async function GET(request) {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const countOnly = searchParams.get('count') === 'true';
     
     if (!category || !TABLE_MAPPING[category]) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
@@ -191,6 +192,19 @@ export async function GET(request) {
 
     const tableName = TABLE_MAPPING[category];
     
+    if (countOnly) {
+      const { count, error } = await supabase
+        .from(tableName)
+        .select('*', { count: 'exact', head: true });
+
+      if (error) {
+        console.error('Error fetching count:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ count });
+    }
+
     const { data, error } = await supabase
       .from(tableName)
       .select('*')
