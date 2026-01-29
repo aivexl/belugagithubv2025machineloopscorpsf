@@ -119,19 +119,25 @@ export const bulkInsertData = async (category, items) => {
       throw new Error(`Unknown category: ${category}`);
     }
 
-    // Insert items satu per satu untuk menghindari error bulk
-    const results = [];
-    for (const item of items) {
-      try {
-        const result = await addDatabaseItem(category, item);
-        results.push(result);
-      } catch (error) {
-        console.error('Error inserting item:', error);
-        // Continue with next item
-      }
+    if (!items || items.length === 0) {
+      return [];
     }
 
-    return results;
+    const response = await fetch(API_BASE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ category, items }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to bulk add items');
+    }
+
+    const result = await response.json();
+    return result.data;
   } catch (error) {
     console.error('Database error:', error);
     throw error;

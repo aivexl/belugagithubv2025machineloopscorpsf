@@ -234,35 +234,59 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { category, itemData } = body;
+    const { category, itemData, items } = body;
     
     if (!category || !TABLE_MAPPING[category]) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
     }
 
     const tableName = TABLE_MAPPING[category];
-    const mappedData = mapFields(category, itemData);
-    
-    // Debug logging
-    console.log('Category:', category);
-    console.log('Table name:', tableName);
-    console.log('Original data:', itemData);
-    console.log('Mapped data:', mappedData);
-    
-    const { data, error } = await supabase
-      .from(tableName)
-      .insert([mappedData])
-      .select()
-      .single();
 
-    if (error) {
-      console.error('Error adding item:', error);
-      console.error('Table:', tableName);
-      console.error('Data:', mappedData);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    // Handle bulk insert
+    if (items && Array.isArray(items) && items.length > 0) {
+      const mappedItems = items.map(item => mapFields(category, item));
+
+      const { data, error } = await supabase
+        .from(tableName)
+        .insert(mappedItems)
+        .select();
+
+      if (error) {
+        console.error('Error adding items:', error);
+        console.error('Table:', tableName);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ data });
     }
 
-    return NextResponse.json({ data });
+    // Handle single insert
+    if (itemData) {
+      const mappedData = mapFields(category, itemData);
+
+      // Debug logging
+      console.log('Category:', category);
+      console.log('Table name:', tableName);
+      console.log('Original data:', itemData);
+      console.log('Mapped data:', mappedData);
+
+      const { data, error } = await supabase
+        .from(tableName)
+        .insert([mappedData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error adding item:', error);
+        console.error('Table:', tableName);
+        console.error('Data:', mappedData);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ data });
+    }
+
+    return NextResponse.json({ error: 'Missing itemData or items' }, { status: 400 });
   } catch (error) {
     console.error('API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
