@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useHomepageCrypto } from './HomepageCryptoProvider';
 import { formatVolume, formatCryptoPrice, formatPercentageChange } from '../utils/numberFormatting';
 
@@ -9,9 +9,13 @@ export default function Top100Trending() {
   const { homepageCoins, homepageLoading, homepageError } = useHomepageCrypto();
   
   // Get trending coins (top 10 by volume change)
-  const trendingCoins = homepageCoins
-    .sort((a, b) => (b.total_volume || 0) - (a.total_volume || 0))
-    .slice(0, 10);
+  // OPTIMIZATION: Memoize the sorting to prevent unnecessary re-calculations on every render
+  // and ensure we don't mutate the original homepageCoins array.
+  const trendingCoins = useMemo(() => {
+    return [...homepageCoins]
+      .sort((a, b) => (b.total_volume || 0) - (a.total_volume || 0))
+      .slice(0, 10);
+  }, [homepageCoins]);
 
   // Show skeleton if loading, or if there's an error (no internet/API failure), or if no data
   // Data will only show if: not loading AND no error AND we have data
