@@ -141,42 +141,35 @@ export const bulkInsertData = async (category, items) => {
 // Function untuk search data
 export const searchDatabaseData = async (category, searchTerm, filters = {}) => {
   try {
-    // Untuk sementara, ambil semua data dan filter di client side
-    const allData = await getDatabaseData(category);
-    
-    let filteredData = allData;
-
-    // Apply search term
-    if (searchTerm) {
-      filteredData = filteredData.filter(item => {
-        switch (category) {
-          case 'exchanges':
-            return item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                   item.country?.toLowerCase().includes(searchTerm.toLowerCase());
-          case 'airdrop':
-          case 'ico-ido':
-            return item.project?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                   item.token?.toLowerCase().includes(searchTerm.toLowerCase());
-          case 'fundraising':
-            return item.project?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                   item.category?.toLowerCase().includes(searchTerm.toLowerCase());
-          case 'glossary':
-            return item.term?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                   item.definition?.toLowerCase().includes(searchTerm.toLowerCase());
-          default:
-            return true;
-        }
-      });
+    if (!TABLE_MAPPING[category]) {
+      throw new Error(`Unknown category: ${category}`);
     }
 
-    // Apply filters
+    // Construct query parameters
+    const queryParams = new URLSearchParams();
+    queryParams.set('category', category);
+    queryParams.set('t', Date.now());
+
+    if (searchTerm) {
+      queryParams.set('search', searchTerm);
+    }
+
+    // Add filters to query parameters
     Object.keys(filters).forEach(key => {
       if (filters[key] && filters[key] !== 'All') {
-        filteredData = filteredData.filter(item => item[key] === filters[key]);
+        queryParams.set(key, filters[key]);
       }
     });
 
-    return filteredData;
+    const response = await fetch(`${API_BASE_URL}?${queryParams.toString()}`);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to search data');
+    }
+
+    const result = await response.json();
+    return result.data || [];
   } catch (error) {
     console.error('Database search error:', error);
     throw error;

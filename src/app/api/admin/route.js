@@ -184,6 +184,9 @@ export async function GET(request) {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const searchParam = searchParams.get('search');
+    // Sanitize search param to prevent PostgREST injection (remove commas and parentheses)
+    const search = searchParam ? searchParam.replace(/[,()]/g, '') : null;
     
     if (!category || !TABLE_MAPPING[category]) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
@@ -191,10 +194,38 @@ export async function GET(request) {
 
     const tableName = TABLE_MAPPING[category];
     
-    const { data, error } = await supabase
+    let query = supabase
       .from(tableName)
       .select('*')
       .order('created_at', { ascending: false });
+
+    // Apply search term
+    if (search) {
+      if (category === 'exchanges') {
+        query = query.or(`name.ilike.%${search}%,region.ilike.%${search}%`);
+      } else if (category === 'airdrop' || category === 'ico-ido') {
+        query = query.or(`project.ilike.%${search}%,token.ilike.%${search}%`);
+      } else if (category === 'fundraising') {
+        query = query.or(`project.ilike.%${search}%,category.ilike.%${search}%`);
+      } else if (category === 'glossary') {
+        query = query.or(`term.ilike.%${search}%,definition.ilike.%${search}%`);
+      }
+    }
+
+    // Apply filters
+    const mapping = FIELD_MAPPING[category];
+    for (const [key, value] of searchParams.entries()) {
+      if (['category', 'search', 't'].includes(key)) continue;
+
+      // Map frontend field to database field if mapping exists
+      const dbField = (mapping && mapping[key]) ? mapping[key] : key;
+
+      if (value && value !== 'All') {
+        query = query.eq(dbField, value);
+      }
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching data:', error);
