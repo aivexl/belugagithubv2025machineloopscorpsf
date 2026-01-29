@@ -1,12 +1,6 @@
 // API route untuk admin operations (simplified)
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://sqjqirkrcfczypxygdtm.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxanFpcmtyY2ZjenlweHlnZHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5NzE5MDAsImV4cCI6MjA3MTU0NzkwMH0.7Tnurb-zS8n_KeuE_K2rA_RlLSVsk2E4S3YiTf9MfhI';
-
-// Create client dengan anon key
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Mapping kategori ke tabel database
 const TABLE_MAPPING = {
@@ -187,6 +181,7 @@ function reverseMapFields(category, item) {
 // GET - Ambil data
 export async function GET(request) {
   try {
+    const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     
@@ -231,6 +226,13 @@ export async function GET(request) {
 // POST - Tambah data
 export async function POST(request) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { category, itemData } = body;
     
@@ -270,6 +272,13 @@ export async function POST(request) {
 // PUT - Update data
 export async function PUT(request) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { category, id, updateData } = body;
     
@@ -302,6 +311,13 @@ export async function PUT(request) {
 // DELETE - Hapus data
 export async function DELETE(request) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const id = searchParams.get('id');
