@@ -8,7 +8,6 @@ import {
   deleteDatabaseItem,
   searchDatabaseData,
   getDatabaseDataPaginated,
-  getDatabaseStats,
   clearDatabaseTable
 } from './databaseServiceAPI';
 
@@ -26,10 +25,11 @@ export const useSupabaseData = (category) => {
       setError(null);
       
       console.log('Loading data for category:', category, 'retry:', retryCount);
-      const [dataResult, statsResult] = await Promise.all([
-        getDatabaseData(category),
-        getDatabaseStats(category)
-      ]);
+
+      // Optimization: Fetch data once and derive stats locally
+      // This saves a redundant network request
+      const dataResult = await getDatabaseData(category);
+      const statsResult = { total: dataResult ? dataResult.length : 0, category };
       
       console.log('Loaded data:', dataResult.length, 'items');
       console.log('Data result:', dataResult);
