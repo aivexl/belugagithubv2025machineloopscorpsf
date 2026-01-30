@@ -321,19 +321,35 @@ export async function DELETE(request) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const id = searchParams.get('id');
+    const deleteAll = searchParams.get('deleteAll') === 'true';
     
-    if (!category || !TABLE_MAPPING[category] || !id) {
+    if (!category || !TABLE_MAPPING[category]) {
       return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
+    }
+
+    if (!id && !deleteAll) {
+      return NextResponse.json({ error: 'Missing id' }, { status: 400 });
     }
 
     const tableName = TABLE_MAPPING[category];
     
-    const { data, error } = await supabase
-      .from(tableName)
-      .delete()
-      .eq('id', id)
-      .select()
-      .single();
+    let result;
+    if (deleteAll) {
+      result = await supabase
+        .from(tableName)
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000')
+        .select();
+    } else {
+      result = await supabase
+        .from(tableName)
+        .delete()
+        .eq('id', id)
+        .select()
+        .single();
+    }
+
+    const { data, error } = result;
 
     if (error) {
       console.error('Error deleting item:', error);

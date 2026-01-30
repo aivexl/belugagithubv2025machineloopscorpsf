@@ -228,12 +228,14 @@ export const clearDatabaseTable = async (category) => {
       throw new Error(`Unknown category: ${category}`);
     }
 
-    // Get all items first
-    const allData = await getDatabaseData(category);
-    
-    // Delete all items
-    for (const item of allData) {
-      await deleteDatabaseItem(category, item.id);
+    // Use bulk delete endpoint
+    const response = await fetch(`${API_BASE_URL}?category=${category}&deleteAll=true`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to clear table');
     }
 
     return true;
