@@ -112,20 +112,32 @@ const API_BASE_URL = 'https://api.coingecko.com/api/v3';
 const API_TIMEOUT = 10000; // 10 seconds
 
 // Rate limiting
-let lastRequestTime = 0;
+// Optimization: Using a "next available time" scheduler instead of "last request time"
+// allows us to serialize concurrent requests correctly. Even if multiple requests
+// are initiated simultaneously, they will be assigned sequential time slots,
+// preventing race conditions where they would otherwise all fire after a single delay.
+let nextAvailableTime = 0;
 const MIN_REQUEST_INTERVAL = 1200; // 1.2 seconds between requests
 
 const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
 const makeRequest = async (endpoint: string): Promise<unknown> => {
   const now = Date.now();
-  const timeSinceLastRequest = now - lastRequestTime;
   
-  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
-    await delay(MIN_REQUEST_INTERVAL - timeSinceLastRequest);
+  // Schedule this request to run at the next available slot
+  // If the system was idle, scheduledTime will be 'now'.
+  // If busy, it will be the end of the previous request's window.
+  const scheduledTime = Math.max(now, nextAvailableTime);
+
+  // Advance the global pointer synchronously so the next call sees the updated time
+  // even if this function awaits/yields.
+  nextAvailableTime = scheduledTime + MIN_REQUEST_INTERVAL;
+  
+  const waitTime = scheduledTime - now;
+
+  if (waitTime > 0) {
+    await delay(waitTime);
   }
-  
-  lastRequestTime = Date.now();
   
   try {
     const controller = new AbortController();
