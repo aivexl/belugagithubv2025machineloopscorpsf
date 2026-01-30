@@ -94,8 +94,8 @@ export async function getAllArticles(): Promise<SanityArticle[]> {
       }
     }
   `
-  // Avoid stale cache by disabling Next.js caching for this fetch
-  return client.fetch(query, {}, { cache: 'no-store', next: { revalidate: 0 } })
+  // Cache for 60 seconds
+  return client.fetch(query, {}, { next: { revalidate: 60 } })
 }
 
 // Fetch articles by category
@@ -128,7 +128,7 @@ export async function getArticlesByCategory(category: 'newsroom' | 'academy'): P
     }
   }
 `
-  return client.fetch(query, { category }, { cache: 'no-store', next: { revalidate: 0 } })
+  return client.fetch(query, { category }, { next: { revalidate: 60 } })
 }
 
 // Fetch a single article by slug
@@ -162,7 +162,7 @@ export async function getArticleBySlug(slug: string): Promise<SanityArticle | nu
       }
     }
   `
-  return client.fetch(query, { slug }, { cache: 'no-store', next: { revalidate: 0 } })
+  return client.fetch(query, { slug }, { next: { revalidate: 60 } })
 }
 
 // Fetch featured articles
@@ -194,7 +194,7 @@ export async function getFeaturedArticles(): Promise<SanityArticle[]> {
       }
     }
   `
-  return client.fetch(query, {}, { cache: 'no-store', next: { revalidate: 0 } })
+  return client.fetch(query, {}, { next: { revalidate: 60 } })
 }
 
 // Fetch articles filtered by network and optional category
@@ -208,7 +208,7 @@ export async function getArticlesByNetwork(network: string, category: 'academy' 
     }`;
 
   try {
-    const result = await client.fetch(query, {}, { cache: 'no-store', next: { revalidate: 0 } });
+    const result = await client.fetch(query, {}, { next: { revalidate: 60 } });
     return result || [];
   } catch (error) {
     console.error('Error fetching articles by network:', { network, category }, error);
@@ -240,15 +240,15 @@ export async function getAcademyArticlesByCoin(coinSymbol: string): Promise<Sani
 
   try {
     // Try exact symbol match first
-    let result = await client.fetch(`${queries[0]} ${fieldQuery}`, { coinSymbol: coinSymbol }, { cache: 'no-store', next: { revalidate: 0 } })
+    let result = await client.fetch(`${queries[0]} ${fieldQuery}`, { coinSymbol: coinSymbol }, { next: { revalidate: 60 } })
     if (result && result.length > 0) return result
 
     // Try uppercase match
-    result = await client.fetch(`${queries[1]} ${fieldQuery}`, { coinSymbolUpper: coinSymbol.toUpperCase() }, { cache: 'no-store', next: { revalidate: 0 } })
+    result = await client.fetch(`${queries[1]} ${fieldQuery}`, { coinSymbolUpper: coinSymbol.toUpperCase() }, { next: { revalidate: 60 } })
     if (result && result.length > 0) return result
 
     // Try lowercase match
-    result = await client.fetch(`${queries[2]} ${fieldQuery}`, { coinSymbolLower: coinSymbol.toLowerCase() }, { cache: 'no-store', next: { revalidate: 0 } })
+    result = await client.fetch(`${queries[2]} ${fieldQuery}`, { coinSymbolLower: coinSymbol.toLowerCase() }, { next: { revalidate: 60 } })
     return result || []
   } catch (error) {
     console.error('Error fetching academy articles by coin:', error)
@@ -271,7 +271,7 @@ export async function getArticlesByCoinTags(category?: 'academy' | 'newsroom' | 
   }`
 
   try {
-    const result = await client.fetch(query, {}, { cache: 'no-store', next: { revalidate: 0 } })
+    const result = await client.fetch(query, {}, { next: { revalidate: 60 } })
     console.log(`📊 getArticlesByCoinTags(${category}) returned ${result?.length || 0} articles`)
     return result || []
   } catch (error) {
