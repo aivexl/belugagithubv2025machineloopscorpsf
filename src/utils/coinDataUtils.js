@@ -45,7 +45,7 @@ export const getDatabaseCoinSymbol = (coingeckoSymbol) => {
 // Fetch detailed coin data from CoinGecko API
 export const fetchDetailedCoinData = async (coinId) => {
   try {
-    const response = await fetch(`/api/coingecko/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=true&developer_data=true&sparkline=false`);
+    const response = await fetch(`/api/coingecko/api/v3/coins/${coinId}?localization=false&tickers=true&market_data=true&community_data=true&developer_data=true&sparkline=false`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

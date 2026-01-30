@@ -153,7 +153,7 @@ export default function CryptoDetailClient({ cryptoId }) {
       
       while (retryCount < maxRetries) {
         try {
-          detailedResponse = await fetch(`/api/coingecko/api/v3/coins/${cryptoId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false`);
+          detailedResponse = await fetch(`/api/coingecko/api/v3/coins/${cryptoId}?localization=false&tickers=true&market_data=true&community_data=false&developer_data=false`);
           
           if (detailedResponse.status === 431) {
             retryCount++;
