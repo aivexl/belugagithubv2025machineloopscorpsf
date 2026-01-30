@@ -208,7 +208,7 @@ export async function GET(request) {
       query = query.range(from, to);
     }
 
-    const { data, error, count } = await query.order('created_at', { ascending: false });
+    let { data, error, count } = await query.order('created_at', { ascending: false });
 
     // Apply search term
     if (search) {
@@ -236,7 +236,9 @@ export async function GET(request) {
       }
     }
 
-    const { data, error } = await query;
+    const secondResult = await query;
+    data = secondResult.data;
+    error = secondResult.error;
 
     if (error) {
       console.error('Error fetching data:', error);
@@ -276,13 +278,37 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { category, itemData } = body;
+    const { category, itemData, items } = body;
     
     if (!category || !TABLE_MAPPING[category]) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
     }
 
     const tableName = TABLE_MAPPING[category];
+
+    // Handle bulk insert
+    if (items && Array.isArray(items)) {
+      const mappedItems = items.map(item => mapFields(category, item));
+
+      // Debug logging for bulk
+      console.log('Category:', category);
+      console.log('Table name:', tableName);
+      console.log('Bulk insert count:', items.length);
+
+      const { data, error } = await supabase
+        .from(tableName)
+        .insert(mappedItems)
+        .select();
+
+      if (error) {
+        console.error('Error adding items:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ data });
+    }
+
+    // Handle single insert
     const mappedData = mapFields(category, itemData);
     
     // Debug logging
