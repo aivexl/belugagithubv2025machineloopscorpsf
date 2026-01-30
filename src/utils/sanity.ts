@@ -218,37 +218,20 @@ export async function getArticlesByNetwork(network: string, category: 'academy' 
 
 // Fetch academy articles by coin symbol from Dunia Crypto
 export async function getAcademyArticlesByCoin(coinSymbol: string): Promise<SanityArticle[]> {
-  const queries = [
-    // Try exact symbol match
-    `*[_type == "article" && category == "academy" && source == "Dunia Crypto" &&
-      count(coinTags[]->) > 0 &&
-      count(coinTags[]->[symbol == $coinSymbol]) > 0] | order(publishedAt desc)`,
-    // Try uppercase symbol match
-    `*[_type == "article" && category == "academy" && source == "Dunia Crypto" &&
-      count(coinTags[]->) > 0 &&
-      count(coinTags[]->[symbol == $coinSymbolUpper]) > 0] | order(publishedAt desc)`,
-    // Try lowercase symbol match
-    `*[_type == "article" && category == "academy" && source == "Dunia Crypto" &&
-      count(coinTags[]->) > 0 &&
-      count(coinTags[]->[symbol == $coinSymbolLower]) > 0] | order(publishedAt desc)`,
-  ]
-
-  const fieldQuery = `{
+  const query = `*[_type == "article" && category == "academy" && source == "Dunia Crypto" &&
+    count(coinTags[]->) > 0 &&
+    count((coinTags[]->)[symbol in [$coinSymbol, $coinSymbolUpper, $coinSymbolLower]]) > 0] | order(publishedAt desc) {
     _id, title, slug, excerpt, content, image, category, source, publishedAt, featured, showInSlider, level, topics, networks,
     coinTags[]->{ _id, name, symbol, logo, category, isActive, link }
   }`
 
   try {
-    // Try exact symbol match first
-    let result = await client.fetch(`${queries[0]} ${fieldQuery}`, { coinSymbol: coinSymbol }, { cache: 'no-store', next: { revalidate: 0 } })
-    if (result && result.length > 0) return result
+    const result = await client.fetch(query, {
+      coinSymbol: coinSymbol,
+      coinSymbolUpper: coinSymbol.toUpperCase(),
+      coinSymbolLower: coinSymbol.toLowerCase()
+    }, { cache: 'no-store', next: { revalidate: 0 } })
 
-    // Try uppercase match
-    result = await client.fetch(`${queries[1]} ${fieldQuery}`, { coinSymbolUpper: coinSymbol.toUpperCase() }, { cache: 'no-store', next: { revalidate: 0 } })
-    if (result && result.length > 0) return result
-
-    // Try lowercase match
-    result = await client.fetch(`${queries[2]} ${fieldQuery}`, { coinSymbolLower: coinSymbol.toLowerCase() }, { cache: 'no-store', next: { revalidate: 0 } })
     return result || []
   } catch (error) {
     console.error('Error fetching academy articles by coin:', error)
