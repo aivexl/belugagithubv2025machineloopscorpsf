@@ -172,7 +172,6 @@ export default function CryptoDetailInfo({
   const [loadingAcademy, setLoadingAcademy] = useState(true);
   const [loadingNews, setLoadingNews] = useState(true);
   const [error, setError] = useState(null);
-  const [debugInfo, setDebugInfo] = useState({});
 
   // CTO Debug: Log component initialization
   console.log('🔧 CryptoDetailInfo: Component initialized');
@@ -190,7 +189,6 @@ export default function CryptoDetailInfo({
       if (!coinData?.symbol) {
         console.warn('⚠️ CryptoDetailInfo: No coin symbol provided, skipping academy fetch');
         setLoadingAcademy(false);
-        setDebugInfo(prev => ({ ...prev, academySkipped: 'No coin symbol' }));
         return;
       }
 
@@ -212,27 +210,12 @@ export default function CryptoDetailInfo({
         const limitedArticles = articles.slice(0, 4);
         setAcademyArticles(limitedArticles);
 
-        // CTO Debug: Update debug info
-        setDebugInfo(prev => ({
-          ...prev,
-          academyArticlesCount: limitedArticles.length,
-          academyLastFetch: new Date().toISOString(),
-          academyError: null
-        }));
-
         console.log('🎯 CTO: Academy articles state updated:', limitedArticles.length, 'articles');
 
       } catch (error) {
         console.error('❌ CTO: Academy articles fetch failed:', error);
         setError(`Academy fetch failed: ${error.message}`);
         setAcademyArticles([]);
-
-        // CTO Debug: Update debug info with error
-        setDebugInfo(prev => ({
-          ...prev,
-          academyError: error.message,
-          academyLastError: new Date().toISOString()
-        }));
       } finally {
         setLoadingAcademy(false);
         console.log('🏁 CTO: Academy articles fetch completed');
@@ -249,7 +232,6 @@ export default function CryptoDetailInfo({
       if (!coinData?.symbol) {
         console.warn('⚠️ CryptoDetailInfo: No coin symbol provided, skipping news fetch');
         setLoadingNews(false);
-        setDebugInfo(prev => ({ ...prev, newsSkipped: 'No coin symbol' }));
         return;
       }
 
@@ -271,27 +253,12 @@ export default function CryptoDetailInfo({
         const limitedArticles = articles.slice(0, 4);
         setNewsArticles(limitedArticles);
 
-        // CTO Debug: Update debug info
-        setDebugInfo(prev => ({
-          ...prev,
-          newsArticlesCount: limitedArticles.length,
-          newsLastFetch: new Date().toISOString(),
-          newsError: null
-        }));
-
         console.log('🎯 CTO: News articles state updated:', limitedArticles.length, 'articles');
 
       } catch (error) {
         console.error('❌ CTO: News articles fetch failed:', error);
         setError(`News fetch failed: ${error.message}`);
         setNewsArticles([]);
-
-        // CTO Debug: Update debug info with error
-        setDebugInfo(prev => ({
-          ...prev,
-          newsError: error.message,
-          newsLastError: new Date().toISOString()
-        }));
       } finally {
         setLoadingNews(false);
         console.log('🏁 CTO: News articles fetch completed');
@@ -324,24 +291,6 @@ export default function CryptoDetailInfo({
 
   return (
     <div className={`space-y-4 pb-8 ${className}`}>
-      {/* CTO Debug Panel - Remove in production */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 text-xs">
-          <details>
-            <summary className="text-blue-400 cursor-pointer font-medium">🔧 CTO Debug Panel</summary>
-            <div className="mt-2 space-y-1 text-gray-300">
-              <div>Coin Symbol: <span className="text-white">{coinData.symbol}</span></div>
-              <div>Academy Articles: <span className="text-white">{academyArticles.length}</span></div>
-              <div>News Articles: <span className="text-white">{newsArticles.length}</span></div>
-              <div>Loading Academy: <span className="text-white">{loadingAcademy ? 'Yes' : 'No'}</span></div>
-              <div>Loading News: <span className="text-white">{loadingNews ? 'Yes' : 'No'}</span></div>
-              <div>Error: <span className="text-white">{error || 'None'}</span></div>
-              <div>Debug Info: <span className="text-white">{JSON.stringify(debugInfo, null, 2)}</span></div>
-            </div>
-          </details>
-        </div>
-      )}
-
       {/* Error Display */}
       {error && (
         <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
