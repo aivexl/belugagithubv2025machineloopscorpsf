@@ -210,10 +210,12 @@ export const getDatabaseDataPaginated = async (category, page = 1, limit = 10) =
 // Function untuk mendapatkan statistik data
 export const getDatabaseStats = async (category) => {
   try {
-    const data = await getDatabaseData(category);
+    // Optimization: Use paginated fetch with limit=1 to get total count
+    // without fetching all data (which reduces payload significantly).
+    const result = await getDatabaseDataPaginated(category, 1, 1);
     
     return {
-      total: data.length,
+      total: result.total,
       category
     };
   } catch (error) {
