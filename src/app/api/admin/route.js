@@ -200,16 +200,6 @@ export async function GET(request) {
       .from(tableName)
       .select('*', { count: 'exact' });
 
-    if (page && limit) {
-      const p = parseInt(page);
-      const l = parseInt(limit);
-      const from = (p - 1) * l;
-      const to = from + l - 1;
-      query = query.range(from, to);
-    }
-
-    const { data, error, count } = await query.order('created_at', { ascending: false });
-
     // Apply search term
     if (search) {
       if (category === 'exchanges') {
@@ -226,7 +216,7 @@ export async function GET(request) {
     // Apply filters
     const mapping = FIELD_MAPPING[category];
     for (const [key, value] of searchParams.entries()) {
-      if (['category', 'search', 't'].includes(key)) continue;
+      if (['category', 'search', 't', 'page', 'limit'].includes(key)) continue;
 
       // Map frontend field to database field if mapping exists
       const dbField = (mapping && mapping[key]) ? mapping[key] : key;
@@ -236,7 +226,19 @@ export async function GET(request) {
       }
     }
 
-    const { data, error } = await query;
+    // Apply ordering
+    query = query.order('created_at', { ascending: false });
+
+    // Apply pagination
+    if (page && limit) {
+      const p = parseInt(page);
+      const l = parseInt(limit);
+      const from = (p - 1) * l;
+      const to = from + l - 1;
+      query = query.range(from, to);
+    }
+
+    const { data, error, count } = await query;
 
     if (error) {
       console.error('Error fetching data:', error);
