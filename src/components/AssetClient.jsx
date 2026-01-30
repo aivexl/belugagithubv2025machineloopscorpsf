@@ -57,6 +57,17 @@ export default function AssetClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cryptoFilter, setCryptoFilter] = useState('top-100');
 
+  // Lifted state from CryptoTableWithSearch
+  const [coins, setCoins] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastValidData, setLastValidData] = useState(null);
+  const [dataUpdateCount, setDataUpdateCount] = useState(0);
+  const [dataSource, setDataSource] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [lastFetchTime, setLastFetchTime] = useState(0);
+  const abortControllerRef = useRef(null);
+
   // Debug logging for state changes
   useEffect(() => {
     console.log('AssetClient: State changed:', { activeSection, cryptoFilter, searchQuery });
@@ -79,6 +90,208 @@ export default function AssetClient() {
       viewMode
     });
   }, []);
+
+  // Data fetching logic (Lifted)
+  useEffect(() => {
+    let isMounted = true;
+    let autoRefreshInterval = null;
+
+    const loadCoins = async () => {
+      // Prevent multiple simultaneous API calls
+      if (isFetching) {
+        console.log('AssetClient: Skipping API call - already fetching');
+        return;
+      }
+
+      // Debounce rapid requests (prevent spam)
+      const now = Date.now();
+      if (now - lastFetchTime < 2000) { // 2 second debounce for better performance
+        console.log('AssetClient: Skipping API call - too soon after last request');
+        return;
+      }
+
+      // Cancel any existing request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        console.log('AssetClient: Cancelled previous request');
+      }
+
+      // Set fetching state to prevent duplicates
+      setIsFetching(true);
+      setLastFetchTime(now);
+
+      // Create new abort controller for this request
+      abortControllerRef.current = new AbortController();
+
+      try {
+        console.log('AssetClient: Fetching crypto data from CoinGecko proxy...');
+
+        const response = await fetch('/api/coingecko-proxy/coins', {
+          signal: abortControllerRef.current.signal,
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Enterprise-level data validation
+        if (data && Array.isArray(data) && data.length > 0) {
+          const isValidData = data.every(coin =>
+            coin.id && coin.symbol && coin.name &&
+            typeof coin.current_price === 'number' &&
+            typeof coin.market_cap === 'number' &&
+            typeof coin.market_cap_rank === 'number'
+          );
+
+          if (isValidData && isMounted) {
+            console.log(`AssetClient: Successfully loaded ${data.length} coins from CoinGecko proxy`);
+
+            // Store as backup data for corruption recovery
+            setLastValidData([...data]);
+            setCoins(data);
+            setDataSource('coingecko-api');
+            setLoading(false);
+            setDataUpdateCount(prev => prev + 1);
+            setError(null); // Clear any previous errors
+          } else if (!isMounted) {
+            console.log('AssetClient: Component unmounted, skipping state update');
+          } else {
+            throw new Error('Data validation failed - incomplete coin data structure');
+          }
+        } else {
+          throw new Error('Invalid data structure received from API');
+        }
+      } catch (error) {
+        // Handle abort errors gracefully
+        if (error.name === 'AbortError') {
+          console.log('AssetClient: Request was cancelled');
+          return;
+        }
+
+        console.error('AssetClient: API fetch failed:', error);
+        if (isMounted) {
+          setError('Failed to load crypto data. Please refresh the page to retry.');
+          setLoading(false);
+        }
+      } finally {
+        if (isMounted) {
+          setIsFetching(false);
+        }
+      }
+    };
+
+    // Load coins on mount
+    loadCoins();
+
+    // Auto-refresh data every 5 minutes
+    autoRefreshInterval = setInterval(() => {
+      if (isMounted && !isFetching && coins.length > 0) {
+        console.log('AssetClient: Auto-refreshing data (5-minute interval)');
+        loadCoins();
+      }
+    }, 5 * 60 * 1000);
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+      }
+    };
+  }, []); // Empty dependency array - only run on mount
+
+  // Manual refresh function
+  const handleManualRefresh = async () => {
+    if (isFetching) {
+      console.log('AssetClient: Refresh skipped - already fetching');
+      return;
+    }
+
+    console.log('AssetClient: Manual refresh initiated by user');
+    setLoading(true);
+    setError(null);
+
+    // Reset fetching state to allow new request
+    setIsFetching(false);
+    setLastFetchTime(0);
+
+    // Trigger new data fetch
+    const loadCoins = async () => {
+      try {
+        const response = await fetch('/api/coingecko-proxy/coins');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data && Array.isArray(data) && data.length > 0) {
+          const isValidData = data.every(coin =>
+            coin.id && coin.symbol && coin.name &&
+            typeof coin.current_price === 'number' &&
+            typeof coin.market_cap === 'number' &&
+            typeof coin.market_cap_rank === 'number'
+          );
+
+          if (isValidData) {
+            console.log(`AssetClient: Manual refresh successful - loaded ${data.length} coins`);
+            setLastValidData([...data]);
+            setCoins(data);
+            setDataSource('coingecko-api');
+            setDataUpdateCount(prev => prev + 1);
+          } else {
+            throw new Error('Data validation failed during manual refresh');
+          }
+        } else {
+          throw new Error('Invalid data structure during manual refresh');
+        }
+      } catch (error) {
+        console.error('AssetClient: Manual refresh failed:', error);
+        setError(`Manual refresh failed: ${error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCoins();
+  };
+
+  // Data integrity check (Lifted)
+  const dataIntegrity = useMemo(() => {
+    if (!coins || coins.length === 0) return null;
+
+    return {
+      hasValidIds: coins.every(coin => coin.id && typeof coin.id === 'string'),
+      hasValidPrices: coins.every(coin => typeof coin.current_price === 'number' && coin.current_price > 0),
+      hasValidMarketCaps: coins.every(coin => typeof coin.market_cap === 'number' && coin.market_cap > 0),
+      hasValidRanks: coins.every(coin => typeof coin.market_cap_rank === 'number' && coin.market_cap_rank > 0)
+    };
+  }, [coins]);
+
+  // Data corruption detection (Lifted)
+  useEffect(() => {
+    if (coins && coins.length > 0 && dataIntegrity && !dataIntegrity.hasValidIds) {
+      console.error('AssetClient: Data corruption detected! Attempting auto-recovery...');
+      if (lastValidData && lastValidData.length > 0) {
+        console.log('AssetClient: Restoring from backup data...');
+        setCoins(lastValidData);
+        setError('Data corruption detected and recovered from backup');
+      } else {
+        console.error('AssetClient: No backup data available for recovery');
+        setError('Critical data corruption - no backup available');
+      }
+    }
+  }, [coins?.length, dataIntegrity?.hasValidIds, lastValidData?.length]);
+
 
   // Back to Top functionality
   useEffect(() => {
@@ -342,6 +555,13 @@ export default function AssetClient() {
                   searchQuery={searchQuery}
                   filter={activeSection === 'top-100' ? 'top-100' : cryptoFilter}
                   dateRange={dateRange}
+                  coins={coins}
+                  loading={loading}
+                  error={error}
+                  lastValidData={lastValidData}
+                  dataUpdateCount={dataUpdateCount}
+                  dataSource={dataSource}
+                  onRefresh={handleManualRefresh}
                   onCoinClick={(coin) => {
                     // Navigate to cryptocurrency detail page
                     router.push(`/cryptocurrencies/${coin.id}`);
@@ -352,6 +572,9 @@ export default function AssetClient() {
                   searchQuery={searchQuery}
                   filter={cryptoFilter}
                   dateRange={dateRange}
+                  coins={coins}
+                  loading={loading}
+                  error={error}
                   onCoinClick={(coin) => {
                     // Navigate to cryptocurrency detail page
                     router.push(`/cryptocurrencies/${coin.id}`);
@@ -577,21 +800,10 @@ function MarketOverviewRedesigned() {
 }
 
 // Crypto Table with Search Component (Ultra Compact Mobile)
-function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) {
-  const [coins, setCoins] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // Add error state
+function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick, coins, loading, error, lastValidData, dataUpdateCount, dataSource, onRefresh }) {
   const [sortColumn, setSortColumn] = useState('market_cap'); // Default sorting by market cap
   const [sortDirection, setSortDirection] = useState('desc'); // Default descending when sorting is activated
-  const [lastValidData, setLastValidData] = useState(null); // Backup of last valid data
-  const [dataUpdateCount, setDataUpdateCount] = useState(0); // Track data update frequency
-  const [dataSource, setDataSource] = useState(null); // Track data source (API-only)
-
-  // CRITICAL FIX: Request deduplication to prevent race conditions
-  const [isFetching, setIsFetching] = useState(false);
-  const [lastFetchTime, setLastFetchTime] = useState(0);
-  const abortControllerRef = useRef(null);
-  const fetchTimeoutRef = useRef(null);
+  // removed internal state
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -623,124 +835,6 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
       </svg>
     );
   };
-
-  // ENTERPRISE-LEVEL FIX: Optimized data fetching with proper state management
-  useEffect(() => {
-    let isMounted = true;
-    let autoRefreshInterval = null;
-
-    const loadCoins = async () => {
-      // Prevent multiple simultaneous API calls
-      if (isFetching) {
-        console.log('CryptoTableWithSearch: Skipping API call - already fetching');
-        return;
-      }
-
-      // Debounce rapid requests (prevent spam)
-      const now = Date.now();
-      if (now - lastFetchTime < 2000) { // 2 second debounce for better performance
-        console.log('CryptoTableWithSearch: Skipping API call - too soon after last request');
-        return;
-      }
-
-      // Cancel any existing request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        console.log('CryptoTableWithSearch: Cancelled previous request');
-      }
-
-      // Set fetching state to prevent duplicates
-      setIsFetching(true);
-      setLastFetchTime(now);
-
-      // Create new abort controller for this request
-      abortControllerRef.current = new AbortController();
-
-      try {
-        console.log('CryptoTableWithSearch: Fetching crypto data from CoinGecko proxy...');
-
-        const response = await fetch('/api/coingecko-proxy/coins', {
-          signal: abortControllerRef.current.signal,
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        // Enterprise-level data validation
-        if (data && Array.isArray(data) && data.length > 0) {
-          const isValidData = data.every(coin =>
-            coin.id && coin.symbol && coin.name &&
-            typeof coin.current_price === 'number' &&
-            typeof coin.market_cap === 'number' &&
-            typeof coin.market_cap_rank === 'number'
-          );
-
-          if (isValidData && isMounted) {
-            console.log(`CryptoTableWithSearch: Successfully loaded ${data.length} coins from CoinGecko proxy`);
-
-            // Store as backup data for corruption recovery
-            setLastValidData([...data]);
-            setCoins(data);
-            setDataSource('coingecko-api');
-            setLoading(false);
-            setDataUpdateCount(prev => prev + 1);
-            setError(null); // Clear any previous errors
-          } else if (!isMounted) {
-            console.log('CryptoTableWithSearch: Component unmounted, skipping state update');
-          } else {
-            throw new Error('Data validation failed - incomplete coin data structure');
-          }
-        } else {
-          throw new Error('Invalid data structure received from API');
-        }
-      } catch (error) {
-        // Handle abort errors gracefully
-        if (error.name === 'AbortError') {
-          console.log('CryptoTableWithSearch: Request was cancelled');
-          return;
-        }
-
-        console.error('CryptoTableWithSearch: API fetch failed:', error);
-        if (isMounted) {
-          setError('Failed to load crypto data. Please refresh the page to retry.');
-          setLoading(false);
-        }
-      } finally {
-        if (isMounted) {
-          setIsFetching(false);
-        }
-      }
-    };
-
-    // Load coins on mount
-    loadCoins();
-
-    // Auto-refresh data every 5 minutes
-    autoRefreshInterval = setInterval(() => {
-      if (isMounted && !isFetching && coins.length > 0) {
-        console.log('CryptoTableWithSearch: Auto-refreshing data (5-minute interval)');
-        loadCoins();
-      }
-    }, 5 * 60 * 1000);
-
-    // Cleanup function
-    return () => {
-      isMounted = false;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      if (autoRefreshInterval) {
-        clearInterval(autoRefreshInterval);
-      }
-    };
-  }, []); // Empty dependency array - only run on mount
 
   // ENTERPRISE-LEVEL OPTIMIZATION: Memoized filtered coins to prevent excessive recalculations
   const filteredCoins = useMemo(() => {
@@ -1081,73 +1175,6 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     return filteredCoins;
   }, [coins, searchQuery, filter, dateRange, sortColumn, sortDirection]); // ENTERPRISE-LEVEL: Proper dependency array for useMemo
 
-  // CRITICAL FIX: Manual refresh function for user-initiated updates
-  const handleManualRefresh = async () => {
-    if (isFetching) {
-      console.log('CryptoTableWithSearch: Refresh skipped - already fetching');
-      return;
-    }
-
-    console.log('CryptoTableWithSearch: Manual refresh initiated by user');
-    setLoading(true);
-    setError(null);
-
-    // Reset fetching state to allow new request
-    setIsFetching(false);
-    setLastFetchTime(0);
-
-    // Trigger new data fetch
-    const loadCoins = async () => {
-      try {
-        const response = await fetch('/api/coingecko-proxy/coins');
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        if (data && Array.isArray(data) && data.length > 0) {
-          const isValidData = data.every(coin =>
-            coin.id && coin.symbol && coin.name &&
-            typeof coin.current_price === 'number' &&
-            typeof coin.market_cap === 'number' &&
-            typeof coin.market_cap_rank === 'number'
-          );
-
-          if (isValidData) {
-            console.log(`CryptoTableWithSearch: Manual refresh successful - loaded ${data.length} coins`);
-            setLastValidData([...data]);
-            setCoins(data);
-            setDataSource('coingecko-api');
-            setDataUpdateCount(prev => prev + 1);
-          } else {
-            throw new Error('Data validation failed during manual refresh');
-          }
-        } else {
-          throw new Error('Invalid data structure during manual refresh');
-        }
-      } catch (error) {
-        console.error('CryptoTableWithSearch: Manual refresh failed:', error);
-        setError(`Manual refresh failed: ${error.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCoins();
-  };
-
-  // ENTERPRISE-LEVEL OPTIMIZATION: Memoized data integrity check to prevent excessive calculations
-  const dataIntegrity = React.useMemo(() => {
-    if (!coins || coins.length === 0) return null;
-
-    return {
-      hasValidIds: coins.every(coin => coin.id && typeof coin.id === 'string'),
-      hasValidPrices: coins.every(coin => typeof coin.current_price === 'number' && coin.current_price > 0),
-      hasValidMarketCaps: coins.every(coin => typeof coin.market_cap === 'number' && coin.market_cap > 0),
-      hasValidRanks: coins.every(coin => typeof coin.market_cap_rank === 'number' && coin.market_cap_rank > 0)
-    };
-  }, [coins]);
 
   // ENTERPRISE-LEVEL OPTIMIZATION: Reduced logging for production performance
   useEffect(() => {
@@ -1162,20 +1189,6 @@ function CryptoTableWithSearch({ searchQuery, filter, dateRange, onCoinClick }) 
     }
   }, [coins?.length, loading, error, dataSource, dataUpdateCount]);
 
-  // ENTERPRISE-LEVEL OPTIMIZATION: Data corruption detection with performance optimization
-  useEffect(() => {
-    if (coins && coins.length > 0 && dataIntegrity && !dataIntegrity.hasValidIds) {
-      console.error('CryptoTableWithSearch: Data corruption detected! Attempting auto-recovery...');
-      if (lastValidData && lastValidData.length > 0) {
-        console.log('CryptoTableWithSearch: Restoring from backup data...');
-        setCoins(lastValidData);
-        setError('Data corruption detected and recovered from backup');
-      } else {
-        console.error('CryptoTableWithSearch: No backup data available for recovery');
-        setError('Critical data corruption - no backup available');
-      }
-    }
-  }, [coins?.length, dataIntegrity?.hasValidIds, lastValidData?.length]);
 
   // ENTERPRISE-LEVEL OPTIMIZATION: Conditional logging for production performance
   if (process.env.NODE_ENV === 'development') {
@@ -1635,63 +1648,8 @@ function CryptoSectors() {
 }
 
 // Crypto Heatmap Component
-function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
-  const [coins, setCoins] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // Add error state for API-only strategy
-
-  useEffect(() => {
-    let isMounted = true;
-    let abortController = new AbortController();
-
-    const fetchCoins = async () => {
-      try {
-        console.log('Fetching coins for heatmap...');
-        setLoading(true);
-        setError(null);
-
-        const response = await fetch('/api/coingecko-proxy/coins', {
-          signal: abortController.signal,
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const heatmapData = data.slice(0, 25); // Get top 25 for heatmap
-
-          if (isMounted) {
-            console.log('Coins loaded successfully for heatmap:', heatmapData.length);
-            setCoins(heatmapData);
-            setLoading(false);
-          }
-        } else {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.log('CryptoHeatmap: Request was cancelled');
-          return;
-        }
-
-        console.error('CryptoHeatmap: API failed:', error);
-        if (isMounted) {
-          setError('Failed to load crypto data from API for heatmap. Please refresh the page to retry.');
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchCoins();
-
-    // Cleanup function
-    return () => {
-      isMounted = false;
-      abortController.abort();
-    };
-  }, []); // Remove dateRange dependency to prevent excessive API calls
+function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick, coins, loading, error }) {
+  // Removed internal state and fetching logic
 
   const getFilteredCoins = () => {
     let filteredCoins = coins || [];
@@ -2121,4 +2079,4 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick }) {
       )}
     </div>
   );
-} 
+}
