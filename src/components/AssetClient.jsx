@@ -1651,7 +1651,7 @@ function CryptoSectors() {
 function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick, coins, loading, error }) {
   // Removed internal state and fetching logic
 
-  const getFilteredCoins = () => {
+  const filteredCoins = useMemo(() => {
     let filteredCoins = coins || [];
 
     console.log('Initial coins count for heatmap:', filteredCoins.length);
@@ -1887,7 +1887,7 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick, coins, loa
     }
 
     return filteredCoins;
-  };
+  }, [coins, searchQuery, filter, dateRange]);
 
 
 
@@ -1936,10 +1936,6 @@ function CryptoHeatmap({ searchQuery, filter, dateRange, onCoinClick, coins, loa
       </div>
     );
   }
-
-  const filteredCoins = getFilteredCoins();
-
-
 
   return (
     <div className="w-full">
