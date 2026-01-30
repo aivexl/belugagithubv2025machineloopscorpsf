@@ -24,7 +24,7 @@ async function getAllAcademyArticles() {
       _id,
       slug
     }`
-    const articles = await sanityClient.fetch(query, {}, { cache: 'no-store', next: { revalidate: 0 } })
+    const articles = await sanityClient.fetch(query, {}, { next: { revalidate: 3600 } })
     return articles || []
   } catch (error) {
     console.error('Error fetching academy articles:', error)
@@ -39,7 +39,7 @@ async function getAllNewsroomArticles() {
       _id,
       slug
     }`
-    const articles = await sanityClient.fetch(query, {}, { cache: 'no-store', next: { revalidate: 0 } })
+    const articles = await sanityClient.fetch(query, {}, { next: { revalidate: 3600 } })
     return articles || []
   } catch (error) {
     console.error('Error fetching newsroom articles:', error)
@@ -233,4 +233,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...cryptocurrencyPages,
   ]
 }
-
