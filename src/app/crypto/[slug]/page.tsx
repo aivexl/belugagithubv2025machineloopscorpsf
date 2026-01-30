@@ -94,7 +94,7 @@ export default async function CryptoArticlePage({
 
         const baseUrl = process.env.NODE_ENV === 'production' ? 'https://beluga.id' : 'http://localhost:3000';
         const articleUrl = `${baseUrl}/crypto/${slug}`;
-        const imageUrl = article.imageUrl || `${baseUrl}/Asset/belugalogov3white.png`;
+        const imageUrl = articleWithImage.imageUrl || `${baseUrl}/Asset/belugalogov3white.png`;
 
         const jsonLd = {
             '@context': 'https://schema.org',
