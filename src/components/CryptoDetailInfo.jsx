@@ -594,10 +594,59 @@ export default function CryptoDetailInfo({
       {/* Market Section */}
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30 p-4 shadow-lg">
         <h3 className="text-sm font-semibold text-gray-300 mb-4 tracking-wide uppercase">{coinData.symbol?.toUpperCase()} Market</h3>
-        <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
-          <div className="text-gray-500 text-sm mb-2">Coming Soon</div>
-          <div className="text-gray-600 text-xs">Market data will be available here</div>
-        </div>
+
+        {detailedData?.tickers?.length > 0 ? (
+          <div className="space-y-3">
+             <div className="grid grid-cols-5 text-xs text-gray-500 font-medium px-2 pb-2 border-b border-gray-700/50">
+                <div className="col-span-2">Exchange / Pair</div>
+                <div className="text-right">Price</div>
+                <div className="text-right">Volume</div>
+                <div className="text-center">Trust</div>
+             </div>
+
+             {detailedData.tickers
+               .filter(t => t.market?.name && t.last)
+               .sort((a, b) => (b.converted_volume?.usd || 0) - (a.converted_volume?.usd || 0))
+               .slice(0, 5)
+               .map((ticker, idx) => (
+                 <a
+                   key={`${ticker.market.identifier}-${ticker.base}-${ticker.target}-${idx}`}
+                   href={ticker.trade_url}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   className="grid grid-cols-5 text-xs items-center px-2 py-2 hover:bg-gray-700/30 rounded transition-colors group"
+                 >
+                   <div className="col-span-2 truncate">
+                      <div className="text-gray-300 font-medium truncate">{ticker.market.name}</div>
+                      <div className="text-gray-500 text-[10px] truncate">{ticker.base}/{ticker.target}</div>
+                   </div>
+                   <div className="text-right text-white font-medium">
+                      {formatPrice(ticker.last)}
+                   </div>
+                   <div className="text-right text-gray-400">
+                      {formatMarketCap(ticker.converted_volume?.usd || 0)}
+                   </div>
+                   <div className="flex justify-center">
+                      <div className={`w-2 h-2 rounded-full ${
+                        ticker.trust_score === 'green' ? 'bg-green-500' :
+                        ticker.trust_score === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
+                      }`} />
+                   </div>
+                 </a>
+               ))}
+
+             <div className="text-center pt-2">
+                <a href={`https://www.coingecko.com/en/coins/${coinData.id}#markets`} target="_blank" rel="noopener noreferrer" className="text-blue-400 text-xs hover:text-blue-300 transition-colors">
+                  View all markets
+                </a>
+             </div>
+          </div>
+        ) : (
+          <div className="text-gray-400 text-xs leading-relaxed text-center py-8">
+            <div className="text-gray-500 text-sm mb-2">No Data</div>
+            <div className="text-gray-600 text-xs">Market data unavailable</div>
+          </div>
+        )}
       </div>
 
 
