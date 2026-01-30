@@ -685,7 +685,115 @@ export const getFormFields = (activeTab, formData, handleInputChange) => {
         </>
       );
 
-    default:
-      return <div>Form fields for {activeTab} coming soon...</div>;
+    default: {
+      if (!formData) return null;
+
+      // Generic form builder for unknown categories
+
+      // Check if we are in "Create Mode" (no ID) or "Edit Mode" (has ID)
+      const isCreateMode = !formData.id;
+
+      if (isCreateMode) {
+        return (
+          <>
+            <div className="md:col-span-2 p-4 bg-yellow-900/20 border border-yellow-700/50 rounded-lg mb-4">
+              <p className="text-yellow-200 text-sm">
+                <span className="font-bold">Note:</span> This is a generic form for the "{activeTab}" category.
+                Please ensure the database table exists and matches these fields.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Name / Title *</label>
+              <input
+                type="text"
+                value={formData.name || formData.title || formData.project || ''}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+             <div>
+              <label className="block text-sm font-medium mb-2">Status</label>
+              <select
+                value={formData.status || ''}
+                onChange={(e) => handleInputChange('status', e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Pending">Pending</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-2">Description</label>
+              <textarea
+                value={formData.description || ''}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <LogoUploadSection
+              formData={formData}
+              handleInputChange={handleInputChange}
+              category={activeTab}
+            />
+          </>
+        );
+      }
+
+      // Edit Mode: Render fields based on existing data
+      const systemFields = ['id', 'created_at', 'updated_at', 'category'];
+      const keys = Object.keys(formData).filter(key => !systemFields.includes(key));
+
+      return (
+        <>
+            {keys.map(key => {
+                const value = formData[key];
+                const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+
+                if (key === 'logo' || key === 'logo_url' || key === 'image') {
+                    return null; // Handled by LogoUploadSection
+                }
+
+                if (key === 'description' || key === 'bio' || (typeof value === 'string' && value.length > 100)) {
+                     return (
+                        <div className="md:col-span-2" key={key}>
+                          <label className="block text-sm font-medium mb-2">{label}</label>
+                          <textarea
+                            value={value || ''}
+                            onChange={(e) => handleInputChange(key, e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                     );
+                }
+
+                 return (
+                    <div key={key}>
+                        <label className="block text-sm font-medium mb-2">{label}</label>
+                         <input
+                            type="text"
+                            value={value || ''}
+                            onChange={(e) => handleInputChange(key, e.target.value)}
+                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         />
+                    </div>
+                 );
+            })}
+             <LogoUploadSection
+              formData={formData}
+              handleInputChange={handleInputChange}
+              category={activeTab}
+            />
+        </>
+      );
+    }
   }
 };
