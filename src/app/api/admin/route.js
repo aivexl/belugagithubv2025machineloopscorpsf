@@ -236,15 +236,15 @@ export async function GET(request) {
       }
     }
 
-    const { data, error } = await query;
+    const { data: searchData, error: searchError } = await query;
 
-    if (error) {
-      console.error('Error fetching data:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (searchError) {
+      console.error('Error fetching data:', searchError);
+      return NextResponse.json({ error: searchError.message }, { status: 500 });
     }
 
     // Process data with reverse mapping and ensure valid logos
-    const processedData = (data || []).map(item => {
+    const processedData = (searchData || []).map(item => {
       // Apply reverse mapping to convert database fields to form fields
       const mappedItem = reverseMapFields(category, item);
       

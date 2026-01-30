@@ -229,7 +229,7 @@ export const clearDatabaseTable = async (category) => {
       throw new Error(`Unknown category: ${category}`);
     }
 
-    // Use bulk delete endpoint
+    // Optimization: Use bulk delete endpoint to avoid N+1 requests
     const response = await fetch(`${API_BASE_URL}?category=${category}&deleteAll=true`, {
       method: 'DELETE',
     });
