@@ -186,19 +186,27 @@ export const searchDatabaseData = async (category, searchTerm, filters = {}) => 
 // Function untuk mendapatkan data dengan pagination
 export const getDatabaseDataPaginated = async (category, page = 1, limit = 10) => {
   try {
-    const allData = await getDatabaseData(category);
+    if (!TABLE_MAPPING[category]) {
+      throw new Error(`Unknown category: ${category}`);
+    }
+
+    const response = await fetch(`${API_BASE_URL}?category=${category}&page=${page}&limit=${limit}&t=${Date.now()}`);
     
-    const from = (page - 1) * limit;
-    const to = from + limit;
-    
-    const paginatedData = allData.slice(from, to);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to fetch data');
+    }
+
+    const result = await response.json();
+    const data = result.data || [];
+    const total = result.total || 0;
     
     return {
-      data: paginatedData,
-      total: allData.length,
+      data,
+      total,
       page,
       limit,
-      totalPages: Math.ceil(allData.length / limit)
+      totalPages: Math.ceil(total / limit)
     };
   } catch (error) {
     console.error('Database pagination error:', error);

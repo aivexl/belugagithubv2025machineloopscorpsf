@@ -190,11 +190,22 @@ export async function GET(request) {
     }
 
     const tableName = TABLE_MAPPING[category];
+    const page = searchParams.get('page');
+    const limit = searchParams.get('limit');
     
-    const { data, error } = await supabase
+    let query = supabase
       .from(tableName)
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*', { count: 'exact' });
+
+    if (page && limit) {
+      const p = parseInt(page);
+      const l = parseInt(limit);
+      const from = (p - 1) * l;
+      const to = from + l - 1;
+      query = query.range(from, to);
+    }
+
+    const { data, error, count } = await query.order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching data:', error);
@@ -216,7 +227,7 @@ export async function GET(request) {
       return mappedItem;
     });
 
-    return NextResponse.json({ data: processedData });
+    return NextResponse.json({ data: processedData, total: count || 0 });
   } catch (error) {
     console.error('API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
